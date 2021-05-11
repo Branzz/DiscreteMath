@@ -1,7 +1,7 @@
 package bran.sets;
 
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.tree.Branch;
+import bran.tree.Branch;
 
 public class LineSet implements Set, Branch<Set, LineOperator> {
 

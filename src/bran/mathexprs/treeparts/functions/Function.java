@@ -1,11 +1,8 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
-import bran.logic.tree.Operator;
+import bran.tree.Operator;
 import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
-
-import java.util.Collection;
 
 public interface Function extends Operator {
 

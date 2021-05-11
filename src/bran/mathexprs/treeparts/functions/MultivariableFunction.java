@@ -12,7 +12,7 @@ import static java.lang.Math.*;
 public enum MultivariableFunction implements Function {
 	LOG  (e -> e[0].greater(ZERO).and(e[1].greater(ZERO)),
 		  2, a -> log(a[0]) / log(a[1])),
-	LN   (e -> e[1].greater(ZERO),
+	LN   (e -> e[0].greater(ZERO),
 		  1, a -> log(a[0]), a -> a[0].derive().div(a[0])),
 	SIGN (1, a -> Math.signum(a[0]), a -> ZERO), // not roots
 	ABS  (1, a -> abs(a[0]), a -> SIGN.ofS(a[0]).chain(a[0])),
@@ -107,14 +107,10 @@ public enum MultivariableFunction implements Function {
 	}
 
 	/**
-	 * of Secure; for package use
+	 * "of Secure"; TODO for package use
 	 */
 	public FunctionExpression ofS(Expression... other) {
-		try {
-			return new FunctionExpression(this, other);
-		} catch (IllegalArgumentAmountException ignored) {
-		}
-		return null;
+		return new FunctionExpression(this, true, other);
 	}
 
 	public FunctionExpression of(Expression... other) throws IllegalArgumentAmountException {

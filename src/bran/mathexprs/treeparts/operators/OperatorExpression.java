@@ -1,6 +1,6 @@
 package bran.mathexprs.treeparts.operators;
 
-import bran.logic.tree.Fork;
+import bran.tree.Fork;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
@@ -84,8 +84,8 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	@Override
 	public String toString() {
-		// if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL))
-		// 	return "-" + right;
+		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL))
+			return "-" + right; // negative is a visual illusion
 		return "(" + left + " " + operator + " " + right + ')';
 	}
 

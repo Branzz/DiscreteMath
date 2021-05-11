@@ -6,8 +6,8 @@ import bran.exceptions.VariableExpressionException;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
 import bran.logic.statements.special.ConditionalStatement;
-import bran.logic.tree.Equivalable;
-import bran.logic.tree.TreePart;
+import bran.tree.Equivalable;
+import bran.tree.TreePart;
 import bran.mathexprs.Equation;
 
 import static java.util.Collections.*;

@@ -209,11 +209,11 @@ public class StatementBuilder {
 			}
 		}
 
-		private static class LineOperatorNode extends Node {
+		private static class LineOperatorNode extends StatementNode {
 			final LineOperator operator;
 			Object value() { return operator; }
 			public LineOperatorNode(final LineOperator operator) {
-				// super(null);
+				super(null);
 				this.operator = operator;
 			}
 			Node append(Object next) {

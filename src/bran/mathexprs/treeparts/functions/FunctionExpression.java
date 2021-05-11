@@ -1,7 +1,7 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
-import bran.logic.tree.MultiLeaf;
+import bran.tree.MultiLeaf;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
@@ -24,7 +24,7 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 		this.expressions = expressions;
 	}
 
-	private FunctionExpression(final Function function, boolean secure, final Expression... expressions) {
+	FunctionExpression(final Function function, boolean secure, final Expression... expressions) {
 		super(Stream.concat(Stream.of(function.domain(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		this.function = function;
 		this.expressions = expressions;
@@ -100,7 +100,7 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 
 	@Override
 	public String toString() {
-		return "(" + function + " " + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
+		return "(" + function + "(" + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
 	}
 
 }

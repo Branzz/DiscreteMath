@@ -4,7 +4,7 @@ public enum DisplayStyle {
 
 	NAME(-1), LOWERCASE_NAME(-1), MATH(0), CONVENTIONAL(1), JAVA_LOGICAL(2), JAVA_BITWISE(3), SET(4), SET_SYMBOL(5);
 
-	public static DisplayStyle displayStyle = DisplayStyle.MATH;
+	public static DisplayStyle displayStyle = DisplayStyle.CONVENTIONAL;
 
 	int index;
 

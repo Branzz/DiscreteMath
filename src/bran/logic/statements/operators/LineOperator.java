@@ -1,8 +1,8 @@
 package bran.logic.statements.operators;
 
 import bran.logic.statements.OperatorType;
-import bran.logic.tree.BranchOperator;
-import bran.logic.tree.Associativity;
+import bran.tree.BranchOperator;
+import bran.tree.Associativity;
 
 import static bran.logic.statements.OperatorType.REVERSE;
 import static bran.logic.statements.operators.DisplayStyle.displayStyle;

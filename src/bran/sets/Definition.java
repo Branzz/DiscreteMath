@@ -22,9 +22,9 @@ public class Definition <T> {
 	}
 
 	public static final Definition<Constant> ODD = new Definition<>(
-			n -> n.mod(Constant.of(2)).equates(Constant.of(1)), "a number is odd");
+			n -> n.mod(Constant.of(2)).equates(Constant.of(1)), "integer", "odd");
 	public static final Definition<Constant> EVEN = new Definition<>(
-			n -> n.mod(Constant.of(2)).equates(Constant.of(0)), "a number is even");
+			n -> n.mod(Constant.of(2)).equates(Constant.of(0)), "integer",  "even");
 	public static final Definition<Constant> PRIME = new Definition<>(n -> {
 				Variable r = new Variable("r"), s = new Variable("s");
 				return n.greater(Constant.ONE).and(
@@ -33,8 +33,8 @@ public class Definition <T> {
 	public static final Definition<Constant> COMPOSITE = new Definition<>(
 			n -> new Inequality(n, InequalityType.GREATER, Constant.of(1)).and(PRIME.definable.defined(n).not()),
 			"a number is composite");
-	public static final Definition<Expression> EXISTS = new Definition<>(e -> e.getDomainConditions(), "expression exists"); // if for each of the functions used.
-	public static final Definition<Expression> DIFFERENTIABLE = new Definition<>(e -> e.getDomainConditions(), "equation is differentiable");
+	// public static final Definition<Expression> EXISTS = new Definition<>(e -> e.getDomainConditions(), "expression exists"); // if for each of the functions used.
+	// public static final Definition<Expression> DIFFERENTIABLE = new Definition<>(e -> e.getDomainConditions(), "equation is differentiable");
 	public static final Definition<LimitExpression> LIMIT = new Definition<>(e -> { // https://tutorial.math.lamar.edu/classes/calcI/defnoflimit.aspx
 				Variable epsilon = new Variable("\u03b5"), delta = new Variable("\u03b4");
 				return new UniversalNumbersStatement(new SpecialSet(SpecialSetType.R),
@@ -51,6 +51,10 @@ public class Definition <T> {
 	@Override
 	public String toString() {
 		return symbols[0] + " if " + definable.defined(null);
+	}
+
+	public String test(T arg) {
+		return "for the " + symbols[0] + " " + arg + ", it is " + symbols[1] + " iff " + definable.defined(arg) + ", which is " + definable.defined(arg).truth();
 	}
 
 }

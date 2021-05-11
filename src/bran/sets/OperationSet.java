@@ -1,7 +1,7 @@
 package bran.sets;
 
 import bran.logic.statements.operators.Operator;
-import bran.logic.tree.Fork;
+import bran.tree.Fork;
 
 public class OperationSet implements Set, Fork<Set, Operator, Set> {
 

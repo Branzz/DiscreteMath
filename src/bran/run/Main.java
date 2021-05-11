@@ -17,21 +17,25 @@ import bran.mathexprs.ExpressionGenerator;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
+import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.matrices.Matrix;
 import bran.parser.StatementParser;
+import bran.sets.Definition;
 import bran.sets.FiniteSet;
 import bran.sets.NumberToText;
 import bran.sets.numbers.NumberLiteral;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
-import static bran.logic.statements.VariableStatement.*;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.SINH;
 
 public class Main {
 
 	public static void main(String[] args) {
+
+		showcase();
 
 		// NumberToStringTest();
 		// SetsTest();
@@ -43,7 +47,34 @@ public class Main {
 		// parseTest();
 		// statementGeneratorTest();
 		// Stream.of("111", "50").map(Main::solve).forEach(System.out::println);
-		expressionTest();
+		// expressionTest();
+
+	}
+
+	public static void showcase() {
+		// DisplayStyle.displayStyle;
+		String statementString = "a    and  ~ b or  !(c ^   t) implies b";
+		Statement statement = StatementParser.parseStatement(statementString);
+		Variable varA = new Variable("a", true);
+		Expression expression = null;
+		try {
+			expression = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
+		} catch (IllegalArgumentAmountException ignored) { }
+		System.out.println(
+				statementString + "\n" +
+				statement + "\n" +
+				TruthTable.getTable(statement) + "\n" +
+				Definition.ODD.test(new Constant(5.0)) + "\n" +
+				new ExistentialStatement<>(a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
+														 new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)), true,
+														 new Variable("b")),
+										   new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
+										   new Variable("a")) + "\n" +
+				expression + "\n" +
+				expression.simplified() + "\n" +
+				expression.derive() + "\n" +
+				expression.simplified().derive() + "\n" +
+				expression.derive().simplified()); // where t is a tautology
 	}
 
 	public static void expressionTest() {
@@ -67,13 +98,13 @@ public class Main {
 		// 		new VariableStatement[] { new VariableStatement('a'), new VariableStatement('b') },
 		// 		a -> a[0].equates(TAUTOLOGY).and(a[1].equates(TAUTOLOGY)), new FiniteSet<>(true, false),
 		// 		true));
-		System.out.println(new ExistentialStatement<>(
-				new Variable[] { new Variable("a") },
-				a -> new UniversalStatement<>(new Variable[] { new Variable("b") },
-												b -> a[0].times(b[0]).equates(Constant.ZERO),
-												new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true),
-				new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)),
-				true));
+		// System.out.println(new ExistentialStatement<>(
+		// 		new Variable[] { new Variable("a") },
+		// 		a -> new UniversalStatement<>(new Variable[] { new Variable("b") },
+		// 										b -> a[0].times(b[0]).equates(Constant.ZERO),
+		// 										new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true),
+		// 		new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)),
+		// 		true));
 	}
 
 	public static int solve(String message) {

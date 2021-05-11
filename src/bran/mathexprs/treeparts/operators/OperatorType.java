@@ -1,8 +1,8 @@
 package bran.mathexprs.treeparts.operators;
 
-import bran.logic.tree.Associativity;
+import bran.tree.Associativity;
 
-import static bran.logic.tree.Associativity.*;
+import static bran.tree.Associativity.*;
 
 public enum OperatorType {
 	E(7, RIGHT_TO_LEFT), MD(5, LEFT_TO_RIGHT), AS(3, LEFT_TO_RIGHT);

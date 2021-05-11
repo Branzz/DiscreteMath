@@ -3,7 +3,7 @@ package bran.sets;
 import bran.exceptions.VariableExpressionException;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
-import bran.logic.tree.Leaf;
+import bran.tree.Leaf;
 
 public interface Set extends Leaf
 //Comparable<AbstractSet>,

@@ -3,8 +3,8 @@ package bran.mathexprs.treeparts.operators;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.operators.DisplayStyle;
-import bran.logic.tree.Associativity;
-import bran.logic.tree.ForkOperator;
+import bran.tree.Associativity;
+import bran.tree.ForkOperator;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 

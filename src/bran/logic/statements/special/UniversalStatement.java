@@ -1,28 +1,21 @@
 package bran.logic.statements.special;
 
-import bran.combinatorics.Combinator;
-import bran.combinatorics.CombinatorList;
-import bran.combinatorics.Combinatorics;
 import bran.combinatorics.Counter;
 import bran.logic.statements.Statement;
-import bran.logic.tree.Equivalable;
-import bran.logic.tree.Holder;
-import bran.logic.tree.Leaf;
-import bran.logic.tree.TreePart;
+import bran.tree.Equivalable;
+import bran.tree.Holder;
 import bran.sets.FiniteSet;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static bran.logic.statements.operators.DisplayStyle.*;
 
-public class UniversalStatement <I, E extends Holder<I> & Equivalable<? super E>> extends SpecialStatement {
+public class UniversalStatement <I, E extends Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
 
 	private final int argumentSize;
-	private final UniversalStatementArguments<E> universalStatement;
+	private final QuantifiedStatementArguments<E> universalStatement;
 	private final E[] variables;
 	private final FiniteSet<I> domain;
 	private boolean proven;
@@ -30,7 +23,7 @@ public class UniversalStatement <I, E extends Holder<I> & Equivalable<? super E>
 	public static final String[] forAllSymbols = { "\u2200", "\u2200", "\u2200", "\u2200", "\u2200", "\u2200" };
 	public static final String[] inSetSymbols  = { "\u2208", "\u2208", "\u2208", "\u2208", "\u2208", "\u2208" };
 
-	public UniversalStatement(final E[] variables, final UniversalStatementArguments<E> universalStatement, final FiniteSet<I> domain, final boolean proven) {
+	public UniversalStatement(final QuantifiedStatementArguments<E> universalStatement, final FiniteSet<I> domain, final boolean proven, final E... variables) {
 		this.argumentSize = variables.length;
 		this.universalStatement = universalStatement;
 		this.variables = variables;
@@ -58,6 +51,31 @@ public class UniversalStatement <I, E extends Holder<I> & Equivalable<? super E>
 		return true;
 	}
 
+	public String exhaustiveProofString() {
+		StringBuilder sb = new StringBuilder();
+		List<I> choices = domain.stream().toList();
+		Counter counter = new Counter(argumentSize, choices.size());
+		while (counter.hasNext()) {
+			int[] count = counter.next();
+			for (int i = 0; i < argumentSize; i++)
+				variables[i].set(choices.get(count[i]));
+			sb.append(Arrays.stream(variables)
+							.map(v -> v.toString() + " = " + v.get())
+							.collect(Collectors.joining(", ", "for ", ", ")));
+			Statement statement = universalStatement.state(variables);
+			if (statement instanceof QuantifiedStatement quantifiedStatement)
+				sb.append("\u21b4\n\t").append(quantifiedStatement.exhaustiveProofString().replaceAll("\n", "\n\t"));
+			else
+				sb.append(statement);
+			// sb.append("\n");
+			if (!statement.truth())
+				return sb.append(", which is false. (invalid)").toString();
+			else if (counter.hasNext())
+				sb.append(", which is true... continuing\n");
+		}
+		return sb.append("\nwhich are all true. (valid)").toString();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -71,7 +89,7 @@ public class UniversalStatement <I, E extends Holder<I> & Equivalable<? super E>
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[displayStyle.index()];
 		});
-		return sb.append(' ').append(domain).append(", ").append(universalStatement.state(variables)).toString();
+		return sb.append(domain).append(", ").append(universalStatement.state(variables)).toString();
 	}
 
 }

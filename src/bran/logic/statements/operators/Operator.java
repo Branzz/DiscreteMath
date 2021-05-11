@@ -1,8 +1,8 @@
 package bran.logic.statements.operators;
 
 import bran.logic.statements.OperatorType;
-import bran.logic.tree.Associativity;
-import bran.logic.tree.ForkOperator;
+import bran.tree.Associativity;
+import bran.tree.ForkOperator;
 
 import static bran.logic.statements.OperatorType.*;
 import static bran.logic.statements.operators.DisplayStyle.displayStyle;

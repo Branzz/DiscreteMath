@@ -1,6 +1,6 @@
 package bran.mathexprs.treeparts;
 
-import bran.logic.tree.Holder;
+import bran.tree.Holder;
 import bran.sets.numbers.NumberLiteral;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	protected int level = 0; // 1 for first derivative, 2 for second, etc.
 
 	public Variable(final String name) {
-		this(name, false);
+		this(name, true);
 	}
 
 	public Variable(final String name, final boolean respects) {

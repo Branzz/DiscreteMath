@@ -1,8 +1,8 @@
 package bran.logic.statements.special;
 
 import bran.combinatorics.Counter;
-import bran.logic.tree.Equivalable;
-import bran.logic.tree.Holder;
+import bran.logic.statements.Statement;
+import bran.tree.Equivalable;
 import bran.sets.FiniteSet;
 
 import java.util.Arrays;
@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 
 import static bran.logic.statements.operators.DisplayStyle.displayStyle;
 
-public class ExistentialStatement <I, E extends Holder<I> & Equivalable<? super E>> extends SpecialStatement {
+public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
 
 	private final int argumentSize;
-	private final UniversalStatementArguments<E> universalStatement;
+	private final QuantifiedStatementArguments<E> universalStatement;
 	private final E[] variables;
 	private final FiniteSet<I> domain;
 	private boolean proven;
@@ -22,7 +22,7 @@ public class ExistentialStatement <I, E extends Holder<I> & Equivalable<? super 
 	public static final String[] forAllSymbols = { "\u2203", "\u2203", "\u2203", "\u2203", "\u2203", "\u2203" };
 	public static final String[] inSetSymbols  = { "\u2208", "\u2208", "\u2208", "\u2208", "\u2208", "\u2208" };
 
-	public ExistentialStatement(final E[] variables, final UniversalStatementArguments<E> universalStatement, final FiniteSet<I> domain, final boolean proven) {
+	public ExistentialStatement(final QuantifiedStatementArguments<E> universalStatement, final FiniteSet<I> domain, final boolean proven, final E... variables) {
 		this.argumentSize = variables.length;
 		this.universalStatement = universalStatement;
 		this.variables = variables;
@@ -49,20 +49,43 @@ public class ExistentialStatement <I, E extends Holder<I> & Equivalable<? super 
 		return false;
 	}
 
+	public String exhaustiveProofString() {
+		StringBuilder sb = new StringBuilder();
+		List<I> choices = domain.stream().toList();
+		Counter counter = new Counter(argumentSize, choices.size());
+		while (counter.hasNext()) {
+			int[] count = counter.next();
+			for (int i = 0; i < argumentSize; i++)
+				variables[i].set(choices.get(count[i]));
+			sb.append(Arrays.stream(variables)
+										   .map(v -> v.toString() + " = " + v.get())
+										   .collect(Collectors.joining(", ", "for ", ", ")));
+			Statement statement = universalStatement.state(variables);
+			if (statement instanceof QuantifiedStatement quantifiedStatement)
+				sb.append("\u21b4\n\t").append(quantifiedStatement.exhaustiveProofString().replaceAll("\n", "\n\t"));
+			else
+				sb.append(statement);
+			// sb.append("\n");
+			if (statement.truth())
+				return sb.append("\nwhich is true. (valid)").toString();
+			else if (counter.hasNext())
+				sb.append(", which is false... continuing\n");
+		}
+		return sb.append("\nwhich are all false (invalid)").toString();
+	}
+
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(switch (displayStyle) {
+		return switch (displayStyle) {
 			case NAME -> "There exists ";
 			case LOWERCASE_NAME -> "there exists ";
 			default -> forAllSymbols[displayStyle.index()];
-		});
-		sb.append(Arrays.stream(variables).map(Object::toString).collect(Collectors.joining(",")));
-		sb.append(switch (displayStyle) {
+		} + Arrays.stream(variables)
+				  .map(Object::toString)
+				  .collect(Collectors.joining(",")) + switch (displayStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[displayStyle.index()];
-		});
-		return sb.append(' ').append(domain).append(" such that ").append(universalStatement.state(variables)).toString();
+		} + domain + "|" + universalStatement.state(variables);
 	}
 
 }

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import bran.logic.tree.Holder;
-import bran.logic.tree.Leaf;
+import bran.tree.Holder;
+import bran.tree.Leaf;
 
 public class VariableStatement extends Statement implements Leaf, Holder<Boolean> { // No Child
 

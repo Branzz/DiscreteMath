@@ -5,7 +5,7 @@ import java.util.List;
 
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
-import bran.logic.tree.Fork;
+import bran.tree.Fork;
 
 public class OperationStatement extends Statement implements Fork<Statement, Operator, Statement> { // Two Child
 

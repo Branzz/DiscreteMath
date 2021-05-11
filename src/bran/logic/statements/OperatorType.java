@@ -1,8 +1,8 @@
 package bran.logic.statements;
 
-import bran.logic.tree.Associativity;
+import bran.tree.Associativity;
 
-import static bran.logic.tree.Associativity.*;
+import static bran.tree.Associativity.*;
 
 public enum OperatorType {
 	ANDS(5, LEFT_TO_RIGHT), ORS(4, LEFT_TO_RIGHT), XORS(3, LEFT_TO_RIGHT), IMPLY(2, LEFT_TO_RIGHT), REVERSE(1, RIGHT_TO_LEFT);

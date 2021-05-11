@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.tree.Branch;
+import bran.tree.Branch;
 
 import static bran.logic.statements.operators.LineOperator.NOT;
 

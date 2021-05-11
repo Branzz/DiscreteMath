@@ -1,7 +1,6 @@
 package bran.mathexprs.treeparts;
 
-import bran.logic.tree.Equivalable;
-import bran.logic.tree.Leaf;
+import bran.tree.Leaf;
 import bran.sets.numbers.NumberLiteral;
 
 import java.util.Objects;
