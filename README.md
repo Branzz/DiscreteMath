@@ -66,7 +66,7 @@ Expression exp = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
 ```java
 exp
 ```
-`((a ^ (LOG(a, (a ^ a))) - 0)`
+`((a ^ LOG(a, (a ^ a))) - 0)`
 ```java
 exp.simplified()
 ```
@@ -75,15 +75,15 @@ exp.simplified()
 ```java
 exp.derive()
 ```
-`(((a ^ (LOG(a, (a ^ a))) * ((((LOG(a, (a ^ a)) / a) * da) + ((LN(a) * ((((a ^ a) * (((a / a) * da) + ((LN(a) * da))) - ((((a ^ a) * (LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * (LN(a)))))) - 0)`
+`(((a ^ LOG(a, (a ^ a))) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (((a / a) * da) + (LN(a) * da))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))) - 0)`
 ```java
 exp.derive().simplified()
 ```
-`((a ^ a) * ((((LOG(a, (a ^ a)) / a) * da) + ((LN(a) * ((((a ^ a) * (da * (1 + (LN(a)))) - ((((a ^ a) * (LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * (LN(a))))))`
+`((a ^ a) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (da * (1 + LN(a)))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a))))))`
 ```java
 exp.derive().getUniversalStatement() // the domain, unsimplified
 ```
-`∀a,da∈R((a > 0 ⋀ (a ^ a) > 0) ⋀ (((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0)) ⋀ (a > 0 ⋀ (((((a ≠ 0) ⋀ a > 0) ⋀ ((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0))) ⋀ a > 0) ⋀ (((a ^ a) * (LN(a)) ≠ 0)))))`
+`∀a,da∈R((a > 0 ⋀ (a ^ a) > 0) ⋀ (((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0)) ⋀ (a > 0 ⋀ (((((a ≠ 0) ⋀ a > 0) ⋀ ((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0))) ⋀ a > 0) ⋀ (((a ^ a) * LN(a)) ≠ 0)))))`
 - - -
 ```java
 Definition.ODD.test(new Constant(5.0))
