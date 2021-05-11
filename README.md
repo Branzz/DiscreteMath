@@ -61,27 +61,27 @@ TruthTable.getTable(statement)
 - - -
 ```java
 Variable varA = new Variable("a");
-Expression expression = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
+Expression exp = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
 ```
 ```java
-expression
+exp
 ```
 `((a ^ (LOG(a, (a ^ a))) - 0)`
 ```java
-.simplified()
+exp.simplified()
 ```
 
 `(a ^ a)`
 ```java
-.derive()
+exp.derive()
 ```
 `(((a ^ (LOG(a, (a ^ a))) * ((((LOG(a, (a ^ a)) / a) * da) + ((LN(a) * ((((a ^ a) * (((a / a) * da) + ((LN(a) * da))) - ((((a ^ a) * (LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * (LN(a)))))) - 0)`
 ```java
-.derive().simplified()
+exp.derive().simplified()
 ```
 `((a ^ a) * ((((LOG(a, (a ^ a)) / a) * da) + ((LN(a) * ((((a ^ a) * (da * (1 + (LN(a)))) - ((((a ^ a) * (LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * (LN(a))))))`
 ```java
-.derive().getUniversalStatement() // the domain, unsimplified
+exp.derive().getUniversalStatement() // the domain, unsimplified
 ```
 `∀a,da∈R((a > 0 ⋀ (a ^ a) > 0) ⋀ (((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0)) ⋀ (a > 0 ⋀ (((((a ≠ 0) ⋀ a > 0) ⋀ ((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0))) ⋀ a > 0) ⋀ (((a ^ a) * (LN(a)) ≠ 0)))))`
 - - -
