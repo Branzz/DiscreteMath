@@ -5,12 +5,17 @@ When worked on: September 2020 - May 2021
 
 - - -
 
-The entire class of discrete math I took as a library.
+The entire class of discrete math I took as a library (and some more)
 
 ⭐ - Favorites / most impressive
 
 * Combinatorics
 * Expressions
+  * Drawer (like desmos) ⭐
+    * Declare variables and functions
+    * Automatically adjusts precision
+    * Real-time render scaling
+    * Deep exception detection
   * Functions / Operators
   * Simplifier ⭐
   * Derivatives ⭐
@@ -23,8 +28,8 @@ The entire class of discrete math I took as a library.
   * Convert to Graph
   * Utilility
     * +, -, *, / matrices
-* Parser (String input)
-  * Read statements ⭐
+* Parser (String input) ⭐
+  * Read statements
   * Applied to any tree structure *(unfinished)*
   * Syntax error catching
 * Proofs
@@ -44,20 +49,15 @@ Examples:
 ```java
 Statement statement = StatementParser.parseStatement("a    and  ~ b or  !(c ^   t) implies b");
 ```
-`(((a n (~b)) v (~(c xor t))) -> b) // c is contradiction, t is tautology`
+`((a and (not b)) or (not (c xor t))) implies b    // c is contradiction, t is tautology`
+
+*other display style*
+
+`((a ⋀ (¬b)) ⋁ (¬(c ⊻ t))) ⇒ b`
 ```java
-TruthTable.getTable(statement)
+statement.getTable()
 ```
-```
-┌───┬───┬───┬───┬──────┬───────────┬────────────┬──────────────┬─────────────────────────────┬────────────────────────────────────┐
-│ a │ b │ c │ t │ (~b) │ (c xor t) │ (a n (~b)) │ (~(c xor t)) │ ((a n (~b)) v (~(c xor t))) │ (((a n (~b)) v (~(c xor t))) -> b) │
-├───┼───┼───┼───┼──────┼───────────┼────────────┼──────────────┼─────────────────────────────┼────────────────────────────────────┤
-│ 0 │ 0 │ 0 │ 1 │  1   │     1     │     0      │      0       │              0              │                 1                  │
-│ 0 │ 1 │ 0 │ 1 │  0   │     1     │     0      │      0       │              0              │                 1                  │
-│ 1 │ 0 │ 0 │ 1 │  1   │     1     │     1      │      0       │              1              │                 0                  │
-│ 1 │ 1 │ 0 │ 1 │  0   │     1     │     0      │      0       │              0              │                 1                  │
-└───┴───┴───┴───┴──────┴───────────┴────────────┴──────────────┴─────────────────────────────┴────────────────────────────────────┘
-```
+![image](https://user-images.githubusercontent.com/12685201/118528497-06678100-b708-11eb-81c9-20fc8a530bdd.png)
 - - -
 ```java
 Variable varA = new Variable("a");
@@ -66,20 +66,20 @@ Expression exp = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
 ```java
 exp
 ```
-`((a ^ LOG(a, (a ^ a))) - 0)`
+`(a ^ LOG(a, (a ^ a))) - 0`
 ```java
 exp.simplified()
 ```
 
-`(a ^ a)`
+`a ^ a`
 ```java
 exp.derive()
 ```
-`(((a ^ LOG(a, (a ^ a))) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (((a / a) * da) + (LN(a) * da))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))) - 0)`
+`((a ^ LOG(a, (a ^ a))) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (((a / a) * da) + (LN(a) * da))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))) - 0`
 ```java
 exp.derive().simplified()
 ```
-`((a ^ a) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (da * (1 + LN(a)))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a))))))`
+`(a ^ a) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (da * (1 + LN(a)))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))`
 ```java
 exp.derive().getUniversalStatement() // the domain, unsimplified
 ```
@@ -88,7 +88,7 @@ exp.derive().getUniversalStatement() // the domain, unsimplified
 ```java
 Definition.ODD.test(new Constant(5.0))
 ```
-`for the integer 5, it is odd iff ((5 % 2) = 1), which is true`
+`for the integer 5, it is odd iff (5 % 2) == 1, which is true, so 5 is odd`
 ```java
 new ExistentialStatement<>(
         a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
@@ -103,13 +103,19 @@ exhaustiveProofString()
 ```
 ```
 for a = 2.0, ↴
-	for b = 5.0, ((a * b) = 0), which is false. (invalid), which is false... continuing
+	for b = 5.0, (a * b) = 0, which is false. (invalid), which is false... continuing
 for a = 1.0, ↴
-	for b = 5.0, ((a * b) = 0), which is false. (invalid), which is false... continuing
+	for b = 5.0, (a * b) = 0, which is false. (invalid), which is false... continuing
 for a = 0.0, ↴
-	for b = 9.0, ((a * b) = 0), which is true... continuing
-	for b = 5.0, ((a * b) = 0), which is true... continuing
-	for b = 9.0, ((a * b) = 0)
+	for b = 9.0, (a * b) = 0, which is true... continuing
+	for b = 5.0, (a * b) = 0, which is true... continuing
+	for b = 9.0, (a * b) = 0
 	which are all true. (valid)
 which is true. (valid)
 ```
+- - -
+![image](https://user-images.githubusercontent.com/12685201/118525688-1762c300-b705-11eb-8feb-26b0a69ebdb2.png)
+
+Very brief mid re-render frame while not very precise yet.
+
+![image](https://user-images.githubusercontent.com/12685201/118526791-34e45c80-b706-11eb-8bb0-abe9b8026df4.png)
