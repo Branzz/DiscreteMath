@@ -5,7 +5,8 @@ import bran.tree.Associativity;
 import bran.tree.ForkOperator;
 
 import static bran.logic.statements.OperatorType.*;
-import static bran.logic.statements.operators.DisplayStyle.displayStyle;
+import static bran.logic.statements.StatementDisplayStyle.statementStyle;
+import static bran.sets.SetDisplayStyle.setStyle;
 
 public enum Operator implements ForkOperator {
 	AND((l, r) -> l && r, 			ANDS, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
@@ -66,11 +67,29 @@ public enum Operator implements ForkOperator {
 		return operatorType.associativity();
 	}
 
+	private String getSymbol(int index) {
+		try {
+			return symbols[index];
+		} catch (IndexOutOfBoundsException e) {
+			return name();
+		}
+	}
+
 	public String toString() {
-		return switch (displayStyle) {
+		return switch (statementStyle) {
 			case NAME -> name();
 			case LOWERCASE_NAME -> name().toLowerCase();
-			default -> symbols[displayStyle.index()];
+			default -> getSymbol(statementStyle.index());
+		};
+	}
+
+	public String toString(boolean sets) {
+		if (!sets)
+			return toString();
+		return switch (setStyle) {
+			case NAME -> name();
+			case LOWERCASE_NAME -> name().toLowerCase();
+			default -> getSymbol(setStyle.index());
 		};
 	}
 

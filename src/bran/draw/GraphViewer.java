@@ -21,12 +21,12 @@ import bran.graphs.Graph;
 import bran.graphs.Vertex;
 import bran.matrices.Matrix;
 
-public class Viewer extends Applet {
+public class GraphViewer extends Applet {
 
     private final int DELAY = 20;
 	private Graph graph;
 
-    public Viewer(Graph graph) {
+    public GraphViewer(Graph graph) {
     	this.graph = graph;
     }
 
@@ -151,13 +151,13 @@ public class Viewer extends Applet {
 //        for (Entry<Vertex, ArrayList<Edge>> v : entrySet) {
 //        	vertexX.put(v.getKey(), (int) (shiftX + standardLength * (1 + Math.cos(count * 2 * Math.PI / (entrySet.size())))));
 //        	vertexY.put(v.getKey(), (int) (shiftY + standardLength * (1 + Math.sin(count * 2 * Math.PI / (entrySet.size())))));
-//        	g2.fillOval((int) (shiftX + standardLength * (1 + Math.cos(count * 2 * Math.PI / (entrySet.size())))) - 4, 
+//        	g2.fillOval((int) (shiftX + standardLength * (1 + Math.cos(count * 2 * Math.PI / (entrySet.size())))) - 4,
 //        			(int) (shiftY + standardLength * (1 + Math.sin(count * 2 * Math.PI / (entrySet.size())))) - 4, 8, 8);
 //        	g2.drawString(v.getKey().toString(), (int) (shiftX + - 5 + standardLength + (15 + standardLength) * Math.cos(count * 2 * Math.PI / (entrySet.size()))),
 //        			(int) (shiftY + 5 + standardLength + (15 + standardLength) * Math.sin(count * 2 * Math.PI / (entrySet.size()))));
 //        	count++;
 //        }
-//        
+//
 //        for (Entry<Vertex, ArrayList<Edge>> v : entrySet) {
 //        	for (Entry<Vertex, ArrayList<Edge>> w : entrySet) {
 //        		if (v != w) {
@@ -167,7 +167,7 @@ public class Viewer extends Applet {
 //        						g2.drawLine(vertexX.get(v.getKey()), vertexY.get(v.getKey()), vertexX.get(w.getKey()), vertexY.get(w.getKey()));
 //        						g2.drawString(e.toString(), (int) ((vertexX.get(v.getKey()) + vertexX.get(w.getKey())) / 2),
 //        								(int) ((vertexY.get(v.getKey()) + vertexY.get(w.getKey())) / 2));
-//        						
+//
 //        					}
 //        		}
 //        	}

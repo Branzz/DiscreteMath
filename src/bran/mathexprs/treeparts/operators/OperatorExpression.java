@@ -6,18 +6,16 @@ import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.functions.FunctionExpression;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static bran.mathexprs.treeparts.operators.Operator.*;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
 
 public class OperatorExpression extends Expression implements Fork<Expression, Operator, Expression> {
 
-	private final Expression left;
+	private Expression left;
 	private final Operator operator;
-	private final Expression right;
+	private Expression right;
 
 	public OperatorExpression(final Expression left, final Operator operator, final Expression right) {
 		super(left.getDomainConditions(), right.getDomainConditions(), operator.domain(left, right));
@@ -57,8 +55,20 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	}
 
 	@Override
-	public List<Variable> getVariables() {
-		List<Variable> variables = new ArrayList<>();
+	public void replaceAll(final Expression approaches, final Expression approached) {
+		if (left.equals(approaches))
+			left = approached;
+		else
+			left.replaceAll(approaches, approached);
+		if (right.equals(approaches))
+			right = approached;
+		else
+			right.replaceAll(approaches, approached);
+	}
+
+	@Override
+	public Set<Variable> getVariables() {
+		Set<Variable> variables = new HashSet<>();
 		variables.addAll(left.getVariables());
 		variables.addAll(right.getVariables());
 		return variables;

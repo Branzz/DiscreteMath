@@ -2,15 +2,15 @@ package bran.mathexprs.treeparts.operators;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.operators.DisplayStyle;
-import bran.tree.Associativity;
-import bran.tree.ForkOperator;
+import bran.mathexprs.ExpressionDisplayStyle;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
+import bran.tree.Associativity;
+import bran.tree.ForkOperator;
 
+import static bran.mathexprs.ExpressionDisplayStyle.expressionStyle;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
 import static bran.mathexprs.treeparts.operators.DomainSupplier.DENOM_NOT_ZERO;
-
 import static bran.mathexprs.treeparts.operators.OperatorType.*;
 
 public enum Operator implements ForkOperator {
@@ -73,7 +73,11 @@ public enum Operator implements ForkOperator {
 
 	@Override
 	public String toString() {
-		return switch(DisplayStyle.displayStyle) {
+		return toString(expressionStyle);
+	}
+
+	public String toString(ExpressionDisplayStyle displayStyle) {
+		return switch(displayStyle) {
 			case NAME -> symbols[1].toUpperCase();
 			case LOWERCASE_NAME -> symbols[1];
 			default -> symbols[0];

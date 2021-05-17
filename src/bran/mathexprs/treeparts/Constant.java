@@ -5,6 +5,7 @@ import bran.sets.numbers.NumberLiteral;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Constant extends Value {
 
@@ -15,8 +16,8 @@ public class Constant extends Value {
 	public static final Expression NEG_ONE = new Constant(-1.0);
 	public static final Constant ZERO = new Constant(0.0);
 	public static final Constant ONE = new Constant(1.0);
-	public static final Constant E = new Constant(Math.E);
-	public static final Constant PI = new Constant(Math.PI);
+	public static final Constant E = new Constant(Math.E) { @Override public String toString() { return "e"; } };
+	public static final Constant PI = new Constant(Math.PI) { @Override public String toString() { return "pi"; } };
 	public static final Constant INFINITY = new Constant(Double.POSITIVE_INFINITY);
 
 	public static Constant of(final double value) {
@@ -24,8 +25,8 @@ public class Constant extends Value {
 	}
 
 	@Override
-	public List<Variable> getVariables() {
-		return Collections.emptyList();
+	public Set<Variable> getVariables() {
+		return Collections.emptySet();
 	}
 
 	@Override

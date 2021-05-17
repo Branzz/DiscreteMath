@@ -5,14 +5,16 @@ import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.SpecialStatement;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
+import bran.tree.Equivalable;
+import bran.tree.TreePart;
 
-public class Inequality<L extends Comparable<L>, R extends Comparable<R>> extends SpecialStatement {
+public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> extends Equivalence {
 
-	private final L left;
+	private final T left;
 	private final InequalityType inequalityType;
-	private final R right;
+	private final T right;
 
-	public Inequality(final L left, final InequalityType inequalityType, final R right) {
+	public Inequality(final T left, final InequalityType inequalityType, final T right) {
 		this.left = left;
 		this.inequalityType = inequalityType;
 		this.right = right;

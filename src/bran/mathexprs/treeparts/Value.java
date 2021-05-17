@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public abstract class Value extends Expression implements Leaf {
 
-	protected NumberLiteral number; // non-final; it can/will change in hypothetical - FOR VARIABLES ONLY
+	protected NumberLiteral number; // non-final; it can/will change in hypothetical - FOR VARIABLES
 
 	public Value() {
 		number = new NumberLiteral(0.0);
@@ -19,15 +19,21 @@ public abstract class Value extends Expression implements Leaf {
 	}
 
 	@Override
+	public void replaceAll(final Expression approaches, final Expression approached) {
+
+	}
+
+	@Override
 	public String toString() {
 		if (number.doubleValue() % 1 == 0)
 			return String.valueOf(number.intValue());
-		return number.toString();
+		else
+			return number.toString();
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		return this == other || other instanceof Value v && Objects.equals(v.number, number);
+		return this == other || other instanceof Value value && Objects.equals(value.number, number);
 	}
 
 	@Override

@@ -1,10 +1,9 @@
 package bran.mathexprs;
 
-import bran.logic.statements.special.SpecialStatement;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
 
-public class Equation<T extends TreePart & Equivalable<T>> extends SpecialStatement {
+public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 
 	private final T left;
 	private final EquationType equationType;

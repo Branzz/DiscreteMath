@@ -6,7 +6,12 @@ import bran.exceptions.VariableExpressionException;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
 import bran.logic.statements.special.ConditionalStatement;
+import bran.logic.statements.special.QuantifiedStatementArguments;
+import bran.logic.statements.special.UniversalStatement;
+import bran.sets.FiniteSet;
+import bran.sets.SpecialSet;
 import bran.tree.Equivalable;
+import bran.tree.Holder;
 import bran.tree.TreePart;
 import bran.mathexprs.Equation;
 
@@ -290,6 +295,31 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 
 	public static Statement empty() {
 		return emptyStatement;
+	}
+
+	// Imperative style assistance classes
+
+	public static <I, E extends Holder<I> & Equivalable<? super E>> UniversalStatementVariables forAll(E... variables) {
+		return new UniversalStatementVariables(variables);
+	}
+
+	public static record UniversalStatementVariables<I, E extends Holder<I> & Equivalable<? super E>> (E... variables) {
+		public UniversalStatementDomainStatement<I, E> in(FiniteSet<I> domain, QuantifiedStatementArguments<E> statement) {
+			return new UniversalStatementDomainStatement<>(domain, statement, variables);
+		}
+		// public UniversalStatementDomainStatement<I, E> in(SpecialSet domain, QuantifiedStatementArguments<E> statement) {
+		// 	return new UniversalStatementDomainStatement<>(domain, statement, variables);
+		// }
+	}
+
+	public static record UniversalStatementDomainStatement<I, E extends Holder<I> & Equivalable<? super E>>
+			(FiniteSet<I> domain, QuantifiedStatementArguments<E> statement, E... variables) {
+		public UniversalStatement<I, E> proven() {
+			return new UniversalStatement<>(statement, domain, true, variables);
+		}
+		public UniversalStatement<I, E> unProven() {
+			return new UniversalStatement<>(statement, domain, false, variables);
+		}
 	}
 
 	//	public Statement realNot() {

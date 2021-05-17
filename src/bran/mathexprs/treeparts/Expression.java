@@ -15,10 +15,7 @@ import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.SpecialSet;
 import bran.sets.SpecialSetType;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.operators.Operator.AND;
@@ -69,7 +66,7 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 		return combinedStatements;
 	}
 
-	public abstract List<Variable> getVariables();
+	public abstract Set<Variable> getVariables();
 
 	public abstract Expression simplified();
 
@@ -82,12 +79,15 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 
 	public abstract boolean respect(final Collection<Variable> respectsTo);
 
+	public abstract void replaceAll(final Expression approaches, final Expression approached);
+
 	private static final Expression emptyExpression = new Expression() {
-		@Override public List<Variable> getVariables() { return Collections.emptyList(); }
+		@Override public Set<Variable> getVariables() { return Collections.emptySet(); }
 		@Override public Expression simplified() { return empty(); }
 		@Override public double evaluate() { return 0.0; }
 		@Override public Expression derive() { return empty(); }
 		@Override public boolean respect(final Collection<Variable> respectsTo) { return false; }
+		@Override public void replaceAll(final Expression approaches, final Expression approached) { }
 		// @Override public boolean equivalentTo(final Expression other) { return other == empty(); }
 		@Override public String toString() { return ""; }
 		// @Override public Expression clone() { return empty(); }
@@ -108,11 +108,19 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 
 	@Override
 	public int compareTo(final Expression o) {
-		// TODO; simplify first? you can prove if a function is less somehow.
+		// TODO; simplify first? you can prove if a function is less somehow; you can with given variables for sure
 		return Double.compare(evaluate(), o.evaluate());
 	}
 
 	public abstract boolean equals(Object other);
+
+	public static String innerString(final String toString) {
+		return toString.length() > 2 ? toString.substring(1, toString.length() - 1) : "";
+	}
+
+	public String deriveString() {
+		return "the derivative of " + this + " is\n" + this.derive();
+	}
 
 	public OperatorExpression pow(Expression exp) {
 		return new OperatorExpression(this, POW, exp);
@@ -182,24 +190,41 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 		return new Equation<>(this, EquationType.UNEQUAL, right);
 	}
 
-	public Inequality<Expression, Expression> greater(Expression right) {
+	public Inequality<Expression> greater(Expression right) {
 		return new Inequality<>(this, GREATER, right);
 	}
 
-	public Inequality<Expression, Expression> greaterEqual(Expression right) {
+	public Inequality<Expression> greaterEqual(Expression right) {
 		return new Inequality<>(this, GREATER_EQUAL, right);
 	}
 
-	public Inequality<Expression, Expression> less(Expression right) {
+	public Inequality<Expression> less(Expression right) {
 		return new Inequality<>(this, LESS, right);
 	}
 
-	public Inequality<Expression, Expression> lessEqual(Expression right) {
+	public Inequality<Expression> lessEqual(Expression right) {
 		return new Inequality<>(this, LESS_EQUAL, right);
 	}
 
-	public String deriveString() {
-		return "the derivative of " + this + " is\n" + this.derive();
+	public LimitApproachesPart approaches(final Expression approached) {
+		return new LimitApproachesPart(this, approached);
+	}
+
+	// Imperative style assistance classes
+
+	public static record LimitApproachesPart(Expression approaches, Expression approached) {
+		public Expression of(Expression function) {
+			return new LimitExpression(approaches, approached, function);
+		}
+	}
+
+	public static record LogBasePart(Expression base) {
+		public Expression of(Expression expression) throws IllegalArgumentAmountException {
+			return LOG.of(base, expression);
+		}
+		public Expression ofS(Expression expression) {
+			return LOG.ofS(base, expression);
+		}
 	}
 
 }

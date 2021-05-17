@@ -6,7 +6,7 @@ import bran.logic.statements.special.UniversalNumbersStatement;
 import bran.mathexprs.Inequality;
 import bran.mathexprs.InequalityType;
 import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Expression;
+import bran.mathexprs.treeparts.LimitExpression;
 import bran.mathexprs.treeparts.Variable;
 
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.ABS;
@@ -35,13 +35,13 @@ public class Definition <T> {
 			"a number is composite");
 	// public static final Definition<Expression> EXISTS = new Definition<>(e -> e.getDomainConditions(), "expression exists"); // if for each of the functions used.
 	// public static final Definition<Expression> DIFFERENTIABLE = new Definition<>(e -> e.getDomainConditions(), "equation is differentiable");
-	public static final Definition<LimitExpression> LIMIT = new Definition<>(e -> { // https://tutorial.math.lamar.edu/classes/calcI/defnoflimit.aspx
-				Variable epsilon = new Variable("\u03b5"), delta = new Variable("\u03b4");
-				return new UniversalNumbersStatement(new SpecialSet(SpecialSetType.R),
-						epsilon.greater(Constant.ZERO).and(new ExistentialNumbersStatement(new SpecialSet(SpecialSetType.R),
-						Constant.ZERO.less(ABS.ofS(e.approached.minus(e.approaches))).and(ABS.ofS(e.approached.minus(e.approaches)).less(delta))
-						.then(e.function.minus(e.limit).less(epsilon)), delta)), epsilon);
-				});
+	// public static final Definition<LimitExpression> LIMIT = new Definition<>(e -> { // https://tutorial.math.lamar.edu/classes/calcI/defnoflimit.aspx
+	// 			Variable epsilon = new Variable("\u03b5"), delta = new Variable("\u03b4");
+	// 			return new UniversalNumbersStatement(new SpecialSet(SpecialSetType.R),
+	// 					epsilon.greater(Constant.ZERO).and(new ExistentialNumbersStatement(new SpecialSet(SpecialSetType.R),
+	// 					Constant.ZERO.less(ABS.ofS(e.approached.minus(e.approaches))).and(ABS.ofS(e.approached.minus(e.approaches)).less(delta))
+	// 					.then(e.function.minus(e.limit).less(epsilon)), delta)), epsilon);
+	// 			});
 
 	@FunctionalInterface
 	interface Definable <T> {

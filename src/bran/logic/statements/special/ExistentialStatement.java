@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static bran.logic.statements.operators.DisplayStyle.displayStyle;
+import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 
 public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
 
@@ -19,8 +19,8 @@ public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalabl
 	private final FiniteSet<I> domain;
 	private boolean proven;
 
-	public static final String[] forAllSymbols = { "\u2203", "\u2203", "\u2203", "\u2203", "\u2203", "\u2203" };
-	public static final String[] inSetSymbols  = { "\u2208", "\u2208", "\u2208", "\u2208", "\u2208", "\u2208" };
+	public static final String[] forAllSymbols = { "\u2203", "\u2203", "\u2203", "\u2203" };
+	public static final String[] inSetSymbols  = { "\u2208", "\u2208", "\u2208", "\u2208" };
 
 	public ExistentialStatement(final QuantifiedStatementArguments<E> universalStatement, final FiniteSet<I> domain, final boolean proven, final E... variables) {
 		this.argumentSize = variables.length;
@@ -76,15 +76,15 @@ public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalabl
 
 	@Override
 	public String toString() {
-		return switch (displayStyle) {
+		return switch (statementStyle) {
 			case NAME -> "There exists ";
 			case LOWERCASE_NAME -> "there exists ";
-			default -> forAllSymbols[displayStyle.index()];
+			default -> forAllSymbols[statementStyle.index()];
 		} + Arrays.stream(variables)
 				  .map(Object::toString)
-				  .collect(Collectors.joining(",")) + switch (displayStyle) {
+				  .collect(Collectors.joining(",")) + switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
-			default -> inSetSymbols[displayStyle.index()];
+			default -> inSetSymbols[statementStyle.index()];
 		} + domain + "|" + universalStatement.state(variables);
 	}
 

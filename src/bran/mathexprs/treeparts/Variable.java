@@ -3,9 +3,7 @@ package bran.mathexprs.treeparts;
 import bran.tree.Holder;
 import bran.sets.numbers.NumberLiteral;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Variable extends Value implements Holder<NumberLiteral> {
 
@@ -33,8 +31,8 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	}
 
 	@Override
-	public List<Variable> getVariables() {
-		return Collections.singletonList(this);
+	public Set<Variable> getVariables() {
+		return Collections.singleton(this);
 	}
 
 	@Override
@@ -70,9 +68,10 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	@Override
 	public Expression derive() {
 		if (respects)
-			return getDifferential();
+			return Constant.ONE;
+			// return getDifferential();
 		else
-			return new Constant(0.0D);
+			return Constant.ZERO;
 	}
 
 	@Override
@@ -88,6 +87,10 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	@Override
 	public void set(final NumberLiteral number) {
 		this.number = number;
+	}
+
+	public boolean parseEquals(final Variable v) {
+		return name.equals(v.name);
 	}
 
 }

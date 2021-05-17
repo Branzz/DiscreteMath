@@ -177,7 +177,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 			case NAND -> Operator.NOR;
 			case NOR -> Operator.NAND;
 			case XOR -> Operator.XNOR;
-			case  XNOR -> Operator.XOR;
+			case XNOR -> Operator.XOR;
 			case IMPLIES -> Operator.REV_IMPLIES; //TODO
 			case REV_IMPLIES -> Operator.IMPLIES;
 			default -> null;

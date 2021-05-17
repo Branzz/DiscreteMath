@@ -3,8 +3,9 @@ package bran.logic;
 import java.util.ArrayList;
 
 import bran.logic.statements.Statement;
+import bran.logic.statements.special.SpecialStatement;
 
-public class Argument {
+public class Argument extends SpecialStatement {
 
 	private ArrayList<Statement> premises;
 	private Statement conclusion;
@@ -18,6 +19,14 @@ public class Argument {
 
 	protected boolean getTruth() {
 		return Statement.andOf((premises.toArray(new Statement[premises.size()]))).implies(conclusion).getTruth();
+	}
+
+	public Statement getConclusion() {
+		return conclusion;
+	}
+
+	public ArrayList<Statement> getPremises() {
+		return premises;
 	}
 
 	public String toString() {
@@ -35,14 +44,6 @@ public class Argument {
 		str += "\u2234 " + conclusion.toString();
 		str += getTruth() ? "\nValid" : "\nInvalid";
 		return str;
-	}
-
-	public Statement getConclusion() {
-		return conclusion;
-	}
-
-	public ArrayList<? extends Statement> getPremises() {
-		return premises;
 	}
 
 }

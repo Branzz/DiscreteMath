@@ -9,8 +9,12 @@ import bran.mathexprs.treeparts.Variable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
 
 public class FunctionExpression extends Expression implements MultiLeaf<Expression, Function> {
 
@@ -41,16 +45,12 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 	}
 
 	@Override
-	public List<Variable> getVariables() {
-		return Arrays.stream(expressions).flatMap(e -> e.getVariables().stream()).collect(Collectors.toList());
+	public Set<Variable> getVariables() {
+		return Arrays.stream(expressions).flatMap(e -> e.getVariables().stream()).collect(Collectors.toSet());
 	}
 
 	@Override
 	public Expression simplified() {
-		// if (function instanceof MultivariableFunction mF)
-		// 	switch (mF) {
-		// 		case :
-		// 	}
 		boolean allConstants = true;
 		Expression[] simplifiedExpressions = new Expression[expressions.length];
 		for (int i = 0; i < expressions.length; i++) {
@@ -63,6 +63,8 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 				constants[i] = ((Constant) simplifiedExpressions[i]).evaluate();
 			return Constant.of(function.function(constants));
 		}
+		if (function instanceof MultivariableFunction mF && mF == LOG && simplifiedExpressions[0].equals(Constant.E))
+			return new FunctionExpression(LN, true, simplifiedExpressions[1]);
 		return new FunctionExpression(function, true, simplifiedExpressions);
 	}
 
@@ -88,6 +90,15 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 		// return Arrays.stream(expressions).map(e -> e.respect(respectsTo)).reduce(false, Boolean::logicalOr);
 	}
 
+	@Override
+	public void replaceAll(final Expression approaches, final Expression approached) {
+		for (int i = 0; i < expressions.length; i++)
+			if (expressions[i].equals(approaches))
+				expressions[i] = approached;
+			else
+				expressions[i].replaceAll(approaches, approached);
+	}
+
 	// @Override
 	// public Expression clone() {
 	// 	return new FunctionExpression(function, true, Arrays.stream(expressions).map(Expression::clone).toArray(Expression[]::new));
@@ -100,7 +111,7 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 
 	@Override
 	public String toString() {
-		return "(" + function + "(" + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
+		return function + "(" + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
 	}
 
 }

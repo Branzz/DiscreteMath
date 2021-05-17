@@ -5,7 +5,7 @@ import bran.tree.BranchOperator;
 import bran.tree.Associativity;
 
 import static bran.logic.statements.OperatorType.REVERSE;
-import static bran.logic.statements.operators.DisplayStyle.displayStyle;
+import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 
 public enum LineOperator implements BranchOperator {
 	CONSTANT(b -> b,	REVERSE, "self", "self", "self", "self", "self", "self"),
@@ -28,10 +28,10 @@ public enum LineOperator implements BranchOperator {
 	}
 
 	public String toString() {
-		return switch (displayStyle) {
+		return switch (statementStyle) {
 			case NAME -> name() + " ";
 			case LOWERCASE_NAME -> name().toLowerCase() + " ";
-			default -> symbols[displayStyle.index()];
+			default -> symbols[statementStyle.index()];
 		};
 	}
 

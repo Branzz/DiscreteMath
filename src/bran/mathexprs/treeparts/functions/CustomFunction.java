@@ -8,6 +8,12 @@ public record CustomFunction(int arguments, Functional functional, Derivable der
 
 	// Example
 	// CustomFunction INC = new CustomFunction(1, a -> a[0] + 1, (r, e) -> e[0], "inc", "increment");
+	// public static final CustomFunction DERIVATIVE;
+	//
+	// static {
+	// 	Variable h = new Variable("h");
+	// 	DERIVATIVE = new CustomFunction(1, a -> new LimitExpression(h, Constant.ZERO, a[0], null), null, "der", "d/dx");
+	// }
 
 	@Override
 	public double function(double... a) {

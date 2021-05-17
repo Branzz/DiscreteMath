@@ -1,6 +1,9 @@
 package bran.mathexprs;
 
-import static bran.logic.statements.operators.DisplayStyle.displayStyle;
+import bran.logic.statements.StatementDisplayStyle;
+
+import static bran.logic.statements.StatementDisplayStyle.statementStyle;
+
 public enum EquationType {
 	EQUAL("EQUALS", "=", "=", "==", "!=", "=", "="),
 	UNEQUAL("DOES NOT EQUAL", "\u2260", "\u2260", "!=", "!=");
@@ -11,10 +14,14 @@ public enum EquationType {
 	}
 
 	public String toString() {
-		return switch (displayStyle) {
+		return toString(statementStyle);
+	}
+
+	public String toString(StatementDisplayStyle displayStyle) {
+		return switch(displayStyle) {
 			case NAME -> symbols[0];
 			case LOWERCASE_NAME -> symbols[0].toLowerCase();
-			default -> symbols[displayStyle.index() + 1];
+			default -> symbols[statementStyle.index() + 1];
 		};
 	}
 

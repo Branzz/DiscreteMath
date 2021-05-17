@@ -8,16 +8,16 @@ import bran.sets.SpecialSet;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static bran.logic.statements.operators.DisplayStyle.*;
+import static bran.logic.statements.StatementDisplayStyle.*;
 
-public class UniversalNumbersStatement extends SpecialStatement { // TODO Not abstract enough.
+public class UniversalNumbersStatement extends SpecialStatement {
 
 	private final Variable[] variables;
 	private final Set domain;
 	private final Statement statement;
 
-	public static final String[] forAllSymbols = {"\u2200", "\u2200", "\u2200", "\u2200", "\u2200", "\u2200"};
-	public static final String[] inSetSymbols  = {"\u2208", "\u2208", "\u2208", "\u2208", "\u2208", "\u2208"};
+	public static final String[] forAllSymbols = {"\u2200", "\u2200", "\u2200", "\u2200" };
+	public static final String[] inSetSymbols  = {"\u2208", "\u2208", "\u2208", "\u2208" };
 
 	public UniversalNumbersStatement(final Set domain, final Statement statement, final Variable... variables) {
 		this.variables = variables;
@@ -33,17 +33,17 @@ public class UniversalNumbersStatement extends SpecialStatement { // TODO Not ab
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(switch (displayStyle) {
+		sb.append(switch (statementStyle) {
 			case NAME -> "For all ";
 			case LOWERCASE_NAME -> "for all ";
-			default -> forAllSymbols[displayStyle.index()];
+			default -> forAllSymbols[statementStyle.index()];
 		});
 		sb.append(Arrays.stream(variables).map(Variable::toString).collect(Collectors.joining(",")));
-		sb.append(switch (displayStyle) {
+		sb.append(switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
-			default -> inSetSymbols[displayStyle.index()];
+			default -> inSetSymbols[statementStyle.index()];
 		});
-		if (domain instanceof SpecialSet && (displayStyle == NAME || displayStyle == LOWERCASE_NAME))
+		if (domain instanceof SpecialSet && (statementStyle == NAME || statementStyle == LOWERCASE_NAME))
 			sb.append(((SpecialSet) domain).toFormalString());
 		else
 			sb.append(domain);

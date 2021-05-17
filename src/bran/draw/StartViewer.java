@@ -24,9 +24,9 @@ public class StartViewer {
 //                 "Enter Parameters", JOptionPane.OK_CANCEL_OPTION);
 //        if (result == JOptionPane.OK_OPTION) {
 
-        	Viewer trial = new Viewer(graph);
-
+        	GraphViewer trial = new GraphViewer(graph);
             JFrame viewer = new JFrame("Graph");
+
             viewer.setContentPane(trial);
             viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
