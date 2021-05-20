@@ -2,6 +2,7 @@ package bran.logic.statements.special;
 
 import bran.combinatorics.Counter;
 import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 import bran.sets.FiniteSet;
@@ -90,6 +91,31 @@ public class UniversalStatement<I, E extends Holder<I> & Equivalable<? super E>>
 			default -> inSetSymbols[statementStyle.index()];
 		});
 		return sb.append(domain).append(", ").append(statement.state(variables)).toString();
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return false;
+	}
+
+	@Override
+	public Statement simplified() {
+		return null;
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 }

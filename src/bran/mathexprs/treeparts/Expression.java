@@ -115,7 +115,7 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 	public abstract boolean equals(Object other);
 
 	public static String innerString(final String toString) {
-		return toString.length() > 2 ? toString.substring(1, toString.length() - 1) : "";
+		return toString.length() > 2 ? toString.substring(1, toString.length() - 1) : toString;
 	}
 
 	public String deriveString() {

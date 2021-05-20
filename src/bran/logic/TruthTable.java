@@ -8,6 +8,7 @@ import java.util.List;
 import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.mathexprs.treeparts.Expression;
 
 public class TruthTable {
 
@@ -15,7 +16,7 @@ public class TruthTable {
 	private static byte tableStyle = BINARY_STYLE;
 	private static String trueString = tableStyle == CAPS_STYLE ? "T" : tableStyle == BINARY_STYLE ? "1" : "E";
 	private static String falseString = tableStyle == CAPS_STYLE ? "F" : tableStyle == BINARY_STYLE ? "0" : "E";
-	private static boolean truesFirst = false;
+	private static boolean truesFirst = true;
 //	private static byte detailLevel = 0;
 
 	public static String getTable(Statement... separateStatements) {
@@ -69,7 +70,7 @@ public class TruthTable {
 //				variables.remove(v);
 
 		for (Statement s : statements) { // Draw header
-			statementStrings.add(" " + s.toString() + " ");
+			statementStrings.add(" " + Expression.innerString(s.toString()) + " ");
 			table.append(statementStrings.get(statementStrings.size() - 1))
 				 .append("\u2502"); // Get column spaces
 		}
@@ -139,7 +140,7 @@ public class TruthTable {
 	//
 	// }
 
-	public static String getLastColumn(OperationStatement statementRoot) {
+	public static String getLastColumn(Statement statementRoot) {
 		String trueString;
 		String falseString;
 		switch (tableStyle) {
@@ -159,18 +160,22 @@ public class TruthTable {
 			allVariables.removeAll(Collections.singletonList(allVariables.get(0)));
 		}
 
+		variables.removeIf(VariableStatement::isConstant);
+
 		StringBuilder table = new StringBuilder(statementRoot.toString() + "\n");
 
-		for (int j = 0; j < statementRoot.toString().length(); j++)
-			table.append("-");
+		table.append("-".repeat(statementRoot.toString().length()));
 		table.append("\n");
 
 		String spacer = " ".repeat(statementRoot.toString().length() / 2);
 
-		for (int i = 0; i < Math.pow(2, variables.size()); i++)
-				table.append(spacer)
-					 .append(statementRoot.getTruth() ? trueString : falseString)
-					 .append("\n");
+		for (int i = 0; i < Math.pow(2, variables.size()); i++) {
+			for (int j = 0; j < variables.size(); j++)
+				variables.get(variables.size() - j - 1).setValue((i >> j & 1) == (truesFirst ? 0 : 1));
+			table.append(spacer)
+				 .append(statementRoot.truth() ? trueString : falseString)
+				 .append("\n");
+		}
 
 		return table.toString();
 	}

@@ -40,7 +40,7 @@ public class StartExpressionViewer {
 
 		JFrame jFrame = new JFrame("Expressions");
 
-		jFrame.setContentPane(viewer);
+
 		jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		//  window.setPreferredSize(new Dimension(500, 500));
@@ -55,13 +55,14 @@ public class StartExpressionViewer {
 			e.printStackTrace();
 		}
 
-		jFrame.setVisible(true);
 		Insets insets = jFrame.getInsets();
 		jFrame.setSize(451 + insets.left + insets.right, 451 + insets.top + insets.bottom);
 		jFrame.setLocation(dim.width / 2 - jFrame.getSize().width / 2, dim.height / 2 - jFrame.getSize().height / 2);
 		jFrame.setBackground(Color.WHITE);
 		viewer.setBackground(Color.WHITE);
 		viewer.init();
+		jFrame.setVisible(true);
+		jFrame.setContentPane(viewer);
 		viewer.start();
 	}
 

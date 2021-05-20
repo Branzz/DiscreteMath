@@ -8,10 +8,8 @@ import bran.graphs.Vertex;
 import bran.logic.Argument;
 import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
-import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.operators.Operator;
 import bran.mathexprs.ExpressionGenerator;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
@@ -24,9 +22,7 @@ import bran.sets.numbers.NumberLiteral;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 public class MainTest {
 
 	public static void main(String[] args) {
@@ -34,7 +30,7 @@ public class MainTest {
 		// SetsTest();
 		// logicTest();
 		// jamesGrimesPuzzleTest();
-		// OperationTest();
+		operationTest();
 		// HamiltonianPathTestingVertices();
 		// hamiltonianPathTestingEdges();
 		// parseTest();
@@ -43,7 +39,14 @@ public class MainTest {
 		// expressionTest();
 		// System.out.println(maxProfit(new int[] {2, 0, -1}));
 		// System.out.println(Stream.of(0, 1).reduce(1, Math::multiplyExact));
-		visualTest();
+		// visualTest();
+
+		// statementsTest();
+
+	}
+
+	public static void statementsTest() {
+
 	}
 
 	public static void visualTest() {
@@ -161,23 +164,39 @@ public class MainTest {
 
 	private static void operationTest() {
 		VariableStatement a = new VariableStatement("a");
-		VariableStatement b = new VariableStatement("b");
-		ArrayList<Statement> demorg = new ArrayList<>();
-		for (Operator o : Operator.values()) {
-			demorg.add(new OperationStatement(a, o, b).not());
-			demorg.add(new OperationStatement(a.not(), o, b.not())); //nand nor, xor xnor/eq
+		// VariableStatement b = new VariableStatement("b");
+		for (long seed = 0L; seed <= 10L; seed++) {
+			Statement y = StatementGenerator.generate(seed, 15);
+			// System.out.println(y.getTable());
+			// System.out.println(y.simplified().getTable());
+			System.out.println(TruthTable.getLastColumn(y.xnor(y.simplified())));
+			// System.out.println((y.xnor(y.simplified())).getTable());
+//(not (not (not ((B or (not ((not (A and (not (not (not (not A)))))) xnor A))) rev_implies B)))) xnor c
+			// break;
 		}
+		// Map<Boolean[], Operator> defaults = Arrays.stream(Operator.values()).collect(Collectors.toMap(o ->
+		// 								IntStream.range(0, 4).mapToObj(i -> o.operate((i & 2) == 2, (i & 1) == 1)).toArray(Boolean[]::new), Function.identity()));
+		// Map<Boolean[], Operator> Stream.of().collect(Collectors.toMap(o ->
+		// 				IntStream.range(0, 4).mapToObj(i -> o.operate((i & 2) == 2, (i & 1) == 1)).toArray(Boolean[]::new), Function.identity()));
+		// Arrays.stream(Operator.values()) // a o (b p a)
+		// 	  .map(o -> Arrays.stream(Operator.values())
+		// 		  .map(p -> defaults.get(defaults.keySet().stream().filter(a -> Arrays.equals(a,
+		// 		  		IntStream.range(0, 4).mapToObj(i -> o.operate((i & 2) == 2, p.operate((i & 2) == 2, (i & 1) == 1))).toArray(Boolean[]::new)))
+		// 			   .findFirst().get())
+		// 					  ))
+		// statement -> new OperationStatement(statement.getLeft(), o, statement.getRight())
+		// 	  .toArray();
+		// for (Statement statement : statements)
+		// 	System.out.println(TruthTable.getTable(statement));
 
-		for (Statement statement : demorg)
-			System.out.println(TruthTable.getTable(statement));
-
-		ArrayList<Statement> abso = new ArrayList<>();
-		for (Operator o : Operator.values())
-			for (Operator o1 : Operator.values())
-				abso.add(new OperationStatement(a, o, new OperationStatement(a, o1, b)));
-
-		for (Statement statement : abso)
-			System.out.println(TruthTable.getTable(statement));
+		// System.out.println(new OperationStatement(a, REV_IMPLIES, b).xnor(new OperationStatement(a.not(), IMPLIES, b.not()).not()).getTable());
+		// ArrayList<Statement> abso = new ArrayList<>();
+		// for (Operator o : Operator.values())
+		// 	for (Operator o1 : Operator.values())
+		// 		abso.add(new OperationStatement(a, o, new OperationStatement(a, o1, b)));
+		//
+		// for (Statement statement : abso)
+		// 	System.out.println(TruthTable.getTable(statement));
 	}
 
 	private static void numberToStringTest() {

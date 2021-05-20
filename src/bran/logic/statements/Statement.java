@@ -1,8 +1,11 @@
 package bran.logic.statements;
 
+import java.util.Arrays;
 import java.util.List;
 
 import bran.exceptions.VariableExpressionException;
+import bran.logic.LogicTable;
+import bran.logic.TruthTable;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
 import bran.logic.statements.special.ConditionalStatement;
@@ -15,6 +18,7 @@ import bran.tree.Holder;
 import bran.tree.TreePart;
 import bran.mathexprs.Equation;
 
+import static bran.logic.statements.operators.Operator.*;
 import static java.util.Collections.*;
 
 public abstract class Statement implements Comparable<Statement>, TreePart, Equivalable<Statement> {
@@ -42,9 +46,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return truth() == other.truth();
 	}
 
-	public boolean equals(Object s) {
-		return this == s;
-	}
+	public abstract boolean equals(Object s);
 
 	public int compareTo(Statement statement) {
 		if (statement == null)
@@ -60,63 +62,69 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 
 	public Statement() {}
 
-	public void simplify() { // another variant where it compares statements with other expressions (p, ~p, t, c)
-		boolean[] laws = new boolean[13];
-		for (int i = 0; i < laws.length; i++)
-			laws[i] = true;
-		simplify(laws);
-	}
+	public abstract Statement simplified();
 
-	public void simplify(boolean... lawsInput) {
-//		boolean equivalence (check if an entire statement is equal, not that it is written the same), boolean associative,
-//		boolean distributive, boolean negation, boolean doubleNegation,
-//		boolean identityIdempotent, boolean universalBound, boolean useDeMorgans, boolean absorption,
-//		boolean negatateConstants;
-		boolean[] laws = new boolean[9];
-		for (int i = 0; i < lawsInput.length && i < laws.length; i++)
-			laws[i] = lawsInput[i];
-
-		 LineStatement root = new LineStatement(this);
-
-		if (laws[4])
-			root.checkDoubleNegationLaw();
-		if (laws[0])
-			root.checkNegateConstantsLaw();
-		if (laws[1])
-			root.checkNegationLaw();
-
-		if (laws[6])
-			root.checkAbsorptionLaw();
-		if (laws[7])
-			root.checkDistributiveLaw();
-
-		if (laws[2])
-			root.checkIdempotentLaw();
-		if (laws[3])
-			root.checkIdentityUniversalBoundLaw();
-
-//		if (laws[5])
-//			root.checkDeMorgansLaw();
-
-		if (laws[8])
-			root.checkAssociativeLaw(); //needs multi child statement?
-
-		/*
-		 * decide order:
-		 * 
-		 * doubleNegation negatateConstants
-		 * negation
-		 * 
-		 * universalBound idempotent|identity
-		 * 					
-		 * useDeMorgans {
-		 * absorption
-		 * distribution
-		 * } if same as before no effect (are there flip flop cycles?)
-		 * associative
-		 */
-		
-	}
+// 	@Deprecated
+// 	public void simplify() { // another variant where it compares statements with other expressions (p, ~p, t, c)
+// 		boolean[] laws = new boolean[13];
+// 		for (int i = 0; i < laws.length; i++)
+// 			laws[i] = true;
+// 		simplify(laws);
+// 	}
+//
+// 	@Deprecated
+// 	public void simplify(boolean... lawsInput) {
+// //		boolean equivalence (check if an entire statement is equal, not that it is written the same), boolean associative,
+// //		boolean distributive, boolean negation, boolean doubleNegation,
+// //		boolean identityIdempotent, boolean universalBound, boolean useDeMorgans, boolean absorption,
+// //		boolean negatateConstants;
+//
+// 		// boolean[] laws = Arrays.copyOf(lawsInput, 9);
+// 		boolean[] laws = new boolean[9];
+// 		for (int i = 0; i < lawsInput.length && i < laws.length; i++)
+// 			laws[i] = lawsInput[i];
+//
+// 		 LineStatement root = new LineStatement(this);
+//
+// 		if (laws[4])
+// 			root.checkDoubleNegationLaw();
+// 		if (laws[0])
+// 			root.checkNegateConstantsLaw();
+// 		if (laws[1])
+// 			root.checkNegationLaw();
+//
+// 		if (laws[6])
+// 			root.checkAbsorptionLaw();
+// 		if (laws[7])
+// 			root.checkDistributiveLaw();
+//
+// 		if (laws[2])
+// 			root.checkIdempotentLaw();
+// 		if (laws[3])
+// 			root.checkIdentityUniversalBoundLaw();
+//
+// //		if (laws[5])
+// //			root.checkDeMorgansLaw();
+//
+// 		if (laws[8])
+// 			root.checkAssociativeLaw(); //needs multi child statement?
+//
+// 		/*
+// 		 * decide order:
+// 		 *
+// 		 * doubleNegation negatateConstants
+// 		 * negation
+// 		 *
+// 		 * universalBound idempotent|identity
+// 		 *
+// 		 * useDeMorgans {
+// 		 * absorption
+// 		 * distribution
+// 		 * } if same as before no effect (are there flip flop cycles?)
+// 		 * associative
+// 		 */
+//
+// 	}
 
 //	public boolean logicallyEquivalentTo(Statement statement) {
 //		//check if structure matches
@@ -147,6 +155,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return true;
 	}
 
+/*
 	protected abstract boolean checkNegateConstantsLaw();
 
 	protected abstract boolean checkNegationLaw();
@@ -166,6 +175,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	protected abstract boolean checkDistributiveLaw();
 
 	protected abstract boolean checkAssociativeLaw();
+*/
 
 //	public Statement doubleNegationStatement() {
 //		return null;
@@ -202,31 +212,31 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	}
 	
 	public static OperationStatement andOf(Statement... s) {
-		return operationOf(Operator.AND, s);
+		return operationOf(AND, s);
 	}
 
 	public static OperationStatement orOf(Statement... s) {
-		return operationOf(Operator.OR, s);
+		return operationOf(OR, s);
 	}
 
 	public static OperationStatement nandOf(Statement... s) {
-		return operationOf(Operator.NAND, s);
+		return operationOf(NAND, s);
 	}
 
 	public static OperationStatement norOf(Statement... s) {
-		return operationOf(Operator.NOR, s);
+		return operationOf(NOR, s);
 	}
 
 	public static OperationStatement xorOf(Statement... s) {
-		return operationOf(Operator.XOR, s);
+		return operationOf(XOR, s);
 	}
 
 	public static OperationStatement xnorOf(Statement... s) {
-		return operationOf(Operator.XNOR, s);
+		return operationOf(XNOR, s);
 	}
 
 	public static OperationStatement impliesOf(Statement r, Statement s) {
-		return operationOf(Operator.IMPLIES, r, s);
+		return operationOf(IMPLIES, r, s);
 	}
 
 	public LineStatement not() {
@@ -238,31 +248,35 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	}
 	
 	public OperationStatement and(Statement... s) {
-		return operation(Operator.AND, s);
+		return operation(AND, s);
 	}
 
 	public OperationStatement or(Statement... s) {
-		return operation(Operator.OR, s);
+		return operation(OR, s);
 	}
 
 	public OperationStatement nand(Statement... s) {
-		return operation(Operator.NAND, s);
+		return operation(NAND, s);
 	}
 
 	public OperationStatement nor(Statement... s) {
-		return operation(Operator.NOR, s);
+		return operation(NOR, s);
 	}
 
 	public OperationStatement xor(Statement... s) {
-		return operation(Operator.XOR, s);
+		return operation(XOR, s);
 	}
 
 	public OperationStatement xnor(Statement... s) {
-		return operation(Operator.XNOR, s);
+		return operation(XNOR, s);
 	}
 
 	public OperationStatement implies(Statement s) {
-		return operation(Operator.IMPLIES, s);
+		return operation(IMPLIES, s);
+	}
+
+	public OperationStatement revImplies(Statement s) {
+		return operation(REV_IMPLIES, s);
 	}
 
 	public Statement then(final Statement conclusion) {
@@ -275,22 +289,24 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 
 	private static final Statement emptyStatement = new Statement() {
 		@Override public boolean equivalentTo(final Statement other) { return this == other; }
+		@Override public boolean equals(final Object s)				 { return false; }
+		@Override public Statement simplified()						 { return empty(); }
 		@Override protected boolean isConstant()					 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }
 		@Override public List<VariableStatement> getVariables()		 { return emptyList(); }
 		@Override public String toString()							 { return "()"; }
 	// @Override public Statement clone()							 { return emptyStatement; }
-		@Override protected boolean checkNegateConstantsLaw()		 { return false; }
-		@Override protected boolean checkNegationLaw()				 { return false; }
-		@Override protected boolean checkIdempotentLaw()			 { return false; }
-		@Override protected boolean checkIdentityUniversalBoundLaw() { return false; }
-		@Override protected boolean checkDoubleNegationLaw()		 { return false; }
-		@Override protected boolean checkDeMorgansLaw()				 { return false; }
-		@Override protected boolean checkAbsorptionLaw()			 { return false; }
-		@Override protected boolean checkExtendedAbsorptionLaw()	 { return false; }
-		@Override protected boolean checkDistributiveLaw()			 { return false; }
-		@Override protected boolean checkAssociativeLaw()			 { return false; }
+	// 	@Override protected boolean checkNegateConstantsLaw()		 { return false; }
+	// 	@Override protected boolean checkNegationLaw()				 { return false; }
+	// 	@Override protected boolean checkIdempotentLaw()			 { return false; }
+	// 	@Override protected boolean checkIdentityUniversalBoundLaw() { return false; }
+	// 	@Override protected boolean checkDoubleNegationLaw()		 { return false; }
+	// 	@Override protected boolean checkDeMorgansLaw()				 { return false; }
+	// 	@Override protected boolean checkAbsorptionLaw()			 { return false; }
+	// 	@Override protected boolean checkExtendedAbsorptionLaw()	 { return false; }
+	// 	@Override protected boolean checkDistributiveLaw()			 { return false; }
+	// 	@Override protected boolean checkAssociativeLaw()			 { return false; }
 	};
 
 	public static Statement empty() {
@@ -301,6 +317,15 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 
 	public static <I, E extends Holder<I> & Equivalable<? super E>> UniversalStatementVariables forAll(E... variables) {
 		return new UniversalStatementVariables(variables);
+	}
+
+	public String getTable() {
+		return TruthTable.getTable(this);
+	}
+
+	protected boolean equalsNot(final Statement other) {
+		return this instanceof LineStatement thisL && thisL.getChild().equals(other)
+				|| other instanceof LineStatement otherL && otherL.getChild().equals(this);
 	}
 
 	public static record UniversalStatementVariables<I, E extends Holder<I> & Equivalable<? super E>> (E... variables) {

@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * this is how you define variables in the ExpressionViewer. (It's like a function with no arguments?)
  */
-public class Declaration extends Drawable { // TODO A parser for this
+public final class Declaration extends Drawable { // TODO A parser for this
 
 	final Variable variable;
 

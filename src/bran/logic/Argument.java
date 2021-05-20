@@ -1,8 +1,10 @@
 package bran.logic;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.SpecialStatement;
 
 public class Argument extends SpecialStatement {
@@ -17,6 +19,7 @@ public class Argument extends SpecialStatement {
 		conclusion = statements[statements.length - 1];
 	}
 
+	@Override
 	protected boolean getTruth() {
 		return Statement.andOf((premises.toArray(new Statement[premises.size()]))).implies(conclusion).getTruth();
 	}
@@ -29,12 +32,23 @@ public class Argument extends SpecialStatement {
 		return premises;
 	}
 
+	@Override
 	public String toString() {
 		String str = "";
 		for (Statement s : premises)
 			str += s + ",";
 		str += "\u2234 " + conclusion.toString();
 		return str;
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return false;
+	}
+
+	@Override
+	public Statement simplified() {
+		return null;
 	}
 
 	public String toFullString() {
@@ -44,6 +58,21 @@ public class Argument extends SpecialStatement {
 		str += "\u2234 " + conclusion.toString();
 		str += getTruth() ? "\nValid" : "\nInvalid";
 		return str;
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 }

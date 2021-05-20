@@ -8,11 +8,19 @@ import static bran.sets.SetDisplayStyle.setStyle;
 public enum InequalityType { // TODO Implement order of operations compatibility with other types
 	LESS((l, r) -> l.compareTo(r) < 0, "less than", "<", "<", "<", "<", "<"),
 	LESS_EQUAL((l, r) -> l.compareTo(r) <= 0, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
-	GREATER((l, r) -> l.compareTo(r) > 0, "greater than", ">", ">", ">", ">", ">"),
+	GREATER((l, r) -> l.compareTo(r) > 0,  "greater than", ">", ">", ">", ">", ">"),
 	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, "greater than or equal to", "\u2265", "\u2265", ">=", ">=");
 
 	private final Comparison comparison;
 	private final String[] symbols;
+	private InequalityType opposite;
+
+	static {
+		LESS.opposite = GREATER_EQUAL;
+		LESS_EQUAL.opposite = GREATER;
+		GREATER_EQUAL.opposite = LESS;
+		GREATER.opposite = LESS_EQUAL;
+	}
 
 	InequalityType(final Comparison comparison, final String... symbols) {
 		this.comparison = comparison;
@@ -34,6 +42,10 @@ public enum InequalityType { // TODO Implement order of operations compatibility
 		} catch (IndexOutOfBoundsException e) {
 			return name();
 		}
+	}
+
+	public InequalityType opposite() {
+		return opposite;
 	}
 
 	public String toString() {

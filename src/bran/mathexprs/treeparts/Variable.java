@@ -22,6 +22,10 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 		this.respects = respects;
 	}
 
+	public Variable(final Character name) {
+		this(String.valueOf(name));
+	}
+
 	public String getName() {
 		return name;
 	}

@@ -6,14 +6,17 @@ import java.util.List;
 import bran.logic.statements.operators.LineOperator;
 import bran.tree.Branch;
 
+import static bran.logic.statements.VariableStatement.CONTRADICTION;
+import static bran.logic.statements.VariableStatement.TAUTOLOGY;
+import static bran.logic.statements.operators.LineOperator.CONSTANT;
 import static bran.logic.statements.operators.LineOperator.NOT;
 
 public class LineStatement extends Statement implements Branch<Statement, LineOperator> { // One child
 
 	private final LineOperator lineOperator;
-	private Statement child;
+	private final Statement child;
 
-	public LineStatement(Statement child) { // NOT preferred
+	public LineStatement(Statement child) {
 		this.child = child;
 		lineOperator = NOT;
 	}
@@ -58,6 +61,21 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	}
 
 	@Override
+	public Statement simplified() {
+		Statement child = this.child.simplified();
+		if (lineOperator == CONSTANT)
+			return child;
+		if (child instanceof LineStatement childLine) // Double Negation Law - since child's simplified, it is a NOT
+			return childLine.child;
+		if (child instanceof VariableStatement childVariable) // Negate Constants Law
+			if (childVariable.equals(TAUTOLOGY))
+				return CONTRADICTION;
+			else if (childVariable.equals(CONTRADICTION))
+				return TAUTOLOGY;
+		return new LineStatement(child);
+	}
+
+	@Override
 	public boolean isConstant() {
 		return false;
 	}
@@ -89,6 +107,8 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	// public Statement clone() {
 	// 	return new LineStatement(child.clone(), lineOperator);
 	// }
+
+	/*
 
 	@Override
 	protected boolean checkNegationLaw() {
@@ -162,5 +182,7 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+*/
 
 }

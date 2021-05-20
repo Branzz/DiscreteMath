@@ -8,13 +8,15 @@ import bran.mathexprs.treeparts.Variable;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.text.DateFormatter;
+import javax.swing.text.DefaultFormatter;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 import java.util.*;
 
 import static bran.draw.exprs.ExpressionInputExceptionType.*;
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.SIN;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
 
 //TODO parametric, polar, points, tables, graphs somehow, boolean (table)
 //TODO make zoom translate to mouse spo1
@@ -30,11 +32,11 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 
 	private ExpressionCalculator calculator;
 
-	double xMin = -2.0;
-	double xMax = 18.0;
+	double xMin = -10.0;
+	double xMax = 10.0;
 	double xScale = xMax - xMin;
-	double yMin = -2.0;
-	double yMax = 18.0;
+	double yMin = -10.0;
+	double yMax = 10.0;
 	double yScale = yMax - yMin;
 
 	private double mouseDownX;
@@ -54,16 +56,18 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		this.addMouseListener(this);
 		this.addComponentListener(this);
 		this.addMouseWheelListener(this);
-		addExpression(LOG.ofS(LOG.ofS(x, Constant.E), LOG.ofS(Constant.E, x)).derive().derive().simplified());
-		// addExpression(Constant.ZERO);
-		// addExpression(SIN.ofS(of("a")));
+		// addExpression(COS.ofS(of("b").sqrt()));
+		addExpression(COS.ofS(of("b").sqrt()));
+		addExpression(LOG.ofS(LOG.ofS(x, Constant.E), LOG.ofS(Constant.E, x)).derive().simplified());
+		addExpression(SIN.ofS(of("a")));
 		// addDeclaration(new Declaration(Collections.emptySet(), x.squared().plus(Constant.ONE), precision, of("a")));
+		// addDeclaration(of("h"), Constant.PI);
+		// addDeclaration(of("h"), of("a").dec());
 
-		ExpressionCalculator calculator = new ExpressionCalculator(drawables, this);
+		calculator = new ExpressionCalculator(drawables, this);
 		calculator.calculate();
 		new Timer(10, e -> calculator.calculate()).start();
 		new Timer(DELAY, e -> repaint()).start();
-
 	}
 
 	public void update(Graphics g) {
@@ -80,12 +84,14 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		g.drawImage(offscreen, 0, 0, this);
 	}
 
+	private static DecimalFormat dF = new DecimalFormat("0.###");
+
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.drawString(String.valueOf(xMin), 5, height / 2);
-		g.drawString(String.valueOf(xMax), width - 64, height / 2);
-		g.drawString(String.valueOf(yMax), width / 2, 16);
-		g.drawString(String.valueOf(yMin), width / 2, height - 16);
+		g.drawString(dF.format(xMin), 5, height / 2);
+		g.drawString(dF.format(xMax), width - 40, height / 2);
+		g.drawString(dF.format(yMax), width / 2, 16);
+		g.drawString(dF.format(yMin), width / 2, height - 12);
 		g.drawLine((int) (- width * xMin / xScale), 0,
 				   (int) (- width * xMin / xScale), height);
 		g.drawLine(0,	  (int) (height + height * yMin / yScale),
@@ -93,7 +99,7 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		int shift = 1;
 		for (Drawable draw : drawables) {
 			g.setColor(draw.getColor());
-			g.drawString(draw.toString(), 5, shift++ * 15);
+			g.drawString(draw.toString(), 5, shift++ * 16);
 			if (draw.isExcepted()) {
 				g.setColor(Color.RED);
 				g.drawString(" [" + draw.exception.getMessage() + "]", 5 + g.getFontMetrics().stringWidth(draw.toString()), (shift - 1) * 16);
@@ -135,6 +141,7 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 	Set<Variable> variablePool = new HashSet<>();
 
 	Variable of(String name) {
+
 		// return variablePool.stream().filter(v -> v.getName().equals(name)).findAny().orElse(next(name));
 		// private Variable next(String name) {
 		// 	Variable next = new Variable(name);
@@ -270,11 +277,12 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		xMax += xIncrease;
 		yMin += yIncrease;
 		yMax += yIncrease;
+		checkBoundaries();
 		resetDrawables();
 	}
 
-	private static final double OUT_FACTOR = 2D;
-	private static final double IN_FACTOR = 1 / (OUT_FACTOR + 1) * OUT_FACTOR;
+	private static final double OUT_FACTOR = 3D;
+	private static final double IN_FACTOR = 1 / (OUT_FACTOR);
 
 	@Override
 	public void mouseWheelMoved(final MouseWheelEvent e) {
@@ -287,7 +295,22 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		xMin = x - xScale / 2;
 		yMax = y + yScale / 2;
 		yMin = y - yScale / 2;
+		checkBoundaries();
 		resetDrawables();
+	}
+
+	private void checkBoundaries() {
+		if (xMin == xMax || yMin == yMax || Double.isNaN(xMin) || Double.isNaN(xMax) || Double.isNaN(yMin) || Double.isNaN(yMax))
+			resetView();
+	}
+
+	private void resetView() {
+		xMin = -10.0;
+		xMax = 10.0;
+		xScale = xMax - xMin;
+		yMin = -10.0;
+		yMax = 10.0;
+		yScale = yMax - yMin;
 	}
 
 	@Override public void componentMoved(final ComponentEvent e) { }

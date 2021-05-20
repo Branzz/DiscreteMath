@@ -54,7 +54,8 @@ public class Definition <T> {
 	}
 
 	public String test(T arg) {
-		return "for the " + symbols[0] + " " + arg + ", it is " + symbols[1] + " iff " + definable.defined(arg) + ", which is " + definable.defined(arg).truth();
+		return "for the " + symbols[0] + " " + arg + ", it is " + symbols[1] + " iff " + definable.defined(arg)
+			   + ", which is " + definable.defined(arg).truth() + ", so " + arg + " is " + symbols[1];
 	}
 
 }

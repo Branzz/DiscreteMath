@@ -2,6 +2,7 @@ package bran.logic.statements.special;
 
 import bran.combinatorics.Counter;
 import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
 import bran.tree.Equivalable;
 import bran.sets.FiniteSet;
 
@@ -86,6 +87,31 @@ public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalabl
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];
 		} + domain + "|" + universalStatement.state(variables);
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return false;
+	}
+
+	@Override
+	public Statement simplified() {
+		return null;
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 }

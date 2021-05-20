@@ -9,6 +9,7 @@ import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
 import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
+import bran.logic.statements.StatementDisplayStyle;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.operators.Operator;
 import bran.logic.statements.special.ExistentialStatement;
@@ -37,10 +38,11 @@ public class Main {
 	 * TODO:
 	 * The other parser, generic parser, graph/equation/expression visual rep, function creation complete, details in readme-better examples-multiple display format
 	 * contrapositive - proof by
+	 * show exactly how it simplified steps
 	 */
 	public static void main(String[] args) {
 
-		// showcase();
+		showcase();
 
 	}
 
@@ -49,6 +51,7 @@ public class Main {
 		// DisplayStyle.displayStyle;
 		String statementString = "a    and  ~ b or  !(c ^   t) implies b"; // where t is a tautology
 		Statement statement = StatementParser.parseStatement(statementString);
+		StatementDisplayStyle.statementStyle = StatementDisplayStyle.JAVA_LOGICAL;
 		Variable varA = new Variable("a", true);
 		Expression expression = null;
 		try {
@@ -56,7 +59,7 @@ public class Main {
 		} catch (IllegalArgumentAmountException ignored) { }
 		System.out.println(statementString
 				+ "\n" + statement
-				+ "\n" + TruthTable.getTable(statement)
+				+ "\n" + statement.getTable()
 				+ "\n" + Definition.ODD.test(new Constant(5.0))
 				+ "\n" + new ExistentialStatement<>(a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
 														 new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)), true,

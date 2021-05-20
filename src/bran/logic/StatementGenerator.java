@@ -4,8 +4,11 @@ import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.operators.Operator;
+import bran.mathexprs.treeparts.Variable;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class StatementGenerator {
 
@@ -44,6 +47,18 @@ public class StatementGenerator {
 
 		private static final Operator[] operators = Operator.values();
 
+		Set<VariableStatement> variablePool = new HashSet<>();
+
+		VariableStatement of(char nameChar) {
+			String name = String.valueOf(nameChar);
+			for (VariableStatement v : variablePool)
+				if (v.toString().equals(name))
+					return v;
+			VariableStatement next = new VariableStatement(name);
+			variablePool.add(next);
+			return next;
+		}
+
 		// This could just be another method in the outer class, but it does exactly the same thing.
 		Generator(final Random rand, final int size) {
 			this(rand, size, 0.5, 0.0, 0.0, 0.5, 0.5);
@@ -69,7 +84,9 @@ public class StatementGenerator {
 				return composite;
 			if (size <= 0)
 				return composite = Statement.empty();
-			composite = new VariableStatement(String.valueOf(maxVariableName));
+			VariableStatement first = new VariableStatement(String.valueOf(maxVariableName));
+			composite = first;
+			variablePool.add(first);
 			int i = 1;
 			while (i < size - 2) {
 				if (rand.nextDouble() < operationProb) {
@@ -94,10 +111,10 @@ public class StatementGenerator {
 				return VariableStatement.CONTRADICTION;
 			else if (rand.nextDouble() < newVariableProb) {
 				maxVariableName++;
-				return new VariableStatement(maxVariableName);
+				return of(maxVariableName);
 			}
 			else
-				return new VariableStatement((char) (rand.nextInt(maxVariableName - 'A' + 1) + 'A'));
+				return of((char) (rand.nextInt(maxVariableName - 'A' + 1) + 'A'));
 		}
 
 		private void appendLineStatement() {

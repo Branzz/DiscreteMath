@@ -1,7 +1,13 @@
 package bran.mathexprs;
 
+import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
+
+import java.util.List;
+
+import static bran.logic.statements.VariableStatement.*;
 
 public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 
@@ -17,11 +23,6 @@ public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 
 	public Equation(T left, T right) {
 		this(left, EquationType.EQUAL, right);
-	}
-
-	@Override
-	public void simplify() {
-		super.simplify();
 	}
 
 	@Override
@@ -43,6 +44,35 @@ public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 	@Override
 	public String toString() {
 		return "(" + left + ' ' + equationType + ' ' + right + ')';
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return true;
+		// return s instanceof Equation<T> e && ((left.equals(e.left) && right.equals(e.right)) || (right.equals(e.left) && left.equals(e.right)));
+	}
+
+	@Override
+	public Statement simplified() {
+		// return getTruth() ? TAUTOLOGY : CONTRADICTION;
+		return left instanceof Statement l && right instanceof Statement r
+				? new Equation<>(l.simplified(), r.simplified())
+				: new Equation<>(left, right);
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 	// @Override // TODO

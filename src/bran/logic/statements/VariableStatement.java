@@ -64,6 +64,11 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		return this == s || (s instanceof VariableStatement && ((VariableStatement) s).name.equals(name));
 	}
 
+	@Override
+	public Statement simplified() {
+		return this;
+	}
+
 	public boolean getTruth() {
 		return value;
 	}
@@ -102,58 +107,58 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		return name;
 	}
 
-	@Override
-	protected boolean checkNegationLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkIdempotentLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkIdentityUniversalBoundLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkNegateConstantsLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkDoubleNegationLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkDeMorgansLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkAbsorptionLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkExtendedAbsorptionLaw() {
-		return false;
-	}
-
-	@Override
-	protected boolean checkDistributiveLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkAssociativeLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	// @Override
+	// protected boolean checkNegationLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkIdempotentLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkIdentityUniversalBoundLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkNegateConstantsLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkDoubleNegationLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkDeMorgansLaw() {
+	// 	// TODO Auto-generated method stub
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkAbsorptionLaw() {
+	// 	// TODO Auto-generated method stub
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkExtendedAbsorptionLaw() {
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkDistributiveLaw() {
+	// 	// TODO Auto-generated method stub
+	// 	return false;
+	// }
+	//
+	// @Override
+	// protected boolean checkAssociativeLaw() {
+	// 	// TODO Auto-generated method stub
+	// 	return false;
+	// }
 
 }

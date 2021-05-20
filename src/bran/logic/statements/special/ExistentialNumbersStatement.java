@@ -1,11 +1,13 @@
 package bran.logic.statements.special;
 
 import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
 import bran.mathexprs.treeparts.Variable;
 import bran.sets.Set;
 import bran.sets.SpecialSet;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.*;
@@ -49,6 +51,31 @@ public class ExistentialNumbersStatement extends SpecialStatement {
 		else
 			sb.append(domain);
 		return sb.append(" such that ").append(statement).toString();
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return false;
+	}
+
+	@Override
+	public Statement simplified() {
+		return null;
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 	// @Override

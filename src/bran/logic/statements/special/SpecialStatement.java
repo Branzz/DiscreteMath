@@ -13,80 +13,12 @@ public abstract class SpecialStatement extends Statement {
 	}
 
 	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
-	}
+	public abstract boolean equivalentTo(final Statement other);
 
 	@Override
-	public List<Statement> getChildren() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract List<Statement> getChildren();
 
 	@Override
-	public List<VariableStatement> getVariables() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected boolean checkNegateConstantsLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkNegationLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkIdempotentLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkIdentityUniversalBoundLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkDoubleNegationLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkDeMorgansLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkAbsorptionLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkExtendedAbsorptionLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkDistributiveLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean checkAssociativeLaw() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public abstract List<VariableStatement> getVariables();
 
 }

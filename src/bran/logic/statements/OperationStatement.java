@@ -2,10 +2,15 @@ package bran.logic.statements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
 import bran.tree.Fork;
+
+import static bran.logic.statements.VariableStatement.*;
+import static bran.logic.statements.operators.Operator.*;
 
 public class OperationStatement extends Statement implements Fork<Statement, Operator, Statement> { // Two Child
 
@@ -17,13 +22,6 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
-	}
-
-	public boolean equals(Object s) {
-		if (!(s instanceof OperationStatement))
-			return false;
-		OperationStatement s0 = (OperationStatement) s;
-		return s0.getOperator().equals(operator) && left.equals(s0.getLeft()) && right.equals(s0.getRight());
 	}
 
 	public Statement getLeft() {
@@ -45,7 +43,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 
 	//	public OperationStatement(Operator operator, Statement... statements) {
 //		if (statements.length == 0)
-//			throw new VariableExpressionException();
+//			throw new Var1iableExpressionException();
 //		if (statements.length == 1) {
 //			left = statements[0];
 //			right = statements[0];
@@ -102,22 +100,169 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return "(" + left.toString() + " " + operator.toString() + " " + right.toString() + ")";
 	}
 
-	// @Override
-	// public OperationStatement clone() {
-	// 	return new OperationStatement(left.clone(), operator, right.clone());
-	// }
-
-	public boolean checkNegationLaw() {
-		//see if self needs to be changed, if so, return true and parent will handle it
-		//if not: check in children need to be handled, and handle them
-		if (left.compareTo(right.not()) == 0)
-			return true;
-		if (left.checkNegationLaw())
-			left = ((OperationStatement) left).negatedLawStatement();
-		if (right.checkNegationLaw())
-			right = ((OperationStatement) right).negatedLawStatement();
-		return false;
+	public boolean equals(Object s) {
+		return s instanceof OperationStatement s0 && s0.getOperator().equals(operator) && left.equals(s0.getLeft()) && right.equals(s0.getRight());
 	}
+
+	// @FunctionalInterface interface LawCheck { boolean check(); }
+	// @FunctionalInterface interface LawGet { Statement morph(); }
+	// private final Map<LawCheck, LawGet> lawCheckGets = Map.of(this::checkNegationLaw, this::negatedLawStatement);
+	// return lawCheckGets.get(lawCheckGets.keySet().stream().filter(LawCheck::check).findFirst()).morph();
+
+	@Override
+	public Statement simplified() {
+		// return new OperationStatement(, operator, right.simplified());
+		Statement left = this.left.simplified();
+		Statement right = this.right.simplified();
+		if (left.isConstant()) { // Universal Bound Law
+			if (right.isConstant()) // basic logic case (not a law)
+				return getTruth() ? TAUTOLOGY : CONTRADICTION;
+			if (left.getTruth())
+				return switch (operator) { // double check these TODO
+					case REV_IMPLIES, OR -> TAUTOLOGY;
+					case NOR -> CONTRADICTION;
+					case IMPLIES, AND, XNOR -> right;
+					case NAND, XOR -> right.not();
+					default -> null;
+				};
+			else
+				return switch (operator) {
+					case IMPLIES, NAND, REV_IMPLIES -> TAUTOLOGY;
+					case AND -> CONTRADICTION;
+					case OR, XOR -> right;
+					case NOR, XNOR -> right.not();
+					default -> null;
+				};
+		}
+		else if (right.isConstant()) { // Universal Bound Law
+			if (right.getTruth())
+				return switch (operator) {
+					case IMPLIES, OR -> TAUTOLOGY;
+					case NOR -> CONTRADICTION;
+					case REV_IMPLIES, AND, XNOR -> left;
+					case NAND, XOR -> left.not();
+					default -> null;
+				};
+			else
+				return switch (operator) {
+					case REV_IMPLIES, NAND -> TAUTOLOGY;
+					case AND -> CONTRADICTION;
+					case OR, XOR -> left;
+					case IMPLIES, NOR, XNOR -> left.not();
+					default -> null;
+				};
+		}
+		if (left.equalsNot(right)) { // Negation Law
+			return switch (operator) {
+				case OR, NAND, XOR -> TAUTOLOGY;
+				case AND, NOR, XNOR -> CONTRADICTION;
+				case REV_IMPLIES -> left;
+				case IMPLIES -> right;
+				default -> null;
+			};
+		}
+		else if (left.equals(right)) { // Idempotent Law
+			return switch (operator) {
+				case XNOR, IMPLIES, REV_IMPLIES -> TAUTOLOGY;
+				case XOR -> CONTRADICTION;
+				case AND, OR -> left;
+				case NAND, NOR -> left.not();
+				default -> null;
+			};
+		}
+		// absorptionAAB
+		// absorptionABA
+		// absorptionABB
+		// absorptionBAB
+		// 	return deMorgans();
+		// extended form of the Absorption Law (precomputed (static) operation combos)
+		// OperationStatement rightO;
+		if (right instanceof OperationStatement rightO) {
+			// rightO = rightOp;
+			// <--- TODO if left instanceof operation then you can factor
+			if (rightO.getLeft().equals(left)) {
+				return (isAsyOp(rightO.getOperator()) ? absorptionAAB : absorptionRightOp)
+							   .get(operator, rightO.getOperator()).absorb(left, rightO.getRight());
+			} else if (rightO.getRight().equals(left))
+				return (isAsyOp(rightO.getOperator()) ? absorptionABA : absorptionRightOp)
+							   .get(operator, rightO.getOperator()).absorb(left, rightO.getLeft());
+		} else if (right instanceof LineStatement rightL && rightL.getChild() instanceof OperationStatement rightLO) {
+			// rightO = rightLO.deMorgans();
+		} else if (left instanceof OperationStatement leftO) {
+			if (leftO.getLeft().equals(right)) {
+				return (isAsyOp(operator) ? absorptionAAB : absorptionRightOp)
+							   .get(leftO.getOperator(), operator).absorb(leftO.getRight(), right);
+			} else if (leftO.getRight().equals(right))
+				return (isAsyOp(operator) ? absorptionAAB : absorptionRightOp)
+							   .get(leftO.getOperator(), operator).absorb(leftO.getLeft(), right);
+		}
+		// if left op and right op
+		// if (checkDeMorgansLaw())
+		return new OperationStatement(left, operator, right);
+	}
+
+	/*
+	 * these operators are asymmetrical and have extra cases in the absorption law
+	 */
+	private static boolean isAsyOp(Operator o) {
+		return o == IMPLIES || o == REV_IMPLIES;
+	}
+
+	/* the laws to check to know if it simplifies.
+	   not technically necessary, but they do have names,
+	   and now, one can check a law themself */
+
+	public Statement deMorgans() {
+		return new OperationStatement(left.not(), switch (operator) {
+			case AND -> OR;
+			case OR -> AND;
+			case NAND -> NOR;
+			case NOR -> NAND;
+			case XOR -> XNOR;
+			case XNOR -> XOR;
+			// case IMPLIES -> REV_IMPLIES; //TODO
+			// case REV_IMPLIES -> IMPLIES;
+			default -> null;
+		}, right.not()).not();
+
+		// if (switchedOperator == null)
+		// 	return null;
+		// Statement leftStatement = left;
+		// if (left instanceof LineStatement)
+		// 	if (((LineStatement) left).getChild() instanceof LineStatement && !((LineStatement) left).getChild().getTruth() && !getTruth())
+		// 		leftStatement = new LineStatement(((LineStatement) left).getChild(), LineOperator.CONSTANT);
+		// 	else
+		// 		leftStatement = ((LineStatement) left).not();
+		// Statement rightStatement = right;
+		// if (right instanceof LineStatement)
+		// 	if (((LineStatement) right).getChild() instanceof LineStatement && !((LineStatement) right).getChild().getTruth() && !getTruth())
+		// 		rightStatement = new LineStatement(((LineStatement) right).getChild(), LineOperator.CONSTANT);
+		// 	else
+		// 		rightStatement = ((LineStatement) right).not();
+		// return new OperationStatement(leftStatement, switchedOperator, rightStatement).not();
+//Operator o = ops[(Arrays.search(ops, operator) + 4) % 8];
+
+//		for (int i = 0;;) // just to see... yes; you can do this entire thing in 1 line
+//			if (new Operator[] { Operator.XNOR, Operator.OR, Operator.NOR, Operator.IMPLIES, Operator.XOR, Operator.AND,
+//					Operator.NAND, Operator.REV_IMPLIES, Operator.EQUIVALENT }[i++].equals(operator))
+//				return new OperationStatement(
+//						!left.getClass().equals(LineStatement.class) ? left
+//								: ((LineStatement) left).getChild().getClass().equals(LineStatement.class)
+//										&& !((LineStatement) left).getChild().getTruth() && !getTruth()
+//												? new LineStatement(((LineStatement) left).getChild(), true)
+//												: ((LineStatement) left).not(),
+//						new Operator[] { Operator.XNOR, Operator.OR, Operator.NOR, Operator.IMPLIES, Operator.XOR,
+//								Operator.AND, Operator.NAND, Operator.REV_IMPLIES, Operator.EQUIVALENT }[(i + 3) % 8],
+//						!right.getClass().equals(LineStatement.class) ? right
+//								: ((LineStatement) right).getChild().getClass().equals(LineStatement.class)
+//										&& !((LineStatement) right).getChild().getTruth() && !getTruth()
+//												? new LineStatement(((LineStatement) left).getChild(), true)
+//												: ((LineStatement) right).not()).not();
+	}
+
+/*
+
+		The next section is old; it tried to check each child and modify it rather than self modiy
 
 	@Override
 	protected boolean checkIdempotentLaw() {
@@ -172,14 +317,14 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 
 	protected LineStatement deMorgans() {
 		Operator switchedOperator = switch (operator) {
-			case AND -> Operator.OR;
-			case OR -> Operator.AND;
-			case NAND -> Operator.NOR;
-			case NOR -> Operator.NAND;
-			case XOR -> Operator.XNOR;
-			case XNOR -> Operator.XOR;
-			case IMPLIES -> Operator.REV_IMPLIES; //TODO
-			case REV_IMPLIES -> Operator.IMPLIES;
+			case AND -> OR;
+			case OR -> AND;
+			case NAND -> NOR;
+			case NOR -> NAND;
+			case XOR -> XNOR;
+			case XNOR -> XOR;
+			case IMPLIES -> REV_IMPLIES; //TODO
+			case REV_IMPLIES -> IMPLIES;
 			default -> null;
 		};
 		if (switchedOperator == null)
@@ -197,11 +342,9 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 			else
 				rightStatement = ((LineStatement) right).not();
 		return new OperationStatement(leftStatement, switchedOperator, rightStatement).not();
-
-
 //Operator o = ops[(Arrays.search(ops, operator) + 4) % 8];
-		
-//		for (int i = 0;;)
+
+//		for (int i = 0;;) // just to see... you can do this entire thing in 1 line
 //			if (new Operator[] { Operator.XNOR, Operator.OR, Operator.NOR, Operator.IMPLIES, Operator.XOR, Operator.AND,
 //					Operator.NAND, Operator.REV_IMPLIES, Operator.EQUIVALENT }[i++].equals(operator))
 //				return new OperationStatement(
@@ -224,13 +367,13 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		if ((left instanceof OperationStatement
 			&& (((OperationStatement) left).getLeft().equals(right)
 			|| ((OperationStatement) left).getRight().equals(right))
-				&& (((OperationStatement) left).getOperator().equals(Operator.AND) && operator.equals(Operator.OR)
-				|| (((OperationStatement) left).getOperator().equals(Operator.OR) && operator.equals(Operator.AND))))
+				&& (((OperationStatement) left).getOperator().equals(AND) && operator.equals(OR)
+				|| (((OperationStatement) left).getOperator().equals(OR) && operator.equals(AND))))
 		|| (right instanceof OperationStatement
 			&& (((OperationStatement) right).getLeft().equals(left)
 			|| ((OperationStatement) right).getRight().equals(left))
-				&& (((OperationStatement) right).getOperator().equals(Operator.AND) && operator.equals(Operator.OR)
-				|| (((OperationStatement) right).getOperator().equals(Operator.OR) && operator.equals(Operator.AND)))
+				&& (((OperationStatement) right).getOperator().equals(AND) && operator.equals(OR)
+				|| (((OperationStatement) right).getOperator().equals(OR) && operator.equals(AND)))
 				))
 			return true;
 		if (right.checkAbsorptionLaw())
@@ -258,72 +401,49 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return false;
 	}
 
+	*//* the replacements for simplification *//*
+
 	public Statement negatedLawStatement() {
-		switch (operator) {
-		case AND: case NOR: case XNOR:
-			return new VariableStatement("c");
-		case OR: case NAND: case XOR:
-			return new VariableStatement("t");
-		case REV_IMPLIES:
-			return left;
-		case IMPLIES:
-			return right;
-		default:
-			return null;
-		}
+		return switch (operator) {
+			case AND, NOR, XNOR -> CONTRADICTION;
+			case OR, NAND, XOR -> TAUTOLOGY;
+			case REV_IMPLIES -> left;
+			case IMPLIES -> right;
+			default -> null;
+		};
 	}
 
 	public Statement idempotentStatement() {
-		switch (operator) {
-		case XNOR: case IMPLIES: case REV_IMPLIES:
-			return new VariableStatement("t");
-		case XOR:
-			return new VariableStatement("c");
-		case AND: case OR:
-			return left;
-		case NAND: case NOR:
-			return left.not();
-		default:
-			return null;
-		}
+		return switch (operator) {
+			case XNOR, IMPLIES, REV_IMPLIES -> TAUTOLOGY;
+			case XOR -> CONTRADICTION;
+			case AND, OR -> left;
+			case NAND, NOR -> left.not();
+			default -> null;
+		};
 	}
 
 	public Statement identityUniversalBoundStatement() {
 		if (left.isConstant() && left.getTruth() || right.isConstant() && right.getTruth())
-			switch (operator) {
-			case IMPLIES:
-				return left.isConstant() ? right : new VariableStatement("t");
-			case REV_IMPLIES:
-				return right.isConstant() ? right : new VariableStatement("t");
-			case OR:
-				return new VariableStatement("t");
-			case NOR:
-				return new VariableStatement("c");
-			case AND: case XNOR:
-				return left.isConstant() ? right : left;
-			case NAND: case XOR:
-				return (left.isConstant() ? right : left).not();
-			default:
-				return null;
-			}
+			return switch (operator) {
+				case IMPLIES -> left.isConstant() ? right : TAUTOLOGY;
+				case REV_IMPLIES -> right.isConstant() ? right : TAUTOLOGY;
+				case OR -> TAUTOLOGY;
+				case NOR -> CONTRADICTION;
+				case AND, XNOR -> left.isConstant() ? right : left;
+				case NAND, XOR -> (left.isConstant() ? right : left).not();
+				default -> null;
+			};
 		else
-			switch (operator) {
-			case IMPLIES:
-				return left.isConstant() ? new VariableStatement("t") : left.not();
-			case REV_IMPLIES:
-				return right.isConstant() ? new VariableStatement("t") : left.not();
-			case NAND:
-				return new VariableStatement("t");
-			case AND:
-				return new VariableStatement("c");
-			case OR: case XOR:
-				return left.isConstant() ? right : left;
-			case NOR: case XNOR:
-				return (left.isConstant() ? right : left).not();
-			default:
-				return null;
-			}
-
+			return switch (operator) {
+				case IMPLIES -> left.isConstant() ? TAUTOLOGY : left.not();
+				case REV_IMPLIES -> right.isConstant() ? TAUTOLOGY : left.not();
+				case NAND -> TAUTOLOGY;
+				case AND -> CONTRADICTION;
+				case OR, XOR -> left.isConstant() ? right : left;
+				case NOR, XNOR -> (left.isConstant() ? right : left).not();
+				default -> null;
+			};
 	}
 
 	public Statement absorptionStatement() {
@@ -361,13 +481,6 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return null;
 	}
 
-}
+*/
 
-//if (left.getClass().equals(VariableStatement.class))
-//current.add(this);
-//else
-//current.addAll(left.getChildren());
-//if (right.getClass().equals(VariableStatement.class))
-//current.add(this);
-//else
-//current.addAll(right.getChildren());
+}

@@ -8,6 +8,8 @@ import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
 
+import java.util.List;
+
 public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> extends Equivalence {
 
 	private final T left;
@@ -18,12 +20,6 @@ public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> ext
 		this.left = left;
 		this.inequalityType = inequalityType;
 		this.right = right;
-	}
-
-	@Override
-	public void simplify() {
-
-		// return VariableStatement.of(getTruth());
 	}
 
 	@Override
@@ -38,6 +34,33 @@ public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> ext
 	@Override
 	public String toString() {
 		return left + " " + inequalityType + " " + right;
+	}
+
+	@Override
+	public boolean equals(final Object s) {
+		return true;
+		// return s instanceof Inequality<T> i && ((left.equals(i.left) && right.equals(i.right) && inequalityType == i.inequalityType)
+		// 									 || (right.equals(i.left) && left.equals(i.right) && inequalityType == inequalityType.opposite()));
+	}
+
+	@Override
+	public Statement simplified() {
+		return null;
+	}
+
+	@Override
+	public boolean equivalentTo(final Statement other) {
+		return false;
+	}
+
+	@Override
+	public List<Statement> getChildren() {
+		return null;
+	}
+
+	@Override
+	public List<VariableStatement> getVariables() {
+		return null;
 	}
 
 	// @Override
