@@ -90,9 +90,13 @@ exp.derive().simplified()
 ```
 `(a ^ a) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (da * (1 + LN(a)))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))`
 ```java
-exp.derive().getUniversalStatement() // the domain, unsimplified
+exp.derive().getUniversalStatement() // the domain
 ```
 `∀a,da∈R((a > 0 ⋀ (a ^ a) > 0) ⋀ (((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0)) ⋀ (a > 0 ⋀ (((((a ≠ 0) ⋀ a > 0) ⋀ ((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0))) ⋀ a > 0) ⋀ (((a ^ a) * LN(a)) ≠ 0)))))`
+```java
+exp.derive().getUniversalStatement().simplified()
+```
+`∀a∈R (a > 0 && (a ^ a) > 0)`
 - - -
 ```java
 Definition.ODD.test(new Constant(5.0))
