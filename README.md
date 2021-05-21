@@ -41,9 +41,9 @@ The entire class of discrete math I took as a library (and some more)
 * Statements (tree structure)
   * Boolean logic
   * Existential/Universal
-  * Laws
+  * Laws (to simplify)
   * Logic table display ⭐
-
+- - -
 Examples:
 
 ```java
@@ -58,6 +58,15 @@ Statement statement = StatementParser.parseStatement("a    and  ~ b or  !(c ^   
 statement.getTable()
 ```
 ![image](https://user-images.githubusercontent.com/12685201/118528497-06678100-b708-11eb-81c9-20fc8a530bdd.png)
+- - -
+```java
+StatementGenerator.generate(37L, 15)
+```
+`not (B nand ((not (A nand ((A xor B) rev_implies A))) nand A))`
+```java
+.simplified()
+```
+`B`
 - - -
 ```java
 Variable varA = new Variable("a");
