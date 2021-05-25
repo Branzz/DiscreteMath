@@ -4,6 +4,9 @@ import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.UniversalNumbersStatement;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
 import bran.mathexprs.Equation;
@@ -81,6 +84,9 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 
 	public abstract void replaceAll(final Expression approaches, final Expression approached);
 
+	@Override
+	public abstract void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
+
 	private static final Expression emptyExpression = new Expression() {
 		@Override public Set<Variable> getVariables() { return Collections.emptySet(); }
 		@Override public Expression simplified() { return empty(); }
@@ -88,8 +94,12 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 		@Override public Expression derive() { return empty(); }
 		@Override public boolean respect(final Collection<Variable> respectsTo) { return false; }
 		@Override public void replaceAll(final Expression approaches, final Expression approached) { }
+		@Override public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+			godelNumbers.push(GodelNumberSymbols.LEFT);
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
+		}
 		// @Override public boolean equivalentTo(final Expression other) { return other == empty(); }
-		@Override public String toString() { return ""; }
+		@Override public String toString() { return "()"; }
 		// @Override public Expression clone() { return empty(); }
 		@Override public boolean equals(Object o) { return o == empty(); }
 	};

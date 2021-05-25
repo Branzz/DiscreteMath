@@ -16,7 +16,7 @@ public class TruthTable {
 	private static byte tableStyle = BINARY_STYLE;
 	private static String trueString = tableStyle == CAPS_STYLE ? "T" : tableStyle == BINARY_STYLE ? "1" : "E";
 	private static String falseString = tableStyle == CAPS_STYLE ? "F" : tableStyle == BINARY_STYLE ? "0" : "E";
-	private static boolean truesFirst = true;
+	private static boolean truesFirst = false;
 //	private static byte detailLevel = 0;
 
 	public static String getTable(Statement... separateStatements) {

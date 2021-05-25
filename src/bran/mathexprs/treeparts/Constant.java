@@ -1,11 +1,11 @@
 package bran.mathexprs.treeparts;
 
 import bran.sets.numbers.NumberLiteral;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Constant extends Value {
 
@@ -47,6 +47,18 @@ public class Constant extends Value {
 	@Override
 	public Expression clone() {
 		return new Constant(number.doubleValue());
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		int num = number.intValue();
+		if (num < 0) { // TODO is there a way to represent negative numbers
+			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+			num = -num;
+		}
+		while (num-- > 0)
+			godelNumbers.push(GodelNumberSymbols.SUCCESSOR);
+		godelNumbers.push(GodelNumberSymbols.ZERO);
 	}
 
 }

@@ -5,9 +5,13 @@ import bran.logic.statements.VariableStatement;
 import bran.mathexprs.treeparts.Variable;
 import bran.sets.Set;
 import bran.sets.SpecialSet;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.*;
@@ -59,7 +63,12 @@ public class UniversalNumbersStatement extends SpecialStatement {
 
 	@Override
 	public Statement simplified() {
-		return null;
+		return new UniversalNumbersStatement(domain, statement.simplified(), variables);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		negation().appendGodelNumbers(godelNumbers, variables);
 	}
 
 	@Override
@@ -75,6 +84,11 @@ public class UniversalNumbersStatement extends SpecialStatement {
 	@Override
 	public List<VariableStatement> getVariables() {
 		return null;
+	}
+
+	@Override
+	public Statement negation() {
+		return new ExistentialNumbersStatement(domain, statement.not(), variables);
 	}
 
 	// @Override

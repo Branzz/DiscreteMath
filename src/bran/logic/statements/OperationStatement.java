@@ -1,16 +1,17 @@
 package bran.logic.statements;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
-import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Fork;
 
 import static bran.logic.statements.VariableStatement.*;
 import static bran.logic.statements.operators.Operator.*;
+import static bran.sets.numbers.godel.GodelNumberSymbols.*;
 
 public class OperationStatement extends Statement implements Fork<Statement, Operator, Statement> { // Two Child
 
@@ -186,14 +187,16 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 			} else if (rightO.getRight().equals(left))
 				return (isAsyOp(rightO.getOperator()) ? absorptionABA : absorptionRightOp)
 							   .get(operator, rightO.getOperator()).absorb(left, rightO.getLeft());
-		} else if (right instanceof LineStatement rightL && rightL.getChild() instanceof OperationStatement rightLO) {
-			// rightO = rightLO.deMorgans();
-		} else if (left instanceof OperationStatement leftO) {
+		}
+		// else if (right instanceof LineStatement rightL && rightL.getChild() instanceof OperationStatement rightLO) {
+		// 	// rightO = rightLO.deMorgans();
+		// }
+		else if (left instanceof OperationStatement leftO) {
 			if (leftO.getLeft().equals(right)) {
-				return (isAsyOp(operator) ? absorptionAAB : absorptionRightOp)
+				return (isAsyOp(operator) ? absorptionBAB : absorptionLeftOp)
 							   .get(leftO.getOperator(), operator).absorb(leftO.getRight(), right);
 			} else if (leftO.getRight().equals(right))
-				return (isAsyOp(operator) ? absorptionAAB : absorptionRightOp)
+				return (isAsyOp(operator) ? absorptionABB : absorptionLeftOp)
 							   .get(leftO.getOperator(), operator).absorb(leftO.getLeft(), right);
 		}
 		// if left op and right op
@@ -201,7 +204,25 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return new OperationStatement(left, operator, right);
 	}
 
-	/*
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> g, final GodelVariableMap vs) {
+		appendGodelOpBuffer(operator.buffer(left, right), g, vs);
+	}
+
+	private void appendGodelOpBuffer(Object[] buffer, final Stack<GodelNumber> g, final GodelVariableMap vs) {
+		for (Object o : buffer) {
+			if (o instanceof GodelNumberSymbols gns)
+				g.push(gns);
+			else if (o instanceof Statement statement)
+				statement.appendGodelNumbers(g, vs);
+			else if (o instanceof Object[] innerBuffer)
+				appendGodelOpBuffer(innerBuffer, g, vs);
+			else
+				new Exception("this shouldn't happen").printStackTrace();
+		}
+	}
+
+	/**
 	 * these operators are asymmetrical and have extra cases in the absorption law
 	 */
 	private static boolean isAsyOp(Operator o) {

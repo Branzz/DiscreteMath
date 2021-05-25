@@ -21,4 +21,6 @@ public abstract class SpecialStatement extends Statement {
 	@Override
 	public abstract List<VariableStatement> getVariables();
 
+	public abstract Statement negation();
+
 }

@@ -2,8 +2,11 @@ package bran.mathexprs.treeparts;
 
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelVariableMap;
 
 import java.util.Collection;
+import java.util.Stack;
 
 public class LimitExpression extends Expression {
 
@@ -49,6 +52,11 @@ public class LimitExpression extends Expression {
 			function = approached;
 		else
 			function.replaceAll(approaches, approached);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+
 	}
 
 	// @Override

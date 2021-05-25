@@ -61,7 +61,7 @@ public class StatementGenerator {
 
 		// This could just be another method in the outer class, but it does exactly the same thing.
 		Generator(final Random rand, final int size) {
-			this(rand, size, 0.5, 0.0, 0.0, 0.5, 0.5);
+			this(rand, size, 0.8, 0.0, 0.0, 0.5, 0.5);
 		}
 
 		Generator(final Random rand, final int size, final double operationProb, final double contProb,

@@ -2,12 +2,15 @@ package bran.mathexprs;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.mathexprs.treeparts.Expression;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
 
 import java.util.List;
-
-import static bran.logic.statements.VariableStatement.*;
+import java.util.Stack;
 
 public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 
@@ -56,8 +59,27 @@ public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 	public Statement simplified() {
 		// return getTruth() ? TAUTOLOGY : CONTRADICTION;
 		return left instanceof Statement l && right instanceof Statement r
-				? new Equation<>(l.simplified(), r.simplified())
-				: new Equation<>(left, right);
+				? new Equation<>(l.simplified(), r.simplified()) :
+				left instanceof Expression l && right instanceof Expression r
+					? new Equation<>(l.simplified(), r.simplified())
+					: new Equation<>(left, right);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		if (equationType == EquationType.EQUAL) {
+			left.appendGodelNumbers(godelNumbers, variables);
+			godelNumbers.push(GodelNumberSymbols.EQUALS);
+			right.appendGodelNumbers(godelNumbers, variables);
+		}
+		else {
+			godelNumbers.push(GodelNumberSymbols.LOGICAL_NOT);
+			godelNumbers.push(GodelNumberSymbols.LEFT);
+			left.appendGodelNumbers(godelNumbers, variables);
+			godelNumbers.push(GodelNumberSymbols.EQUALS);
+			right.appendGodelNumbers(godelNumbers, variables);
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
+		}
 	}
 
 	@Override
@@ -72,6 +94,11 @@ public class Equation<T extends TreePart & Equivalable<T>> extends Equivalence {
 
 	@Override
 	public List<VariableStatement> getVariables() {
+		return null;
+	}
+
+	@Override
+	public Statement negation() {
 		return null;
 	}
 

@@ -41,4 +41,9 @@ public record CustomFunction(int arguments, Functional functional, Derivable der
 		return symbols.length > 0 ? symbols[0] : ("Function #" + hashCode());
 	}
 
+	@Override
+	public String[] getSymbols() {
+		return symbols;
+	}
+
 }

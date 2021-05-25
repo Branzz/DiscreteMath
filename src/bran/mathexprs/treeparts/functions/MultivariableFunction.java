@@ -4,6 +4,8 @@ import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.mathexprs.treeparts.*;
 
+import java.util.Arrays;
+
 import static bran.mathexprs.treeparts.Constant.*;
 import static bran.mathexprs.treeparts.functions.DomainSupplier.*;
 
@@ -98,8 +100,11 @@ public enum MultivariableFunction implements Function {
 		this.functional = functional;
 		this.arguments = arguments;
 		this.domainSupplier = domainSupplier;
-		this.symbols = symbols;
 		this.derivable = derivable;
+		this.symbols = new String[symbols.length + 2];
+		this.symbols[0] = name();
+		this.symbols[1] = name().toLowerCase();
+		System.arraycopy(symbols, 0, this.symbols, 2, symbols.length);
 	}
 
 	public int getArguments() {
@@ -107,7 +112,7 @@ public enum MultivariableFunction implements Function {
 	}
 
 	/**
-	 * "of Secure"; TODO for package use
+	 * "of Secure"; TODO for package use only
 	 */
 	public FunctionExpression ofS(Expression... other) {
 		return new FunctionExpression(this, true, other);
@@ -141,6 +146,11 @@ public enum MultivariableFunction implements Function {
 	@Override
 	public String toString() {
 		return name();
+	}
+
+	@Override
+	public String[] getSymbols() {
+		return symbols;
 	}
 
 }

@@ -2,8 +2,12 @@ package bran.logic.statements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import bran.logic.statements.operators.LineOperator;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Branch;
 
 import static bran.logic.statements.VariableStatement.CONTRADICTION;
@@ -73,6 +77,18 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 			else if (childVariable.equals(CONTRADICTION))
 				return TAUTOLOGY;
 		return new LineStatement(child);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		if (lineOperator == NOT) {
+			godelNumbers.push(GodelNumberSymbols.LOGICAL_NOT);
+			godelNumbers.push(GodelNumberSymbols.LEFT);
+			child.appendGodelNumbers(godelNumbers, variables);
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
+		}
+		else
+			child.appendGodelNumbers(godelNumbers, variables);
 	}
 
 	@Override

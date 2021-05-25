@@ -1,9 +1,13 @@
 package bran.mathexprs.treeparts;
 
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Holder;
 import bran.sets.numbers.NumberLiteral;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Variable extends Value implements Holder<NumberLiteral> {
 
@@ -11,6 +15,8 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	private boolean respects;
 	private Differential differential;
 	protected int level = 0; // 1 for first derivative, 2 for second, etc.
+
+	private final static Matcher variableMatcher = Pattern.compile("[A-Za-z][A-Za-z_\\d]*").matcher("");
 
 	public Variable(final String name) {
 		this(name, true);
@@ -24,6 +30,10 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 
 	public Variable(final Character name) {
 		this(String.valueOf(name));
+	}
+
+	public static boolean validName(final String prefix) {
+		return variableMatcher.reset(prefix).matches();
 	}
 
 	public String getName() {
@@ -95,6 +105,11 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 
 	public boolean parseEquals(final Variable v) {
 		return name.equals(v.name);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		godelNumbers.push(variables.get(this, true));
 	}
 
 }

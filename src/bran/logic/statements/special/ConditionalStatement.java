@@ -4,8 +4,12 @@ import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.operators.Operator;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 
 import java.util.List;
+import java.util.Stack;
 
 public class ConditionalStatement extends SpecialStatement {
 
@@ -36,6 +40,13 @@ public class ConditionalStatement extends SpecialStatement {
 	}
 
 	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		conditional.getLeft().appendGodelNumbers(godelNumbers, variables);
+		godelNumbers.push(GodelNumberSymbols.IF_THEN);
+		conditional.getRight().appendGodelNumbers(godelNumbers, variables);
+	}
+
+	@Override
 	public boolean equivalentTo(final Statement other) {
 		return false;
 	}
@@ -48,6 +59,11 @@ public class ConditionalStatement extends SpecialStatement {
 	@Override
 	public List<VariableStatement> getVariables() {
 		return null;
+	}
+
+	@Override
+	public Statement negation() {
+		return conditional.getLeft().or(conditional.getRight().not());
 	}
 
 	// @Override

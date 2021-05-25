@@ -1,18 +1,19 @@
 package bran.logic.statements;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 import bran.exceptions.VariableExpressionException;
-import bran.logic.LogicTable;
 import bran.logic.TruthTable;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.Operator;
 import bran.logic.statements.special.ConditionalStatement;
 import bran.logic.statements.special.QuantifiedStatementArguments;
 import bran.logic.statements.special.UniversalStatement;
-import bran.sets.FiniteSet;
-import bran.sets.SpecialSet;
+import bran.sets.Set;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberFactors;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 import bran.tree.TreePart;
@@ -63,6 +64,8 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	public Statement() {}
 
 	public abstract Statement simplified();
+
+	public abstract void appendGodelNumbers(Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
 
 // 	@Deprecated
 // 	public void simplify() { // another variant where it compares statements with other expressions (p, ~p, t, c)
@@ -181,11 +184,11 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 //		return null;
 //	}
 
-	private static OperationStatement operationOf(Operator o, Statement... s) {
+	private static Statement operationOf(Operator o, Statement... s) {
 		if (s.length == 0)
 			throw new VariableExpressionException();
 		if (s.length == 1)
-			return new OperationStatement(s[0], o, s[0]);
+			return s[0];
 		OperationStatement combinedStatements = new OperationStatement(s[0], o, s[1]);
 		for (int i = 2; i < s.length; i++)
 			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
@@ -211,31 +214,31 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return new LineStatement(s, LineOperator.CONSTANT);
 	}
 	
-	public static OperationStatement andOf(Statement... s) {
+	public static Statement andOf(Statement... s) {
 		return operationOf(AND, s);
 	}
 
-	public static OperationStatement orOf(Statement... s) {
+	public static Statement orOf(Statement... s) {
 		return operationOf(OR, s);
 	}
 
-	public static OperationStatement nandOf(Statement... s) {
+	public static Statement nandOf(Statement... s) {
 		return operationOf(NAND, s);
 	}
 
-	public static OperationStatement norOf(Statement... s) {
+	public static Statement norOf(Statement... s) {
 		return operationOf(NOR, s);
 	}
 
-	public static OperationStatement xorOf(Statement... s) {
+	public static Statement xorOf(Statement... s) {
 		return operationOf(XOR, s);
 	}
 
-	public static OperationStatement xnorOf(Statement... s) {
+	public static Statement xnorOf(Statement... s) {
 		return operationOf(XNOR, s);
 	}
 
-	public static OperationStatement impliesOf(Statement r, Statement s) {
+	public static Statement impliesOf(Statement r, Statement s) {
 		return operationOf(IMPLIES, r, s);
 	}
 
@@ -271,8 +274,8 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return operation(XNOR, s);
 	}
 
-	public OperationStatement implies(Statement s) {
-		return operation(IMPLIES, s);
+	public OperationStatement implies(Statement... s) {
+		return operation(IMPLIES, andOf(s));
 	}
 
 	public OperationStatement revImplies(Statement s) {
@@ -291,6 +294,8 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		@Override public boolean equivalentTo(final Statement other) { return this == other; }
 		@Override public boolean equals(final Object s)				 { return false; }
 		@Override public Statement simplified()						 { return empty(); }
+		@Override
+		public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) { }
 		@Override protected boolean isConstant()					 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }
@@ -329,7 +334,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	}
 
 	public static record UniversalStatementVariables<I, E extends Holder<I> & Equivalable<? super E>> (E... variables) {
-		public UniversalStatementDomainStatement<I, E> in(FiniteSet<I> domain, QuantifiedStatementArguments<E> statement) {
+		public UniversalStatementDomainStatement<I, E> in(Set domain, QuantifiedStatementArguments<E> statement) {
 			return new UniversalStatementDomainStatement<>(domain, statement, variables);
 		}
 		// public UniversalStatementDomainStatement<I, E> in(SpecialSet domain, QuantifiedStatementArguments<E> statement) {
@@ -338,7 +343,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	}
 
 	public static record UniversalStatementDomainStatement<I, E extends Holder<I> & Equivalable<? super E>>
-			(FiniteSet<I> domain, QuantifiedStatementArguments<E> statement, E... variables) {
+			(Set domain, QuantifiedStatementArguments<E> statement, E... variables) {
 		public UniversalStatement<I, E> proven() {
 			return new UniversalStatement<>(statement, domain, true, variables);
 		}

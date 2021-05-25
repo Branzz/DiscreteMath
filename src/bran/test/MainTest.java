@@ -8,8 +8,10 @@ import bran.graphs.Vertex;
 import bran.logic.Argument;
 import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
+import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.logic.statements.operators.Operator;
 import bran.mathexprs.ExpressionGenerator;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
@@ -18,11 +20,17 @@ import bran.matrices.Matrix;
 import bran.parser.StatementParser;
 import bran.sets.FiniteSet;
 import bran.sets.NumberToText;
+import bran.sets.SpecialSet;
+import bran.sets.SpecialSetType;
 import bran.sets.numbers.NumberLiteral;
+import bran.sets.numbers.godel.GodelNumberFactors;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 public class MainTest {
 
 	public static void main(String[] args) {
@@ -30,7 +38,7 @@ public class MainTest {
 		// SetsTest();
 		// logicTest();
 		// jamesGrimesPuzzleTest();
-		operationTest();
+		// operationTest();
 		// HamiltonianPathTestingVertices();
 		// hamiltonianPathTestingEdges();
 		// parseTest();
@@ -41,12 +49,16 @@ public class MainTest {
 		// System.out.println(Stream.of(0, 1).reduce(1, Math::multiplyExact));
 		// visualTest();
 
-		// statementsTest();
+		godelTest();
 
 	}
 
-	public static void statementsTest() {
-
+	public static void godelTest() {
+		VariableStatement x = new VariableStatement('x');
+		Statement s = Statement.forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
+							   .implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")));
+		System.out.println(s.godelNumber());
+		System.out.println(new GodelNumberFactors(s.godelNumber().getNumber()).toString()); // 25 30
 	}
 
 	public static void visualTest() {
@@ -164,16 +176,37 @@ public class MainTest {
 
 	private static void operationTest() {
 		VariableStatement a = new VariableStatement("a");
-		// VariableStatement b = new VariableStatement("b");
-		for (long seed = 0L; seed <= 10L; seed++) {
-			Statement y = StatementGenerator.generate(seed, 15);
-			// System.out.println(y.getTable());
-			// System.out.println(y.simplified().getTable());
-			System.out.println(TruthTable.getLastColumn(y.xnor(y.simplified())));
-			// System.out.println((y.xnor(y.simplified())).getTable());
-//(not (not (not ((B or (not ((not (A and (not (not (not (not A)))))) xnor A))) rev_implies B)))) xnor c
-			// break;
-		}
+		VariableStatement b = new VariableStatement("b");
+		LongStream.range(0L, 100L).boxed() // cherry pick an example
+				  .collect(Collectors.toMap(l -> l, s -> StatementGenerator.generate(s, 15))).entrySet().stream()
+				  .sorted(Comparator.comparingInt(s -> s.getValue().toString().length() - s.getValue().simplified().toString().length()))
+				  .forEach(s -> System.out.println(s + " -> " + s.getValue().simplified()));
+
+// 		for (long seed = 0L; seed <= 5; seed++) {
+// 			Statement y = StatementGenerator.generate(seed, 15);
+// 			// System.out.println(y.getTable());
+// 			// System.out.println(y.simplified().getTable());
+// 			System.out.println(y);
+// 			System.out.println(y.simplified());
+// 			// System.out.println((y.xnor(y.simplified())).getTable());
+// //(not (not (not ((B or (not ((not (A and (not (not (not (not A)))))) xnor A))) rev_implies B)))) xnor c
+// 			// break;
+// 		}
+
+		// for (Operator o : Operator.values()) {
+		// 	for (Operator p : Operator.values()) {
+		// 		if (p == Operator.IMPLIES || p == Operator.REV_IMPLIES) {
+		// 			Statement s = new OperationStatement(new OperationStatement(b, o, a), p, b);
+		// 			System.out.println(s.getTable());
+		// 			System.out.println(Operator.absorptionBAB.get(o, p)
+		// 													 .absorb(a, b)
+		// 													 .getTable());
+		// 			System.out.println(s.simplified().getTable());
+		// 			System.out.println("- - -");
+		// 		}
+		// 	}
+		// }
+
 		// Map<Boolean[], Operator> defaults = Arrays.stream(Operator.values()).collect(Collectors.toMap(o ->
 		// 								IntStream.range(0, 4).mapToObj(i -> o.operate((i & 2) == 2, (i & 1) == 1)).toArray(Boolean[]::new), Function.identity()));
 		// Map<Boolean[], Operator> Stream.of().collect(Collectors.toMap(o ->

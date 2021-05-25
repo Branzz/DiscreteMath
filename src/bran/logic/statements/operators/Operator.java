@@ -1,11 +1,14 @@
 package bran.logic.statements.operators;
 
 import bran.logic.statements.*;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Associativity;
 import bran.tree.ForkOperator;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Stack;
 import java.util.stream.Stream;
 
 import static bran.logic.statements.OperatorType.*;
@@ -14,17 +17,18 @@ import static bran.logic.statements.VariableStatement.CONTRADICTION;
 import static bran.logic.statements.VariableStatement.TAUTOLOGY;
 import static bran.logic.statements.operators.Operator.AbsorbedOperationStatement.ofAbsorbed;
 import static bran.sets.SetDisplayStyle.setStyle;
+import static bran.sets.numbers.godel.GodelNumberSymbols.*;
 import static java.util.stream.Collectors.toMap;
 
 public enum Operator implements ForkOperator {
-	AND((l, r) -> l && r, 			ANDS, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
-	OR((l, r) -> l || r,			ORS, "\u22c1", "v", "||", "|", "union", "\u2229", "or"),
-	NAND((l, r) -> !(l && r),		ANDS, "\u22bc", "nand", "nand", "nand"),
-	NOR((l, r) -> !(l || r),		ORS, "\u22bd", "nor", "nor", "nor"),
-	XOR((l, r) -> l ^ r,			XORS, "\u22bb", "xor", "^", "^", "symmetric difference", "!="),
-	XNOR((l, r) -> l == r,			XORS, "\u2299", "xnor", "==", "=="),
-	REV_IMPLIES((l, r) -> l || !r,	REVERSE, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
-	IMPLIES((l, r) -> !l || r,		IMPLY, "\u21d2", "->", "implies", "implies");
+	OR((l, r) -> l || r,		   ORS,	 	(l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "v", "||", "|", "union", "\u2229", "or"),
+	NOR((l, r) -> !(l || r),	   ORS,	 	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT } , "\u22bd", "nor", "nor", "nor"),
+	IMPLIES((l, r) -> !l || r,	   IMPLY,	(l, r) -> new Object[] { l, IF_THEN, r }, "\u21d2", "->", "implies", "implies"),
+	REV_IMPLIES((l, r) -> l || !r, REVERSE,	(l, r) -> new Object[] { r, IF_THEN, l }, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
+	NAND((l, r) -> !(l && r),	   ANDS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT}, "\u22bc", "nand", "nand", "nand"),
+	AND((l, r) -> l && r,		   ANDS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
+	XOR((l, r) -> l ^ r,		   XORS,	(l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "^", "^", "symmetric difference", "!="),
+	XNOR((l, r) -> l == r,		   XORS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT }, "\u2299", "xnor", "==", "==");
 	// NOT(-1, "\u00ac", "~", "!", "~", "complement", "\\", "not"),
 	// EQUIVALENT(-1, "\u8801", "=", "equivalent to", "equivalent to", "equals"),
 
@@ -45,15 +49,17 @@ public enum Operator implements ForkOperator {
 	private final String[] symbols;
 	private final OperatorType operatorType;
 	private final Operable operable;
+	private final GodelBuffer godelBuffer;
 
 	// private static final AbsorptionOperationStatement[][] absorptionOperators =
 	// 		new Operator[][] {
 	// 	{ }
 	// };
 
-	Operator(Operable operable, OperatorType operatorType, String... symbols) {
+	Operator(Operable operable, OperatorType operatorType, final GodelBuffer godelBuffer, String... symbols) {
 		this.operable = operable;
 		this.operatorType = operatorType;
+		this.godelBuffer = godelBuffer;
 		this.symbols = symbols;
 	}
 
@@ -115,10 +121,17 @@ public enum Operator implements ForkOperator {
 		return operable.operate(left, right);
 	}
 
+	@FunctionalInterface
+	interface GodelBuffer {
+		Object[] get(Statement left, Statement right);
+	}
+
+	public Object[] buffer(Statement left, Statement right) {
+		return godelBuffer.get(left, right);
+	}
+
 	@FunctionalInterface public interface AbsorbedOperationStatement {
-
 		Statement absorb(Statement a, Statement b);
-
 		static AbsorbedOperationStatement ofAbsorbed(final Statement A, final Statement B, Statement x) {
 			return x instanceof OperationStatement xO ? (a, b) -> new OperationStatement(a, xO.getOperator(), b)
 						: x == A ? ((a, b) -> a) : x == B ? ((a, b) -> b)
@@ -126,7 +139,6 @@ public enum Operator implements ForkOperator {
 						: (a, b) -> (xL.getChild() == A ? a : b).not()
 						: x == TAUTOLOGY ? (a, b) -> TAUTOLOGY : (a, b) ->  CONTRADICTION;
 		}
-
 	}
 
 	/*
@@ -180,9 +192,9 @@ public enum Operator implements ForkOperator {
 							truthAAB |= 1 << n;
 						if (o.operate((n & 2) == 2, p.operate((n & 1) == 1, (n & 2) == 2)))
 							truthABA |= 1 << n;
-						if (o.operate(p.operate((n & 2) == 2, (n & 1) == 1), (n & 1) == 1))
+						if (p.operate(o.operate((n & 2) == 2, (n & 1) == 1), (n & 1) == 1))
 							truthABB |= 1 << n;
-						if (o.operate(p.operate((n & 1) == 1, (n & 2) == 2), (n & 1) == 1))
+						if (p.operate(o.operate((n & 1) == 1, (n & 2) == 2), (n & 1) == 1))
 							truthBAB |= 1 << n;
 					}
 					absorptionAAB.put(o, p, ofAbsorbed(A, B, ops.get(truthAAB))); // constant
@@ -195,15 +207,21 @@ public enum Operator implements ForkOperator {
 					// 				   absorptionABB.get(o, p).absorb(A, B) + ";" +
 					// 				   absorptionBAB.get(o, p).absorb(A, B));
 				} else {
-					byte truthLeft = 0b0000;
+					// if (o == NAND)
+					// 	System.out.println();
+					byte truthLeft  = 0b0000;
 					byte truthRight = 0b0000;
 					for (int n = 0; n <= 3; n++) {
 						A.setValue((n & 2) == 2);
 						B.setValue((n & 1) == 1);
+						// if (o.operate(p.operate((n & 2) == 2, (n & 1) == 1), (n & 1) == 1))
+						// 	truthLeft |= 1 << n;
 						if (o.operate((n & 2) == 2, p.operate((n & 2) == 2, (n & 1) == 1)))
-							truthLeft |= 1 << n;
-						if (o.operate(p.operate((n & 2) == 2, (n & 1) == 1), (n & 1) == 1))
 							truthRight |= 1 << n;
+						if (p.operate(o.operate((n & 2) == 2, (n & 1) == 1), (n & 1) == 1))
+							truthLeft |= 1 << n;
+						// if (p.operate((n & 2) == 2, o.operate((n & 2) == 2, (n & 1) == 1)))
+						// 	truthRight |= 1 << n;
 					}
 					absorptionLeftOp.put(o, p, ofAbsorbed(A, B, ops.get(truthLeft)));
 					absorptionRightOp.put(o, p, ofAbsorbed(A, B, ops.get(truthRight)));

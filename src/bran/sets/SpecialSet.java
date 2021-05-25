@@ -143,7 +143,7 @@ public class SpecialSet implements Set {
 //		return false;
 	}
 
-	private boolean isZero() {
+	public boolean isZero() {
 		return !containsNegatives && containsZero && !containsPositives;
 	}
 

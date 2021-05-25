@@ -5,9 +5,14 @@ import bran.logic.statements.VariableStatement;
 import bran.mathexprs.treeparts.Variable;
 import bran.sets.Set;
 import bran.sets.SpecialSet;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariable;
+import bran.sets.numbers.godel.GodelVariableMap;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.*;
@@ -64,6 +69,20 @@ public class ExistentialNumbersStatement extends SpecialStatement {
 	}
 
 	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variablesMap) {
+		for (final Variable variable : variables) {
+			godelNumbers.push(GodelNumberSymbols.LEFT);
+			godelNumbers.push(GodelNumberSymbols.EACH);
+			godelNumbers.push(variablesMap.get(variable));
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			godelNumbers.push(GodelNumberSymbols.LEFT);
+		}
+		statement.appendGodelNumbers(godelNumbers, variablesMap);
+		for (int i = 0; i < variables.length; i++)
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
+	}
+
+	@Override
 	public boolean equivalentTo(final Statement other) {
 		return false;
 	}
@@ -76,6 +95,11 @@ public class ExistentialNumbersStatement extends SpecialStatement {
 	@Override
 	public List<VariableStatement> getVariables() {
 		return null;
+	}
+
+	@Override
+	public Statement negation() {
+		return new UniversalNumbersStatement(domain, statement.not(), variables);
 	}
 
 	// @Override

@@ -2,9 +2,12 @@ package bran.logic.statements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Holder;
 import bran.tree.Leaf;
 
@@ -69,6 +72,11 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		return this;
 	}
 
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		godelNumbers.push(variables.get(this, false));
+	}
+
 	public boolean getTruth() {
 		return value;
 	}
@@ -106,59 +114,5 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 	public String toString() {
 		return name;
 	}
-
-	// @Override
-	// protected boolean checkNegationLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkIdempotentLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkIdentityUniversalBoundLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkNegateConstantsLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkDoubleNegationLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkDeMorgansLaw() {
-	// 	// TODO Auto-generated method stub
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkAbsorptionLaw() {
-	// 	// TODO Auto-generated method stub
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkExtendedAbsorptionLaw() {
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkDistributiveLaw() {
-	// 	// TODO Auto-generated method stub
-	// 	return false;
-	// }
-	//
-	// @Override
-	// protected boolean checkAssociativeLaw() {
-	// 	// TODO Auto-generated method stub
-	// 	return false;
-	// }
 
 }

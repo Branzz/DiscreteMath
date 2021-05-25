@@ -1,20 +1,22 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.MultiLeaf;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
+import static bran.mathexprs.treeparts.operators.Operator.ADD;
+import static bran.mathexprs.treeparts.operators.Operator.MUL;
 
 public class FunctionExpression extends Expression implements MultiLeaf<Expression, Function> {
 
@@ -97,6 +99,17 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 				expressions[i] = approached;
 			else
 				expressions[i].replaceAll(approaches, approached);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+		godelNumbers.push(GodelNumberSymbols.LEFT);
+		if (expressions.length == 1)
+			expressions[0].appendGodelNumbers(godelNumbers, variables);
+		else
+			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+		godelNumbers.push(GodelNumberSymbols.RIGHT);
 	}
 
 	// @Override

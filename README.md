@@ -20,16 +20,18 @@ The entire class of discrete math I took as a library (and some more)
   * Simplifier ⭐
   * Derivatives ⭐
   * Equations/Inequalities
-  * Knows Domain (uses Sets)
+  * Knows Domain (using Sets)
 * Graphs
-  * Simple graph
+  * Simple graphs
   * Drawer *(unfinished)*
+* Gödel Numbers
+  * From and to numbers
 * Matrices
   * Convert to Graph
-  * Utilility
-    * +, -, *, / matrices
+  * Utility
+    * +, -, ×, ÷ matrices
 * Parser (String input) ⭐
-  * Read statements
+  * Read statements and expressions
   * Applied to any tree structure *(unfinished)*
   * Syntax error catching
 * Proofs
@@ -37,7 +39,7 @@ The entire class of discrete math I took as a library (and some more)
 * Random generator
   * Generate randomized expressions or statements with seed
 * Sets
-  * Infinite
+  * In/finite
 * Statements (tree structure)
   * Boolean logic
   * Existential/Universal
@@ -122,6 +124,24 @@ for a = 0.0, ↴
 	which are all true. (valid)
 which is true. (valid)
 ```
+- - -
+```java
+ZERO.equates(ZERO).godelNumber().getNumber()
+```
+`243000000`
+```java
+new GodelNumberFactors(243_000_000L).symbols()
+```
+`0=0`
+```java
+VariableStatement x = new VariableStatement('x');
+forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
+        .implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")))
+```
+```java
+.godelNumber()
+```
+`¬(¬(A)∨¬(B))⊃(sss0+a)=b Gödel Number: 1181176374..........1505759230` ≈ 10^318
 - - -
 ![image](https://user-images.githubusercontent.com/12685201/118525688-1762c300-b705-11eb-8feb-26b0a69ebdb2.png)
 

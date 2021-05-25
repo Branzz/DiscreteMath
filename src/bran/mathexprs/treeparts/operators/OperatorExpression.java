@@ -1,5 +1,8 @@
 package bran.mathexprs.treeparts.operators;
 
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Fork;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
@@ -64,6 +67,21 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 			right = approached;
 		else
 			right.replaceAll(approaches, approached);
+	}
+
+	@Override
+	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+		godelNumbers.push(GodelNumberSymbols.LEFT);
+		left.appendGodelNumbers(godelNumbers, variables);
+		// godelNumbers.push(GodelNumberSymbols.RIGHT);
+		godelNumbers.push(switch (operator) {
+			case MUL -> GodelNumberSymbols.TIMES;
+			case ADD -> GodelNumberSymbols.PLUS;
+			default -> GodelNumberSymbols.SYNTAX_ERROR;
+		});
+		// godelNumbers.push(GodelNumberSymbols.LEFT);
+		right.appendGodelNumbers(godelNumbers, variables);
+		godelNumbers.push(GodelNumberSymbols.RIGHT);
 	}
 
 	@Override

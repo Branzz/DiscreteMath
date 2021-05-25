@@ -84,4 +84,9 @@ public enum Operator implements ForkOperator {
 		};
 	}
 
+	@Override
+	public String[] getSymbols() {
+		return symbols;
+	}
+
 }
