@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import bran.logic.statements.OperationStatement;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 
 public class CodeGolf {
 
-	static HashMap<ArrayList<Operator>, int[]> solutions = new HashMap<ArrayList<Operator>, int[]>();
+	static HashMap<ArrayList<LogicalOperator>, int[]> solutions = new HashMap<ArrayList<LogicalOperator>, int[]>();
 	static HashSet<Integer> possibleNumbers = new HashSet<Integer>();
 	static HashMap<int[], String> interpolations = new HashMap<int[], String>();
 	static HashMap<String, Integer> outputs = new HashMap<String, Integer>();
@@ -188,7 +188,7 @@ public class CodeGolf {
 
 	final static CodeGolf g = new CodeGolf();
 
-	public static void solve(Entry<ArrayList<Operator>, int[]> e, int a, int b, int input) {
+	public static void solve(Entry<ArrayList<LogicalOperator>, int[]> e, int a, int b, int input) {
 
 		/*
 		 * 0, 0: 0
@@ -301,22 +301,22 @@ public class CodeGolf {
 //				System.out.print(new String[]{"NAND","AND","XOR","XNOR","OR","NOR"}[5-i]);
 	}
 
-	public static void seek(ArrayList<Operator> potentialOperators, ArrayList<Operator> currentList) {
+	public static void seek(ArrayList<LogicalOperator> potentialOperators, ArrayList<LogicalOperator> currentList) {
 		if (potentialOperators.size() == 0) {
 			calculateAdd(currentList);
 			solutions.put(currentList, calculateAdd(currentList));
 		}
 		else {
 			for (int i = 0; i < potentialOperators.size(); i++) {
-				ArrayList<Operator> nextOperators = (ArrayList<Operator>) potentialOperators.clone();
-				ArrayList<Operator> nextList = (ArrayList<Operator>) currentList.clone();
+				ArrayList<LogicalOperator> nextOperators = (ArrayList<LogicalOperator>) potentialOperators.clone();
+				ArrayList<LogicalOperator> nextList = (ArrayList<LogicalOperator>) currentList.clone();
 				nextList.add(nextOperators.remove(i));
 				seek(nextOperators, nextList);
 			}
 		}
 	}
 
-	private static int[] calculateAdd(ArrayList<Operator> currentList) {
+	private static int[] calculateAdd(ArrayList<LogicalOperator> currentList) {
 		int[] nums = new int[3];
 		for (int j = 0; j < 3; j++) {
 			for (int i = 0; i < currentList.size(); i++)

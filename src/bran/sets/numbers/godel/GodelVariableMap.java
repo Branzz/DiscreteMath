@@ -5,6 +5,7 @@ import bran.tree.Holder;
 
 import java.util.HashMap;
 import java.util.Map;
+
 public class GodelVariableMap {
 
 	private final Map<Holder<?>, GodelVariable> variables;

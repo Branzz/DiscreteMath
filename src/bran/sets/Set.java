@@ -2,7 +2,7 @@ package bran.sets;
 
 import bran.exceptions.VariableExpressionException;
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.tree.Leaf;
 
 public interface Set extends Leaf
@@ -23,7 +23,7 @@ public interface Set extends Leaf
 
 	String toString();
 
-	default OperationSet operation(Operator o, Set... s) {
+	default OperationSet operation(LogicalOperator o, Set... s) {
 		if (s.length < 0)
 			throw new VariableExpressionException();
 		if (s.length == 0)
@@ -43,11 +43,11 @@ public interface Set extends Leaf
 //	}
 	
 	default OperationSet intersection(Set... s) {
-		return operation(Operator.AND, s);
+		return operation(LogicalOperator.AND, s);
 	}
 
 	default OperationSet union(Set... s) {
-		return operation(Operator.OR, s);
+		return operation(LogicalOperator.OR, s);
 	}
 
 //	default OperationSet nand(AbstractSet... s) {
@@ -59,7 +59,7 @@ public interface Set extends Leaf
 //	}
 
 	default OperationSet symmetricDifference(Set... s) {
-		return operation(Operator.XOR, s);
+		return operation(LogicalOperator.XOR, s);
 	}
 
 //	default OperationSet xnor(AbstractSet... s) {

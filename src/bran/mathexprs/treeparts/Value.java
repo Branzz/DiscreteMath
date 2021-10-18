@@ -1,5 +1,6 @@
 package bran.mathexprs.treeparts;
 
+import bran.tree.Composition;
 import bran.tree.Leaf;
 import bran.sets.numbers.NumberLiteral;
 
@@ -32,12 +33,17 @@ public abstract class Value extends Expression implements Leaf {
 	}
 
 	@Override
+	public String toString() {
+		return toFullString();
+	}
+
+	@Override
 	public boolean equals(Object other) {
 		return this == other || other instanceof Value value && Objects.equals(value.number, number);
 	}
 
 	@Override
-	public int compareTo(Expression other) {
+	public int compareTo(Composition other) {
 		if (other instanceof Value value)
 			return number.compareTo(value.number);
 		else

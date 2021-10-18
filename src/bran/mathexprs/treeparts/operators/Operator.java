@@ -11,31 +11,33 @@ import bran.tree.ForkOperator;
 import static bran.mathexprs.ExpressionDisplayStyle.expressionStyle;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
 import static bran.mathexprs.treeparts.operators.DomainSupplier.DENOM_NOT_ZERO;
-import static bran.mathexprs.treeparts.operators.OperatorType.*;
+import static bran.mathexprs.treeparts.operators.ExpressionOperatorType.*;
 
 public enum Operator implements ForkOperator {
-	POW(E, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))), "^", "power"), // a^b * ((b/a) * da + ln(a) * db)
-	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), "*", "times"),
-	DIV(MD, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, "/", "over"),
-	MOD(MD, (a, b) -> a % b, (a, b) -> Constant.of(0), DENOM_NOT_ZERO, "%", "mod"),
-	ADD(AS, Double::sum, (a, b) -> a.derive().plus(b.derive()), "+", "plus"),
-	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), "-", "minus");
+	POW(E, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))), false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db) TODO DOMAIN
+	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, "*", "times"),
+	DIV(MD, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
+	MOD(MD, (a, b) -> a % b, (a, b) -> Constant.of(0), DENOM_NOT_ZERO, false, "%", "mod"),
+	ADD(AS, Double::sum, (a, b) -> a.derive().plus(b.derive()), true, "+", "plus"),
+	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
-	private final OperatorType operatorType;
+	private final ExpressionOperatorType operatorType;
 	private final Operable operable;
 	private final Derivable derivable;
 	private final DomainSupplier domainSupplier;
 	private final String[] symbols;
+	private boolean commutative;
 
-	Operator(final OperatorType operatorType, final Operable operable, final Derivable derivable, final String... symbols) {
-		this(operatorType, operable, derivable, (l, r) -> VariableStatement.TAUTOLOGY, symbols);
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, boolean commutative, final String... symbols) {
+		this(operatorType, operable, derivable, (l, r) -> VariableStatement.TAUTOLOGY, commutative, symbols);
 	}
 
-	Operator(final OperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier, final String... symbols) {
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier, boolean commutative, final String... symbols) {
 		this.operatorType = operatorType;
 		this.operable = operable;
 		this.derivable = derivable;
 		this.domainSupplier = domainSupplier;
+		this.commutative = commutative;
 		this.symbols = symbols;
 	}
 
@@ -89,4 +91,7 @@ public enum Operator implements ForkOperator {
 		return symbols;
 	}
 
+	public boolean isCommutative() {
+		return commutative;
+	}
 }

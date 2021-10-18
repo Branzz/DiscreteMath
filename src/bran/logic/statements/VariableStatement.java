@@ -13,9 +13,9 @@ import bran.tree.Leaf;
 
 public class VariableStatement extends Statement implements Leaf, Holder<Boolean> { // No Child
 
-	protected String name;
+	protected final String name;
 	protected boolean value;
-	protected boolean constant;
+	protected final boolean constant;
 
 	private final static Matcher variableMatcher = Pattern.compile("[A-Za-z][A-Za-z_\\d]*").matcher("");
 

@@ -23,4 +23,9 @@ public abstract class SpecialStatement extends Statement {
 
 	public abstract Statement negation();
 
+	@Override
+	public Statement not() {
+		return negation();
+	}
+
 }

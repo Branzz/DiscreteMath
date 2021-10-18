@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import static bran.mathexprs.treeparts.operators.Operator.MOD;
+
 public class ExpressionGenerator {
 
 	public static Expression generate(int size) {

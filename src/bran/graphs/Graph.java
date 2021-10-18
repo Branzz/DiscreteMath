@@ -65,18 +65,50 @@ public class Graph {
 	}
 
 	public boolean isConnected() {
-		//TODO
-		return false;
+		Set<Vertex> visited = new HashSet<>();
+		final Iterator<Vertex> iterator = vertexEdgeTable.keySet().iterator();
+		if (iterator.hasNext()) { // else: empty graph
+			addAllTo(visited, iterator.next());
+			for (Vertex v : vertexEdgeTable.keySet())
+				if (!visited.contains(v))
+					return false;
+		}
+		return true;
+	}
+
+	private void addAllTo(final Set<Vertex> visited, final Vertex vertex) {
+		if (visited.contains(vertex))
+			return;
+		visited.add(vertex);
+		for (Edge edge : vertexEdgeTable.get(vertex))
+			addAllTo(visited, edge.getOther(vertex));
 	}
 
 	public boolean isTree() {
 		//TODO //edges = vertices - 1. it does not contain any loops. connected?
 		// trivial tree possible
+		Set<Vertex> visited = new HashSet<>();
+		final Iterator<Vertex> iterator = vertexEdgeTable.keySet().iterator();
+		if (iterator.hasNext()) {
+			return !hasCycle(visited, iterator.next());
+		} else { // empty graph
+			return true;
+		}
+	}
+
+	private boolean hasCycle(final Set<Vertex> visited, final Vertex vertex) {
+		if (visited.contains(vertex))
+			return true;
+		visited.add(vertex);
+		for (Edge edge : vertexEdgeTable.get(vertex))
+			if (hasCycle(visited, edge.getOther(vertex)))
+				return true;
 		return false;
 	}
 
 	public void h() {
 		/*
+		 * TODO
 		 * add support for:
 		 * if it has at least one /
 		 * how many it has of /
@@ -145,6 +177,7 @@ public class Graph {
 		return false;
 	}
 
+	//protected Map<Vertex, List<Edge>> vertexEdgeTable;
 	public boolean isEulerianTrail() {
 		long amountOfOdds = vertexEdgeTable.values().stream()
 													.map(List::size)

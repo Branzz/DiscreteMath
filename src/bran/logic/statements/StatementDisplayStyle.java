@@ -1,10 +1,12 @@
 package bran.logic.statements;
 
-public enum StatementDisplayStyle {
+import bran.run.DisplayStyle;
+
+public enum StatementDisplayStyle implements DisplayStyle {
 
 	NAME(-1), LOWERCASE_NAME(-1), MATH(0), CONVENTIONAL(1), JAVA_LOGICAL(2), JAVA_BITWISE(3);
 
-	public static StatementDisplayStyle statementStyle = StatementDisplayStyle.LOWERCASE_NAME;
+	public static StatementDisplayStyle statementStyle = LOWERCASE_NAME;
 
 	int index;
 

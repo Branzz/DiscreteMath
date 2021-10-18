@@ -7,7 +7,7 @@ import bran.mathexprs.treeparts.functions.FunctionExpression;
 import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.mathexprs.treeparts.operators.Operator;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.mathexprs.treeparts.operators.OperatorType;
+import bran.mathexprs.treeparts.operators.ExpressionOperatorType;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -135,7 +135,7 @@ public class ExpressionBuilder {
 		}
 
 		void collectOperators() { // TODO
-			for (int order = OperatorType.MAX_ORDER; size != 1 && order >= OperatorType.MIN_ORDER; order--) {
+			for (int order = ExpressionOperatorType.MAX_ORDER; size != 1 && order >= ExpressionOperatorType.MIN_ORDER; order--) {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) {

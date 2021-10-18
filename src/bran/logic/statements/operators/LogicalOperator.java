@@ -1,64 +1,76 @@
 package bran.logic.statements.operators;
 
 import bran.logic.statements.*;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Associativity;
 import bran.tree.ForkOperator;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Stack;
 import java.util.stream.Stream;
 
-import static bran.logic.statements.OperatorType.*;
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
+import static bran.logic.statements.StatementOperatorType.*;
 import static bran.logic.statements.VariableStatement.CONTRADICTION;
 import static bran.logic.statements.VariableStatement.TAUTOLOGY;
-import static bran.logic.statements.operators.Operator.AbsorbedOperationStatement.ofAbsorbed;
+import static bran.logic.statements.operators.LogicalOperator.AbsorbedOperationStatement.ofAbsorbed;
 import static bran.sets.SetDisplayStyle.setStyle;
 import static bran.sets.numbers.godel.GodelNumberSymbols.*;
 import static java.util.stream.Collectors.toMap;
 
-public enum Operator implements ForkOperator {
-	OR((l, r) -> l || r,		   ORS,	 	(l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "v", "||", "|", "union", "\u2229", "or"),
-	NOR((l, r) -> !(l || r),	   ORS,	 	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT } , "\u22bd", "nor", "nor", "nor"),
-	IMPLIES((l, r) -> !l || r,	   IMPLY,	(l, r) -> new Object[] { l, IF_THEN, r }, "\u21d2", "->", "implies", "implies"),
-	REV_IMPLIES((l, r) -> l || !r, REVERSE,	(l, r) -> new Object[] { r, IF_THEN, l }, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
-	NAND((l, r) -> !(l && r),	   ANDS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT}, "\u22bc", "nand", "nand", "nand"),
-	AND((l, r) -> l && r,		   ANDS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
-	XOR((l, r) -> l ^ r,		   XORS,	(l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "^", "^", "symmetric difference", "!="),
-	XNOR((l, r) -> l == r,		   XORS,	(l, r) -> new Object[] { LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT }, "\u2299", "xnor", "==", "==");
+public enum LogicalOperator implements ForkOperator {
+	OR		   ((l, r) -> l || r,	 ORS,	  true,  (l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "v", "||", "|", "union", "\u2229", "or"),
+	NOR 	   ((l, r) -> !(l || r), ORS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT } , "\u22bd", "nor", "nor", "nor"),
+	IMPLIES	   ((l, r) -> !l || r,	 IMPLY,	  false, (l, r) -> new Object[] { l, IF_THEN, r }, "\u21d2", "->", "implies", "implies"),
+	REV_IMPLIES((l, r) -> l || !r, 	 REVERSE, false, (l, r) -> new Object[] { r, IF_THEN, l }, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
+	NAND	   ((l, r) -> !(l && r), ANDS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT}, "\u22bc", "nand", "nand", "nand"),
+	AND		   ((l, r) -> l && r,	 ANDS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
+	XOR		   ((l, r) -> l ^ r,	 XORS,	  true,  (l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "^", "^", "symmetric difference", "!="),
+	XNOR	   ((l, r) -> l == r,	 XORS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT }, "\u2299", "xnor", "==", "==");
 	// NOT(-1, "\u00ac", "~", "!", "~", "complement", "\\", "not"),
 	// EQUIVALENT(-1, "\u8801", "=", "equivalent to", "equivalent to", "equals"),
 
 	/*
-	LEFT((l, r) -> l,					2, ""),
-	RIGHT((l, r) -> r,					2, ""),
-	NOT_LEFT((l, r) -> !l,				2, ""),
-	NOT_RIGHT((l, r) -> !r,				2, ""),
-	TAUTOLOGY((l, r) -> true,				2, ""),
-	CONTRADICTION((l, r) -> false,			2, ""),
-	NOT_IMPLIES((l, r) -> l && !r,			2, ""),
-	NOT_REVERSE_IMPLIES((l, r) -> !l && r,	2, ""),
-	 */
+	ONLY_LEFT((l, r) -> l, ANDS, null, ""),
+	ONLY_RIGHT((l, r) -> r, ANDS, null, ""),
+	NOT_LEFT((l, r) -> !l, ANDS, null, ""),
+	NOT_RIGHT((l, r) -> !r, ANDS, null, ""),
+	TAUT((l, r) -> true, ANDS, null, ""),
+	CONT((l, r) -> false, ANDS, null, ""),
+	NOT_IMPLIES((l, r) -> l && !r, IMPLY, null, ""),
+	NOT_REVERSE_IMPLIES((l, r) -> !l && r, REVERSE, null, "");
+	*/
 
 	public static final int MIN_ORDER = 2;
 	public static final int MAX_ORDER = 5;
 
 	private final String[] symbols;
-	private final OperatorType operatorType;
+	private final StatementOperatorType operatorType;
 	private final Operable operable;
+	private final boolean commutative;
 	private final GodelBuffer godelBuffer;
+
+	private LogicalOperator inverse;
+
+	static {
+		OR.inverse = NOR;
+		NOR.inverse = OR;
+		// IMPLIES.inverse = NOT_IMPLIES;
+		// REV_IMPLIES.inverse = NOT_REVERSE_IMPLIES;
+		NAND.inverse = AND;
+		AND.inverse = NAND;
+		XOR.inverse = XNOR;
+		XNOR.inverse = XOR;
+	}
 
 	// private static final AbsorptionOperationStatement[][] absorptionOperators =
 	// 		new Operator[][] {
 	// 	{ }
 	// };
 
-	Operator(Operable operable, OperatorType operatorType, final GodelBuffer godelBuffer, String... symbols) {
+	LogicalOperator(Operable operable, StatementOperatorType operatorType, boolean commutative, GodelBuffer godelBuffer, String... symbols) {
 		this.operable = operable;
 		this.operatorType = operatorType;
+		this.commutative = commutative;
 		this.godelBuffer = godelBuffer;
 		this.symbols = symbols;
 	}
@@ -86,6 +98,10 @@ public enum Operator implements ForkOperator {
 		return operatorType.associativity();
 	}
 
+	public LogicalOperator not() {
+		return inverse;
+	}
+
 	private String getSymbol(int index) {
 		try {
 			return symbols[index];
@@ -110,6 +126,10 @@ public enum Operator implements ForkOperator {
 			case LOWERCASE_NAME -> name().toLowerCase();
 			default -> getSymbol(setStyle.index());
 		};
+	}
+
+	public boolean isCommutative() {
+		return commutative;
 	}
 
 	@FunctionalInterface
@@ -148,20 +168,20 @@ public enum Operator implements ForkOperator {
 	 * (B o A) p B
 	 */
 	// for implies / rev implies 2nd arg
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionAAB = new MultiEnumMap<>(Operator.class, Operator.values());
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionABA = new MultiEnumMap<>(Operator.class, Operator.values());
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionABB = new MultiEnumMap<>(Operator.class, Operator.values());
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionBAB = new MultiEnumMap<>(Operator.class, Operator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionAAB = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionABA = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionABB = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionBAB = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
 
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionLeftOp = new MultiEnumMap<>(Operator.class, Operator.values());
-	public static final MultiEnumMap<Operator, AbsorbedOperationStatement> absorptionRightOp = new MultiEnumMap<>(Operator.class, Operator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionLeftOp = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
+	public static final MultiEnumMap<LogicalOperator, AbsorbedOperationStatement> absorptionRightOp = new MultiEnumMap<>(LogicalOperator.class, LogicalOperator.values());
 
 	static {
 		VariableStatement A = new VariableStatement("a");
 		VariableStatement B = new VariableStatement("b");
 
 		Map<Byte, Statement> ops =
-			Stream.concat(Arrays.stream(Operator.values()).map(o -> new OperationStatement(A, o, B)), // every possible logic outcome
+			Stream.concat(Arrays.stream(LogicalOperator.values()).map(o -> new OperationStatement(A, o, B)), // every possible logic outcome
 						  Stream.of(A, B, A.not(), B.not(), TAUTOLOGY, CONTRADICTION, new OperationStatement(A, IMPLIES, B).not(), new OperationStatement(A, REV_IMPLIES, B).not()))
 				  .collect(toMap(s -> { // converted to just 4 bits
 					  byte truth = 0b0000;
@@ -178,8 +198,8 @@ public enum Operator implements ForkOperator {
 		// 						  .forEach(IntStream.range(0, 4).))
 								  // .collect(Collectors.groupingBy(p -> p == IMPLIES || p == REV_IMPLIES))
 								  // .forEach(p -> ))
-		for (Operator o : Operator.values()) {
-			for (Operator p : Operator.values()) {
+		for (LogicalOperator o : LogicalOperator.values()) {
+			for (LogicalOperator p : LogicalOperator.values()) {
 				if (p == IMPLIES || p == REV_IMPLIES) {
 					byte truthAAB = 0b0000;
 					byte truthABA = 0b0000;

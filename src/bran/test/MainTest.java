@@ -8,14 +8,14 @@ import bran.graphs.Vertex;
 import bran.logic.Argument;
 import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
-import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.special.UniversalStatement;
 import bran.mathexprs.ExpressionGenerator;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
+import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.matrices.Matrix;
 import bran.parser.StatementParser;
 import bran.sets.FiniteSet;
@@ -25,16 +25,21 @@ import bran.sets.SpecialSetType;
 import bran.sets.numbers.NumberLiteral;
 import bran.sets.numbers.godel.GodelNumberFactors;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
+import static bran.mathexprs.treeparts.operators.Operator.DIV;
+import static bran.mathexprs.treeparts.operators.Operator.MUL;
+
 public class MainTest {
 
 	public static void main(String[] args) {
-		// NumberToStringTest();
+		// numberToStringTest();
 		// SetsTest();
 		// logicTest();
 		// jamesGrimesPuzzleTest();
@@ -48,8 +53,66 @@ public class MainTest {
 		// System.out.println(maxProfit(new int[] {2, 0, -1}));
 		// System.out.println(Stream.of(0, 1).reduce(1, Math::multiplyExact));
 		// visualTest();
+		// godelTest();
+		// factorTest();
 
-		godelTest();
+		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().getTable());
+		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().simplified().getTable());
+
+		// VariableStatement a = new VariableStatement("a");
+		// VariableStatement b = new VariableStatement("b");
+		// VariableStatement c = new VariableStatement("C");
+		//
+		// System.out.println(a.and(b.and(a)).simplified());
+	}
+
+	private static record FactorTest(Expression exp, Expression simplified, String expString, String simplifiedString) {}
+
+	public static void factorTest() {
+		final Constant great = Constant.of(5);
+		final Constant less = Constant.of(2);
+		final Variable y = new Variable("y");
+		final Expression exp1 = SIN.ofS(y);
+		final Expression exp2 = Constant.of(2).times(y);
+		final Expression exp3 = Constant.of(5).times(y);
+		final List<FactorTest> tests = Stream.of(new Expression[] {
+				get(less, great, false, false), get(less, exp1, false, false), get(exp1, less, false, false),
+				get(less, exp2, false, false), get(exp2, less, false, false), get(exp2, exp3, false, false),
+				get(less, great, false, true), get(less, exp1, false, true), get(exp1, less, false, true),
+				get(less, exp2, false, true), get(exp2, less, false, true), get(exp2, exp3, false, true),
+				get(less, great, true, false), get(less, exp1, true, false), get(exp1, less, true, false),
+				get(less, exp2, true, false), get(exp2, less, true, false), get(exp2, exp3, true, false),
+				get(less, great, true, true), get(less, exp1, true, true), get(exp1, less, true, true),
+				get(less, exp2, true, true), get(exp2, less, true, true), get(exp2, exp3, true, true),
+		}).map(e -> {
+			final Expression simplified = e.simplified();
+			return new FactorTest(e, simplified, e.toString(), simplified.toString());
+		}).collect(Collectors.toList());
+		int maxLen = tests.stream().map(FactorTest::expString).map(String::length).max(Integer::compareTo).orElse(0);
+		int maxLenSimp = tests.stream().map(FactorTest::simplifiedString).map(String::length).max(Integer::compareTo).orElse(0);
+		for (FactorTest fT : tests)
+			System.out.println(fT.expString/*.substring(1, fT.expString.length() - 1)*/ + " ".repeat(maxLen + 1 - fT.expString.length()) + "-> "
+							   + fT.simplifiedString/*.substring(1, fT.simplifiedString.length() - 1)*/
+							   + (fT.exp.equals(fT.simplified) ? "" : " ".repeat(maxLenSimp + 1 - fT.simplifiedString.length()) + "<-"));
+	}
+
+	private static Expression get(final Expression leftPower, final Expression rightPower, boolean leftInv, boolean rightInv) {
+		final Variable a = new Variable("a");
+		final Variable b = new Variable("b");
+		final Variable x = new Variable("x");
+		return new OperatorExpression(a, leftInv ? DIV : MUL, x.pow(leftPower)).div(new OperatorExpression(b, rightInv ? DIV : MUL, x.pow(rightPower)));
+	}
+
+	public static void uniTest() {
+		final Variable x = new Variable("x");
+		final Variable y = new Variable("y");
+		final UniversalStatement<NumberLiteral, Variable> test
+				= Statement.forAll(x)
+						   .in(new SpecialSet(SpecialSetType.Z), e0 -> Statement.forAll(y)
+																				.in(new SpecialSet(SpecialSetType.Z), e1 -> e0[0].plus(e1[0]).equates(e1[0].plus(e0[0])))
+																				.proven())
+						   .proven();
+		System.out.println(test + "\n" + test.not());
 
 	}
 
@@ -102,7 +165,7 @@ public class MainTest {
 		// Variable x = new Variable("x");
 		// x.respect();
 		// // x.setValue(2.5);
-		// System.out.println(TAN.of(x.times(Constant.of(2).pow(ASINH.of(x)))).deriveString());
+		// System.out.println(TAN.of(x.times(Constant.TWO.pow(ASINH.of(x)))).deriveString());
 
 		// Arrays.stream(MultivariableFunction.values()).filter(f -> f.derivable == null).forEach(System.out::println);
 		long seed = 0L;
@@ -324,8 +387,8 @@ public class MainTest {
 														   {0, 1, 0, 1, 0, 2},
 														   {1, 1, 1, 1, 1, 0} }));
 		System.out.println("For graph:\n" + graph);
-		System.out.println("Is Euelerian trail? " + graph.isEulerianTrailDeepSearch());
-		// System.out.println("Is Euelerian trail? " + graph.isEulerianTrail());
+		System.out.println("Is Eulerian trail? " + graph.isEulerianTrailDeepSearch());
+		// System.out.println("Is Eulerian trail? " + graph.isEulerianTrail());
 	}
 
 	static void HamiltonianPathTestingVertices() {
@@ -337,8 +400,8 @@ public class MainTest {
 		// 	{0, 1, 0, 1, 0, 1},
 		// 	{1, 1, 1, 1, 1, 0} }));
 		Graph frame = new Graph(symmetricalize(new double[][]
-													   /*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
-													   /*0*/ { {-0, 1, 2, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 }, /*0*/
+						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
+				/*0*/ { {-0, 1, 2, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 }, /*0*/
 				/*1*/	{ 0,-0, 1, 1, 2, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1 }, /*1*/
 				/*2*/	{ 0, 0,-0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 }, /*2*/
 				/*3*/	{ 0, 0, 0,-0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 }, /*3*/
@@ -354,7 +417,7 @@ public class MainTest {
 				/*13*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1,-0, 1, 1 }, /*13*/
 				/*14*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1,-0, 1 }, /*14*/
 				/*15*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1,-0 } }));
-		/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
+						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
 		System.out.println("For graph:\n" + frame);
 		System.out.println("Is Hamiltonian path? " + frame.isHamiltonianPath());
 

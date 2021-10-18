@@ -4,11 +4,6 @@ import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.UniversalNumbersStatement;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
-import bran.tree.Equivalable;
-import bran.tree.TreePart;
 import bran.mathexprs.Equation;
 import bran.mathexprs.EquationType;
 import bran.mathexprs.Inequality;
@@ -17,18 +12,26 @@ import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.SpecialSet;
 import bran.sets.SpecialSetType;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
+import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
+import bran.tree.Equivalable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static bran.logic.statements.operators.Operator.AND;
+import static bran.logic.statements.operators.LogicalOperator.AND;
 import static bran.mathexprs.InequalityType.*;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.SQRT;
 import static bran.mathexprs.treeparts.operators.Operator.*;
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
 
-public abstract class Expression implements TreePart, Comparable<Expression>, Equivalable<Expression> {
+public abstract class Expression extends Composition implements Equivalable<Expression> {
 
 	protected Statement domainConditions;
+
+	public abstract Expression simplified();
 
 	public Expression(Statement... domainConditions) {
 		this.domainConditions = combineDomains(domainConditions);
@@ -71,8 +74,6 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 
 	public abstract Set<Variable> getVariables();
 
-	public abstract Expression simplified();
-
 	public abstract double evaluate();
 
 	/**
@@ -88,15 +89,15 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 	public abstract void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
 
 	private static final Expression emptyExpression = new Expression() {
-		@Override public Set<Variable> getVariables() { return Collections.emptySet(); }
-		@Override public Expression simplified() { return empty(); }
-		@Override public double evaluate() { return 0.0; }
-		@Override public Expression derive() { return empty(); }
+		@Override public Set<Variable> getVariables()					{ return Collections.emptySet(); }
+		@Override public Expression simplified()						{ return empty(); }
+		@Override public double evaluate()								{ return 0.0; }
+		@Override public Expression derive()							{ return empty(); }
 		@Override public boolean respect(final Collection<Variable> respectsTo) { return false; }
 		@Override public void replaceAll(final Expression approaches, final Expression approached) { }
 		@Override public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 			godelNumbers.push(GodelNumberSymbols.LEFT);
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			godelNumbers.push(GodelNumberSymbols.RIGHT); // TODO Is this how it'd be in Godel?
 		}
 		// @Override public boolean equivalentTo(final Expression other) { return other == empty(); }
 		@Override public String toString() { return "()"; }
@@ -117,11 +118,12 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 	}
 
 	@Override
-	public int compareTo(final Expression o) {
+	public int compareTo(final Composition o) {
 		// TODO; simplify first? you can prove if a function is less somehow; you can with given variables for sure
-		return Double.compare(evaluate(), o.evaluate());
+		return o instanceof Expression exp ? Double.compare(evaluate(), exp.evaluate()) : -1;
 	}
 
+	@Override
 	public abstract boolean equals(Object other);
 
 	public static String innerString(final String toString) {
@@ -137,7 +139,7 @@ public abstract class Expression implements TreePart, Comparable<Expression>, Eq
 	}
 
 	public OperatorExpression squared() {
-		return pow(Constant.of(2));
+		return pow(Constant.TWO);
 	}
 
 	public OperatorExpression cubed() {

@@ -1,25 +1,23 @@
 package bran.logic.statements;
 
-import java.io.IOException;
 import java.util.*;
 
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Fork;
 
 import static bran.logic.statements.VariableStatement.*;
-import static bran.logic.statements.operators.Operator.*;
-import static bran.sets.numbers.godel.GodelNumberSymbols.*;
+import static bran.logic.statements.operators.LogicalOperator.*;
 
-public class OperationStatement extends Statement implements Fork<Statement, Operator, Statement> { // Two Child
+public class OperationStatement extends Statement implements Fork<Statement, LogicalOperator, Statement> { // Two Child
 
-	private Statement left;
-	private Operator operator;
-	private Statement right;
+	private final Statement left;
+	private final LogicalOperator operator;
+	private final Statement right;
 
-	public OperationStatement(Statement left, Operator operator, Statement right) {
+	public OperationStatement(Statement left, LogicalOperator operator, Statement right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
@@ -29,7 +27,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return left;
 	}
 
-	public Operator getOperator() {
+	public LogicalOperator getOperator() {
 		return operator;
 	}
 
@@ -70,18 +68,21 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return operator.operate(truth1, truth2);
 	}
 
-	public static boolean operate(boolean truth1, Operator operator, boolean truth2) {
+	public static boolean operate(boolean truth1, LogicalOperator operator, boolean truth2) {
 		return operator.operate(truth1, truth2);
 	}
 
+	@Override
 	public boolean isConstant() {
 		return false;
 	}
 
+	@Override
 	public boolean getTruth() {
 		return operate(left.getTruth(), right.getTruth());
 	}
 
+	@Override
 	public List<Statement> getChildren() {
 		ArrayList<Statement> current = new ArrayList<>();
 		current.add(this);
@@ -90,6 +91,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return current;
 	}
 
+	@Override
 	public List<VariableStatement> getVariables() {
 		ArrayList<VariableStatement> current = new ArrayList<>();
 		current.addAll(left.getVariables());
@@ -97,10 +99,25 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		return current;
 	}
 
-	public String toString() {
-		return "(" + left.toString() + " " + operator.toString() + " " + right.toString() + ")";
+	@Override
+	public String toFullString() {
+		return '(' + left.toFullString() + " " + operator.toString() + " " + right.toFullString() + ')';
 	}
 
+	@Override
+	public String toString() {
+		String leftString = left.toString();
+		String rightString = right.toString();
+		if (left instanceof OperationStatement leftOperation
+			&& leftOperation.getOperator().getOrder() < operator.getOrder())
+			leftString = parens(leftString);
+		if (right instanceof OperationStatement rightOperation
+			&& rightOperation.getOperator().getOrder() < operator.getOrder())
+			rightString = parens(rightString);
+		return leftString + " " + operator.toString() + " " + rightString;
+	}
+
+	@Override
 	public boolean equals(Object s) {
 		return s instanceof OperationStatement s0 && s0.getOperator().equals(operator) && left.equals(s0.getLeft()) && right.equals(s0.getRight());
 	}
@@ -112,9 +129,19 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 
 	@Override
 	public Statement simplified() {
+		final Statement leftSimplified = left.simplified();
+		final Statement rightSimplified = right.simplified();
+		final Statement simplified = simplified(leftSimplified, operator, rightSimplified, true);
+		return simplified == null ? new OperationStatement(leftSimplified, operator, rightSimplified) : simplified;
+	}
+
+	/**
+	 * @return simplified or null if it couldn't simplify
+	 */
+	private Statement simplified(Statement left, LogicalOperator operator, Statement right, boolean cummutativeSearch) {
+		// System.out.print("" + left + operator + right + "\t->\t");
+
 		// return new OperationStatement(, operator, right.simplified());
-		Statement left = this.left.simplified();
-		Statement right = this.right.simplified();
 		if (left.isConstant()) { // Universal Bound Law
 			if (right.isConstant()) // basic logic case (not a law)
 				return getTruth() ? TAUTOLOGY : CONTRADICTION;
@@ -153,6 +180,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 					default -> null;
 				};
 		}
+
 		if (left.equalsNot(right)) { // Negation Law
 			return switch (operator) {
 				case OR, NAND, XOR -> TAUTOLOGY;
@@ -178,14 +206,27 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		// 	return deMorgans();
 		// extended form of the Absorption Law (precomputed (static) operation combos)
 		// OperationStatement rightO;
+
+		/*
+		>= is > or ==
+		<= is < or ==
+		> is not < and not ==
+		< is not > and not ==
+		 */
+
+		if (cummutativeSearch && operator.isCommutative()) {
+			final Statement simplified = commutativeCrossSearch(left, operator, right);
+			if (simplified != null)
+				return simplified;
+		}
 		if (right instanceof OperationStatement rightO) {
 			// rightO = rightOp;
 			// <--- TODO if left instanceof operation then you can factor
 			if (rightO.getLeft().equals(left)) {
-				return (isAsyOp(rightO.getOperator()) ? absorptionAAB : absorptionRightOp)
+				return (!rightO.getOperator().isCommutative() ? absorptionAAB : absorptionRightOp)
 							   .get(operator, rightO.getOperator()).absorb(left, rightO.getRight());
 			} else if (rightO.getRight().equals(left))
-				return (isAsyOp(rightO.getOperator()) ? absorptionABA : absorptionRightOp)
+				return (!rightO.getOperator().isCommutative() ? absorptionABA : absorptionRightOp)
 							   .get(operator, rightO.getOperator()).absorb(left, rightO.getLeft());
 		}
 		// else if (right instanceof LineStatement rightL && rightL.getChild() instanceof OperationStatement rightLO) {
@@ -193,15 +234,96 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 		// }
 		else if (left instanceof OperationStatement leftO) {
 			if (leftO.getLeft().equals(right)) {
-				return (isAsyOp(operator) ? absorptionBAB : absorptionLeftOp)
+				return (!operator.isCommutative() ? absorptionBAB : absorptionLeftOp)
 							   .get(leftO.getOperator(), operator).absorb(leftO.getRight(), right);
 			} else if (leftO.getRight().equals(right))
-				return (isAsyOp(operator) ? absorptionABB : absorptionLeftOp)
+				return (!operator.isCommutative() ? absorptionABB : absorptionLeftOp)
 							   .get(leftO.getOperator(), operator).absorb(leftO.getLeft(), right);
 		}
 		// if left op and right op
 		// if (checkDeMorgansLaw())
-		return new OperationStatement(left, operator, right);
+		return null;
+	}
+
+	// /**
+	//  * @param operator - commutative operator to be searched along
+	//  */
+	// private Statement commutativeDeepSearch(OperationStatement statement, LogicalOperator operator) { // TODO
+	// 	Collection<Statement> terms = new ArrayList<>();
+	// 	commutativeDeepSearch(statement, operator, terms);
+	//
+	// 	// try to factor with all terms?
+	// 	return expression;
+	// }
+
+	// private void commutativeDeepSearch(Statement statement, LogicalOperator operator, Collection<Statement> terms) {
+	// 	if (statement instanceof OperationStatement operationStatement) {
+	// 		if ((operationStatement.getOperator() == operator)) {
+	// 			commutativeDeepSearch(operationStatement.getLeft(), operator, terms);
+	// 			commutativeDeepSearch(operationStatement.getRight(), operator, terms);
+	// 		}
+	// 	} else
+	// 		terms.add(statement);
+	// }
+
+	private Statement commutativeCrossSearch(Statement leftStatement, LogicalOperator operator, Statement rightStatement) {
+		List<Statement> leftTerms = new ArrayList<>();
+		List<Statement> rightTerms = new ArrayList<>();
+		List<Statement> newTerms = new ArrayList<>();
+
+		commutativeSearch(leftStatement, operator, leftTerms);
+		commutativeSearch(rightStatement, operator, rightTerms);
+
+		if (leftTerms.size() + rightTerms.size() < 3)
+			return null;
+		for (int i = 0; i < leftTerms.size(); i++) {
+			for (int j = 0; j < rightTerms.size() && i < leftTerms.size(); j++) {
+				Statement newTerm = simplified(leftTerms.get(i), operator, rightTerms.get(j), false);
+				// System.out.println("\t" + newTerm);
+
+				if (newTerm != null) { // check to see if any of the current terms can combine and accumulate further:
+					leftTerms.remove(i);
+					rightTerms.remove(j--);
+					newTerm = accumulateTerms(operator, newTerms, newTerm);
+					newTerm = accumulateTerms(operator, leftTerms, newTerm);
+					newTerm = accumulateTerms(operator, rightTerms, newTerm);
+					newTerms.add(newTerm);
+				}
+			}
+		}
+		if (newTerms.size() == 0)
+			return null;
+		else {
+			newTerms.addAll(leftTerms);
+			newTerms.addAll(rightTerms);
+			final Iterator<Statement> iterator = newTerms.iterator();
+			if (newTerms.size() == 1)
+				return iterator.next();
+			OperationStatement combinedStatements = new OperationStatement(iterator.next(), operator, iterator.next());
+			while (iterator.hasNext())
+				combinedStatements = new OperationStatement(combinedStatements, operator, iterator.next());
+			return combinedStatements;
+		}
+	}
+
+	private Statement accumulateTerms(final LogicalOperator operator, final List<Statement> terms, Statement newTerm) {
+		for (int i = 0; i < terms.size(); i++) {
+			Statement accNewTerm = simplified(terms.get(i), operator, newTerm, false); // (order doesn't matter because it's commutative)
+			if (accNewTerm != null) {
+				terms.remove(i--);
+				newTerm = accNewTerm;
+			}
+		}
+		return newTerm;
+	}
+
+	private void commutativeSearch(Statement statement, LogicalOperator operator, Collection<Statement> terms) {
+		if (statement instanceof OperationStatement operationStatement
+			&& operationStatement.getOperator() == operator) {
+				commutativeSearch(operationStatement.getLeft(), operator, terms);
+				commutativeSearch(operationStatement.getRight(), operator, terms);
+		} else
+			terms.add(statement);
 	}
 
 	@Override
@@ -220,13 +342,6 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 			else
 				new Exception("this shouldn't happen").printStackTrace();
 		}
-	}
-
-	/**
-	 * these operators are asymmetrical and have extra cases in the absorption law
-	 */
-	private static boolean isAsyOp(Operator o) {
-		return o == IMPLIES || o == REV_IMPLIES;
 	}
 
 	/* the laws to check to know if it simplifies.
@@ -297,7 +412,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Ope
 	}
 
 	@Override
-	protected boolean checkIdentityUniversalBoundLaw() { //TODO this is all wrong
+	protected boolean checkIdentityUniversalBoundLaw() { // this is all wrong
 		if (left.compareTo(right) == 0)
 			return true;
 		if (left.checkNegationLaw())

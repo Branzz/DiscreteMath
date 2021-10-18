@@ -8,10 +8,12 @@ import bran.sets.SpecialSet;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.*;
@@ -36,15 +38,14 @@ public class UniversalNumbersStatement extends SpecialStatement {
 		return statement.truth();
 	}
 
-	@Override
-	public String toString() {
+	public String toString(Function<Composition, String> stringMapper) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(switch (statementStyle) {
 			case NAME -> "For all ";
 			case LOWERCASE_NAME -> "for all ";
 			default -> forAllSymbols[statementStyle.index()];
 		});
-		sb.append(Arrays.stream(variables).map(Variable::toString).collect(Collectors.joining(",")));
+		sb.append(Arrays.stream(variables).map(stringMapper).collect(Collectors.joining(",")));
 		sb.append(switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];

@@ -4,11 +4,9 @@ import bran.exceptions.ParseException;
 import bran.logic.Argument;
 import bran.logic.statements.*;
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static bran.parser.StatementParser.TokenType.*;
@@ -27,8 +25,8 @@ public class StatementParser {
 	// 		.replaceAll("x", "\\s*\\(" + lineOperatorsRegex + "\\)\\s+)*[A-Za-z][A-Za-z_\\d]*\\s+\\(" + operatorsRegex + "\\)\\s*X")
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
-	private static final Map<String, Operator> statementOperators =
-			Stream.of(Operator.values())
+	private static final Map<String, LogicalOperator> statementOperators =
+			Stream.of(LogicalOperator.values())
 				  .flatMap(o -> Arrays.stream(o.getSymbols())
 									  .distinct()
 									  .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
@@ -118,7 +116,7 @@ public class StatementParser {
  						statementBuilder.add(parseStatementExpression(tokens, localVariables, i + 1));
 						break;
 					case RIGHT_IDENTIFIER:
-						if (inner) {
+						if (inner) { // or if at very end
 							tokens.subList(start, i + 1).clear();
 							return statementBuilder.build();
 						} else

@@ -1,30 +1,31 @@
 package bran.logic.statements;
 
-import java.util.List;
-import java.util.Stack;
-
 import bran.exceptions.VariableExpressionException;
 import bran.logic.TruthTable;
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.logic.statements.special.ConditionalStatement;
 import bran.logic.statements.special.QuantifiedStatementArguments;
 import bran.logic.statements.special.UniversalStatement;
+import bran.mathexprs.Equation;
 import bran.sets.Set;
 import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelNumberFactors;
 import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
-import bran.tree.TreePart;
-import bran.mathexprs.Equation;
 
-import static bran.logic.statements.operators.Operator.*;
-import static java.util.Collections.*;
+import java.util.List;
+import java.util.Stack;
 
-public abstract class Statement implements Comparable<Statement>, TreePart, Equivalable<Statement> {
+import static bran.logic.statements.operators.LogicalOperator.*;
+import static java.util.Collections.emptyList;
+
+public abstract class Statement extends Composition implements Equivalable<Statement> {
 
 	private static byte comparisonType = 0; // 0: brute force table, 1: check full tree
+
+	public Statement() { }
 
 	protected abstract boolean isConstant();
 
@@ -38,7 +39,8 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 
 	public abstract List<VariableStatement> getVariables();
 
-	public abstract String toString();
+	@Override
+	public abstract Statement simplified();
 
 	// public abstract Statement clone();
 
@@ -47,23 +49,25 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return truth() == other.truth();
 	}
 
-	public abstract boolean equals(Object s);
-
-	public int compareTo(Statement statement) {
-		if (statement == null)
-			return -1;
-		if (comparisonType == 0)
-			return logicallyEquivalentTableTo(statement) ? 0 : 1;
-		else if (comparisonType == 1)
-			return logicallyEquivalentTreeMatches(statement) ? 0 : 1;
-		else {
-			return logicallyEquivalentTreeMatches(statement) ? 0 : logicallyEquivalentTableTo(statement) ? 0 : 1;
+	@Override
+	public int compareTo(Composition composition) {
+		if (composition instanceof Statement statement) {
+			if (comparisonType == 0)
+				return logicallyEquivalentTableTo(statement) ? 0 : 1;
+			else if (comparisonType == 1)
+				return logicallyEquivalentTreeMatches(statement) ? 0 : 1;
+			else {
+				return logicallyEquivalentTreeMatches(statement) ? 0 : logicallyEquivalentTableTo(statement) ? 0 : 1;
+			}
 		}
+		return -1;
 	}
 
-	public Statement() {}
+	public static Statement empty() {
+		return Statement.emptyStatement;
+	}
 
-	public abstract Statement simplified();
+	public abstract List<Statement> getChildren();
 
 	public abstract void appendGodelNumbers(Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
 
@@ -184,7 +188,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 //		return null;
 //	}
 
-	private static Statement operationOf(Operator o, Statement... s) {
+	public static Statement operationOf(LogicalOperator o, Statement... s) {
 		if (s.length == 0)
 			throw new VariableExpressionException();
 		if (s.length == 1)
@@ -195,11 +199,9 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return combinedStatements;
 	}
 
-	private OperationStatement operation(Operator o, Statement... s) {
-		if (s.length < 0)
-			throw new VariableExpressionException();
+	public OperationStatement operation(LogicalOperator o, Statement... s) {
 		if (s.length == 0)
-			return new OperationStatement(this, o, this);
+			throw new VariableExpressionException();
 		OperationStatement combinedStatements = new OperationStatement(this, o, s[0]);
 		for (int i = 1; i < s.length; i++)
 			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
@@ -242,7 +244,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		return operationOf(IMPLIES, r, s);
 	}
 
-	public LineStatement not() {
+	public Statement not() {
 		return new LineStatement(this, LineOperator.NOT);
 	}
 
@@ -294,8 +296,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		@Override public boolean equivalentTo(final Statement other) { return this == other; }
 		@Override public boolean equals(final Object s)				 { return false; }
 		@Override public Statement simplified()						 { return empty(); }
-		@Override
-		public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) { }
+		@Override public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) { }
 		@Override protected boolean isConstant()					 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }
@@ -314,14 +315,14 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 	// 	@Override protected boolean checkAssociativeLaw()			 { return false; }
 	};
 
-	public static Statement empty() {
-		return emptyStatement;
-	}
-
 	// Imperative style assistance classes
 
-	public static <I, E extends Holder<I> & Equivalable<? super E>> UniversalStatementVariables forAll(E... variables) {
-		return new UniversalStatementVariables(variables);
+	public static <I, E extends Composition & Holder<I> & Equivalable<? super E>> UniversalStatementVariables<I, E> forAll(E... variables) {
+		return new UniversalStatementVariables<>(variables);
+	}
+
+	public String getTable() {
+		return TruthTable.getTable(this);
 	}
 
 	public String getTable() {
@@ -333,7 +334,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 				|| other instanceof LineStatement otherL && otherL.getChild().equals(this);
 	}
 
-	public static record UniversalStatementVariables<I, E extends Holder<I> & Equivalable<? super E>> (E... variables) {
+	public static record UniversalStatementVariables<I, E extends Composition & Holder<I> & Equivalable<? super E>> (E... variables) {
 		public UniversalStatementDomainStatement<I, E> in(Set domain, QuantifiedStatementArguments<E> statement) {
 			return new UniversalStatementDomainStatement<>(domain, statement, variables);
 		}
@@ -342,7 +343,7 @@ public abstract class Statement implements Comparable<Statement>, TreePart, Equi
 		// }
 	}
 
-	public static record UniversalStatementDomainStatement<I, E extends Holder<I> & Equivalable<? super E>>
+	public static record UniversalStatementDomainStatement<I, E extends Composition & Holder<I> & Equivalable<? super E>>
 			(Set domain, QuantifiedStatementArguments<E> statement, E... variables) {
 		public UniversalStatement<I, E> proven() {
 			return new UniversalStatement<>(statement, domain, true, variables);

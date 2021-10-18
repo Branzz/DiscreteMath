@@ -3,8 +3,7 @@ package bran.logic;
 import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.operators.Operator;
-import bran.mathexprs.treeparts.Variable;
+import bran.logic.statements.operators.LogicalOperator;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -45,7 +44,7 @@ public class StatementGenerator {
 		private final double operationProb, contProb, tautProb, newVariableProb, leftSideProb;
 		private boolean generated;
 
-		private static final Operator[] operators = Operator.values();
+		private static final LogicalOperator[] operators = LogicalOperator.values();
 
 		Set<VariableStatement> variablePool = new HashSet<>();
 
@@ -122,7 +121,7 @@ public class StatementGenerator {
 		}
 
 		private void appendOperationStatement() {
-			Operator nextOp = operators[rand.nextInt(operators.length)];
+			LogicalOperator nextOp = operators[rand.nextInt(operators.length)];
 			boolean leftSide = rand.nextDouble() < leftSideProb;
 			composite = leftSide ? new OperationStatement(composite, nextOp, nextVariableStatement())
 								 : new OperationStatement(nextVariableStatement(), nextOp, composite);

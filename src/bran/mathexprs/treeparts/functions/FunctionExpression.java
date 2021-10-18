@@ -1,6 +1,7 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
+import bran.mathexprs.treeparts.Value;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
@@ -125,6 +126,14 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 	@Override
 	public String toString() {
 		return function + "(" + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
+	}
+
+	@Override
+	public String toString() {
+		String argString = Arrays.stream(expressions)
+								 .map(Expression::toString)
+								 .collect(Collectors.joining(", "));
+		return function + (expressions.length == 1 && expressions[0] instanceof Value ? " " + argString : parens(argString));
 	}
 
 }

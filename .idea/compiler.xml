@@ -9,5 +9,8 @@
         </processorPath>
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="16">
+      <module name="Discrete Math" target="16" />
+    </bytecodeTargetLevel>
   </component>
 </project>

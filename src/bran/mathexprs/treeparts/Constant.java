@@ -52,7 +52,7 @@ public class Constant extends Value {
 	@Override
 	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 		int num = number.intValue();
-		if (num < 0) { // TODO is there a way to represent negative numbers
+		if (num < 0) {
 			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
 			num = -num;
 		}

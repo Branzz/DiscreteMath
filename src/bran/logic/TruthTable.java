@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.mathexprs.treeparts.Expression;
+import bran.tree.Composition;
 
 public class TruthTable {
 
@@ -41,7 +42,7 @@ public class TruthTable {
 			variables.add(allVariables.get(0));
 //			allVariables.removeAll(Collections.singletonList(allVariables.get(0)));
 			for (int i = 0; i < allVariables.size();)
-				if (allVariables.get(i).toString().equals(variables.get(variables.size() - 1).toString())) // Based on name of variable TODO doesn't need to be
+				if (stringMapper.apply(allVariables.get(i)).equals(stringMapper.apply(variables.get(variables.size() - 1)))) // Based on name of variable TODO doesn't need to be
 					allVariables.remove(i);
 				else
 					i++;
@@ -60,8 +61,8 @@ public class TruthTable {
 
 		variables.removeIf(VariableStatement::isConstant);
 
-		Comparator<Statement> compareStringLengthFirst = Comparator.comparingInt((Statement s) -> s.toString().length())
-																   .thenComparing(Statement::toString);
+		Comparator<Statement> compareStringLengthFirst = Comparator.comparingInt((Statement s) -> stringMapper.apply(s).length())
+																   .thenComparing(stringMapper);
 		statements.sort(compareStringLengthFirst);
 		variables.sort(compareStringLengthFirst);
 
@@ -70,7 +71,7 @@ public class TruthTable {
 //				variables.remove(v);
 
 		for (Statement s : statements) { // Draw header
-			statementStrings.add(" " + Expression.innerString(s.toString()) + " ");
+			statementStrings.add(" " + stringMapper.apply(s) + " ");
 			table.append(statementStrings.get(statementStrings.size() - 1))
 				 .append("\u2502"); // Get column spaces
 		}
@@ -116,7 +117,7 @@ public class TruthTable {
 		}
 
 
-		return top.toString() + table.deleteCharAt(table.length() - 1).toString() + bottom.toString();
+		return top + table.deleteCharAt(table.length() - 1).toString() + bottom;
 	} //U+2573 x symbol
 
 	public static String getTable(Argument argument) {

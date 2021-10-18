@@ -2,7 +2,7 @@ package bran.sets.numbers;
 
 import java.io.Serial;
 public class NumberLiteral extends java.lang.Number implements Comparable<NumberLiteral> { // Treat like a primitive
-// TODO RENAME TO NumberLiteral, have it implement/extend a Number class that is also variable-like, tie in logic.Variable
+// TODO tie in logic.Variable
 
 	@Serial
 	private static final long serialVersionUID = 1L;

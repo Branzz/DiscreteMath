@@ -8,18 +8,21 @@ import bran.sets.SpecialSet;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.sets.FiniteSet;
+import bran.tree.Holder;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 
-public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
+public class ExistentialStatement <I, E extends Composition & Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
 
 	private final int argumentSize;
 	private final QuantifiedStatementArguments<E> universalStatement;
@@ -111,14 +114,13 @@ public class ExistentialStatement <I, E extends bran.tree.Holder<I> & Equivalabl
 		return "domain too large";
 	}
 
-	@Override
-	public String toString() {
+	public String toString(Function<E, String> stringMapper) {
 		return switch (statementStyle) {
 			case NAME -> "There exists ";
 			case LOWERCASE_NAME -> "there exists ";
 			default -> forAllSymbols[statementStyle.index()];
 		} + Arrays.stream(variables)
-				  .map(Object::toString)
+				  .map(stringMapper)
 				  .collect(Collectors.joining(",")) + switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];

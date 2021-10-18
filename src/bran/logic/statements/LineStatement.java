@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 import bran.logic.statements.operators.LineOperator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
@@ -71,11 +72,35 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 			return child;
 		if (child instanceof LineStatement childLine) // Double Negation Law - since child's simplified, it is a NOT
 			return childLine.child;
-		if (child instanceof VariableStatement childVariable) // Negate Constants Law
+		if (child instanceof VariableStatement childVariable) { // Negate Constants Law
 			if (childVariable.equals(TAUTOLOGY))
 				return CONTRADICTION;
 			else if (childVariable.equals(CONTRADICTION))
 				return TAUTOLOGY;
+		}
+		if (child instanceof OperationStatement childOperation) {
+			LogicalOperator operator = childOperation.getOperator();
+			if (operator == LogicalOperator.IMPLIES) {
+				if (childOperation.getRight() instanceof LineStatement rightLine)
+					return new OperationStatement(childOperation.getLeft(), LogicalOperator.AND, rightLine.getChild());
+				else if (childOperation.getLeft() instanceof LineStatement leftLine)
+					return new OperationStatement(leftLine.getChild(), LogicalOperator.NOR, childOperation.getRight());
+				// else if (childOperation.getRight().equals(TAUTOLOGY)) TODO
+				// 	return new OperationStatement(childOperation.getLeft(), Operator.AND, CONTRADICTION);
+				// else if (childOperation.getRight().equals(CONTRADICTION))
+				// 	return new OperationStatement(childOperation.getLeft(), Operator.AND, TAUTOLOGY);
+				// else if (childOperation.getLeft().equals(TAUTOLOGY))
+				// 	return new OperationStatement(CONTRADICTION, Operator.AND, childOperation.getRight());
+				// else if (childOperation.getLeft().equals(CONTRADICTION))
+				// 	return new OperationStatement(TAUTOLOGY, Operator.AND, childOperation.getRight());
+			} else if (operator == LogicalOperator.REV_IMPLIES) {
+				if (childOperation.getLeft() instanceof LineStatement leftLine)
+					return new OperationStatement(leftLine.getChild(), LogicalOperator.AND, childOperation.getRight());
+				else if (childOperation.getRight() instanceof LineStatement rightLine)
+					return new OperationStatement(childOperation.getLeft(), LogicalOperator.NOR, rightLine.getChild());
+			} else
+				return new OperationStatement(childOperation.getLeft(), childOperation.getOperator().not(), childOperation.getRight());
+		}
 		return new LineStatement(child);
 	}
 

@@ -1,16 +1,16 @@
 package bran.sets;
 
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.tree.Fork;
 
-public class OperationSet implements Set, Fork<Set, Operator, Set> {
+public class OperationSet implements Set, Fork<Set, LogicalOperator, Set> {
 
 	private final Set left;
-	private final Operator operator;
+	private final LogicalOperator operator;
 	private final Set right;
 
 
-	public OperationSet(Set left, Operator operator, Set right) {
+	public OperationSet(Set left, LogicalOperator operator, Set right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
@@ -27,7 +27,7 @@ public class OperationSet implements Set, Fork<Set, Operator, Set> {
 	}
 
 	@Override
-	public Operator getOperator() {
+	public LogicalOperator getOperator() {
 		return operator;
 	}
 

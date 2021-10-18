@@ -1,10 +1,10 @@
 package bran.logic.statements.operators;
 
-import bran.logic.statements.OperatorType;
+import bran.logic.statements.StatementOperatorType;
 import bran.tree.BranchOperator;
 import bran.tree.Associativity;
 
-import static bran.logic.statements.OperatorType.REVERSE;
+import static bran.logic.statements.StatementOperatorType.REVERSE;
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 
 public enum LineOperator implements BranchOperator {
@@ -14,10 +14,10 @@ public enum LineOperator implements BranchOperator {
 	public static final int order = 1;
 
 	private final String[] symbols;
-	private final OperatorType operatorType;
+	private final StatementOperatorType operatorType;
 	private final LineOperable lineOperable;
 
-	LineOperator(final LineOperable lineOperable, final OperatorType operatorType, final String... symbols) {
+	LineOperator(final LineOperable lineOperable, final StatementOperatorType operatorType, final String... symbols) {
 		this.lineOperable = lineOperable;
 		this.operatorType = operatorType;
 		this.symbols = symbols;

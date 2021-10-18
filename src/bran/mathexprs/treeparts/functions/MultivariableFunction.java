@@ -21,7 +21,7 @@ public enum MultivariableFunction implements Function {
 	CEIL (1, a -> Math.ceil(a[0]), a -> ZERO),
 	ROUND(1, a -> Math.round(a[0]), a -> ZERO), // not roots??
 	FLOOR(1, a -> Math.floor(a[0]), a -> ZERO),
-	SQRT (1, a -> Math.sqrt(a[0]), a -> a[0].derive().div(Constant.of(2).times(a[0].sqrt()))),
+	SQRT (1, a -> Math.sqrt(a[0]), a -> a[0].derive().div(Constant.TWO.times(a[0].sqrt()))),
 
 	 SIN (1, a -> Math.sin(a[0])),
 	ASIN (e -> e[0].greaterEqual(NEG_ONE).and(e[0].lessEqual(ONE)),

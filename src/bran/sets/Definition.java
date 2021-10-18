@@ -22,9 +22,9 @@ public class Definition <T> {
 	}
 
 	public static final Definition<Constant> ODD = new Definition<>(
-			n -> n.mod(Constant.of(2)).equates(Constant.of(1)), "integer", "odd");
+			n -> n.mod(Constant.TWO).equates(Constant.of(1)), "integer", "odd");
 	public static final Definition<Constant> EVEN = new Definition<>(
-			n -> n.mod(Constant.of(2)).equates(Constant.of(0)), "integer",  "even");
+			n -> n.mod(Constant.TWO).equates(Constant.of(0)), "integer",  "even");
 	public static final Definition<Constant> PRIME = new Definition<>(n -> {
 				Variable r = new Variable("r"), s = new Variable("s");
 				return n.greater(Constant.ONE).and(

@@ -3,7 +3,7 @@ package bran.parser;
 import bran.exceptions.ParseException;
 import bran.logic.statements.*;
 import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.Operator;
+import bran.logic.statements.operators.LogicalOperator;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -31,7 +31,7 @@ public class StatementBuilder {
 		statementChain.addNode(new StatementChain.StatementNode(statement));
 	}
 
-	public void add(Operator operator) {
+	public void add(LogicalOperator operator) {
 		statementChain.addNode(new StatementChain.OperatorNode(operator));
 	}
 
@@ -132,7 +132,7 @@ public class StatementBuilder {
 		}
 
 		void collectOperators() {
-			for (int order = Operator.MAX_ORDER; size != 1 && order >= Operator.MIN_ORDER; order--) {
+			for (int order = LogicalOperator.MAX_ORDER; size != 1 && order >= LogicalOperator.MIN_ORDER; order--) {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) {
@@ -140,7 +140,7 @@ public class StatementBuilder {
 							//	x -> x.next	-> x.next.next -> x.n.n.n
 							//	S -> O	    -> S	-> ?/null
 							Node insert = new StatementNode(new OperationStatement(
-									(Statement) x.value(), (Operator) x.next.value(), (Statement) x.next.next.value()));
+									(Statement) x.value(), (LogicalOperator) x.next.value(), (Statement) x.next.next.value()));
 							insert.next = x.next.next.next;
 							x = head = insert;
 							size -= 2;
@@ -151,7 +151,7 @@ public class StatementBuilder {
 						//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
 						//	? -> S		-> O			-> S	-> ?/null
 						Node insert = new StatementNode(new OperationStatement(
-								(Statement) x.next.value(), (Operator) x.next.next.value(), (Statement) x.next.next.next.value()));
+								(Statement) x.next.value(), (LogicalOperator) x.next.next.value(), (Statement) x.next.next.next.value()));
 						insert.next = x.next.next.next.next;
 						x.next = insert;
 						size -= 2;
@@ -178,7 +178,7 @@ public class StatementBuilder {
 			static Node of(Object o) {
 				if (o instanceof Statement st)
 					return new StatementNode(st);
-				else if (o instanceof Operator op)
+				else if (o instanceof LogicalOperator op)
 					return new OperatorNode(op);
 				else if (o instanceof LineOperator lO)
 					return new LineOperatorNode(lO);
@@ -199,9 +199,9 @@ public class StatementBuilder {
 		}
 
 		private static class OperatorNode extends Node {
-			final Operator operator;
+			final LogicalOperator operator;
 			Object value() { return operator; }
-			public OperatorNode(final Operator operator) {
+			public OperatorNode(final LogicalOperator operator) {
 				this.operator = operator;
 			}
 			Node append(Object next) {

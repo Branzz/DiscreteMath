@@ -5,7 +5,7 @@ import bran.sets.SetDisplayStyle;
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 import static bran.sets.SetDisplayStyle.setStyle;
 
-public enum InequalityType { // TODO Implement order of operations compatibility with other types
+public enum InequalityType implements EquivalenceType { // TODO Implement order of operations compatibility with other types
 	LESS((l, r) -> l.compareTo(r) < 0, "less than", "<", "<", "<", "<", "<"),
 	LESS_EQUAL((l, r) -> l.compareTo(r) <= 0, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
 	GREATER((l, r) -> l.compareTo(r) > 0,  "greater than", ">", ">", ">", ">", ">"),
@@ -27,13 +27,9 @@ public enum InequalityType { // TODO Implement order of operations compatibility
 		this.symbols = symbols;
 	}
 
+	@Override
 	public boolean evaluate(Comparable left, Comparable right) {
 		return comparison.evaluate(left, right);
-	}
-
-	@FunctionalInterface
-	interface Comparison {
-		boolean evaluate(Comparable left, Comparable right);
 	}
 
 	private String getSymbol(int index) {

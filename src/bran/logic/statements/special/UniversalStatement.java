@@ -6,6 +6,7 @@ import bran.logic.statements.VariableStatement;
 import bran.sets.Set;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 import bran.sets.FiniteSet;
@@ -13,11 +14,12 @@ import bran.sets.FiniteSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.StatementDisplayStyle.*;
 
-public class UniversalStatement<I, E extends Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
+public class UniversalStatement<I, E extends Composition & Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
 
 	private final int argumentSize;
 	private final QuantifiedStatementArguments<E> statement; // TODO migrate to just a statement
@@ -89,15 +91,14 @@ public class UniversalStatement<I, E extends Holder<I> & Equivalable<? super E>>
 		return "domain too large";
 	}
 
-	@Override
-	public String toString() {
+	private String toString(Function<E, String> stringMapper, Function<Statement, String> statementStringMapper) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(switch (statementStyle) {
 			case NAME -> "For all ";
 			case LOWERCASE_NAME -> "for all ";
 			default -> forAllSymbols[statementStyle.index()];
 		});
-		sb.append(Arrays.stream(variables).map(Object::toString).collect(Collectors.joining(",")));
+		sb.append(Arrays.stream(variables).map(stringMapper).collect(Collectors.joining(",")));
 		sb.append(switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];
@@ -112,7 +113,7 @@ public class UniversalStatement<I, E extends Holder<I> & Equivalable<? super E>>
 
 	@Override
 	public Statement simplified() {
-		return new UniversalStatement<>(e -> statement.state(e).simplified(), domain, proven, variables );
+		return new UniversalStatement<>(e -> statement.state(e).simplified(), domain, proven, variables);
 	}
 
 	@Override

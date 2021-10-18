@@ -1,32 +1,19 @@
 package bran.mathexprs;
 
 import bran.logic.statements.Statement;
-import bran.logic.statements.VariableStatement;
-import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
+import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.tree.TreePart;
 
-import java.util.List;
 import java.util.Stack;
 
-public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> extends Equivalence {
+public class Inequality<T extends Composition> extends Equivalence<T> {
 
-	private final T left;
-	private final InequalityType inequalityType;
-	private final T right;
-
-	public Inequality(final T left, final InequalityType inequalityType, final T right) {
-		this.left = left;
-		this.inequalityType = inequalityType;
-		this.right = right;
-	}
-
-	@Override
-	protected boolean getTruth() {
-		return inequalityType.evaluate(left, right);
+	public Inequality(final T left, final InequalityType equivalenceType, final T right) {
+		super(left, equivalenceType, right);
 	}
 
 	// public boolean evaluate() {
@@ -34,8 +21,8 @@ public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> ext
 	// }
 
 	@Override
-	public String toString() {
-		return left + " " + inequalityType + " " + right;
+	public Statement simplified() {
+		return new Inequality<>(left.simplified(), (InequalityType) equivalenceType, right.simplified());
 	}
 
 	@Override
@@ -47,17 +34,8 @@ public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> ext
 		// 			|| (right.equals(inq.left) && left.equals(inq.right) && inequalityType == inequalityType.opposite()));
 		// }
 		// return false;
-		return s instanceof Inequality i && ((left.equals(i.left) && right.equals(i.right) && inequalityType == i.inequalityType)
-											 || (right.equals(i.left) && left.equals(i.right) && inequalityType == inequalityType.opposite()));
-	}
-
-	@Override
-	public Statement simplified() {
-		return left instanceof Statement l && right instanceof Statement r
-			   ? new Equation<>(l.simplified(), r.simplified()) :
-			   left instanceof Expression l && right instanceof Expression r
-				   ? new Equation<>(l.simplified(), r.simplified())
-				   : new Equation<>(left, right);
+		return s instanceof Inequality i && ((left.equals(i.left) && right.equals(i.right) && equivalenceType == i.equivalenceType)
+											 || (right.equals(i.left) && left.equals(i.right) && equivalenceType == equivalenceType.opposite()));
 	}
 
 	@Override
@@ -68,23 +46,8 @@ public class Inequality<T extends TreePart & Equivalable<T> & Comparable<T>> ext
 	}
 
 	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
-	}
-
-	@Override
-	public List<Statement> getChildren() {
-		return null;
-	}
-
-	@Override
-	public List<VariableStatement> getVariables() {
-		return null;
-	}
-
-	@Override
 	public Statement negation() {
-		return null;
+		return new Equation<>(left, (EquationType) equivalenceType.opposite(), right);
 	}
 
 	// @Override

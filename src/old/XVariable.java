@@ -37,7 +37,7 @@ public class XVariable {
 	}
 
 	public String toString() {
-		return "name";  // TODO temp comment
+		return "name";
 	}
 
 }
