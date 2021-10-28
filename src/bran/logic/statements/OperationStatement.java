@@ -3,6 +3,12 @@ package bran.logic.statements;
 import java.util.*;
 
 import bran.logic.statements.operators.LogicalOperator;
+import bran.mathexprs.EquationType;
+import bran.mathexprs.Equivalence;
+import bran.mathexprs.EquivalenceType;
+import bran.mathexprs.InequalityType;
+import bran.mathexprs.treeparts.Constant;
+import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
@@ -109,10 +115,10 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		String leftString = left.toString();
 		String rightString = right.toString();
 		if (left instanceof OperationStatement leftOperation
-			&& leftOperation.getOperator().getOrder() < operator.getOrder())
+			&& leftOperation.getOperator().getOrder() > operator.getOrder())
 			leftString = parens(leftString);
 		if (right instanceof OperationStatement rightOperation
-			&& rightOperation.getOperator().getOrder() < operator.getOrder())
+			&& rightOperation.getOperator().getOrder() > operator.getOrder())
 			rightString = parens(rightString);
 		return leftString + " " + operator.toString() + " " + rightString;
 	}
@@ -132,19 +138,19 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		final Statement leftSimplified = left.simplified();
 		final Statement rightSimplified = right.simplified();
 		final Statement simplified = simplified(leftSimplified, operator, rightSimplified, true);
-		return simplified == null ? new OperationStatement(leftSimplified, operator, rightSimplified) : simplified;
+;		return simplified == null ? new OperationStatement(leftSimplified, operator, rightSimplified) : simplified;
 	}
 
 	/**
 	 * @return simplified or null if it couldn't simplify
 	 */
-	private Statement simplified(Statement left, LogicalOperator operator, Statement right, boolean cummutativeSearch) {
+	private Statement simplified(Statement left, LogicalOperator operator, Statement right, boolean commutativeSearch) {
 		// System.out.print("" + left + operator + right + "\t->\t");
 
 		// return new OperationStatement(, operator, right.simplified());
 		if (left.isConstant()) { // Universal Bound Law
 			if (right.isConstant()) // basic logic case (not a law)
-				return getTruth() ? TAUTOLOGY : CONTRADICTION;
+				return operator.operate(left.getTruth(), right.getTruth()) ? TAUTOLOGY : CONTRADICTION;
 			if (left.getTruth())
 				return switch (operator) { // double check these TODO
 					case REV_IMPLIES, OR -> TAUTOLOGY;
@@ -214,12 +220,31 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		< is not > and not ==
 		 */
 
-		if (cummutativeSearch && operator.isCommutative()) {
+		if (commutativeSearch && operator.isCommutative()) {
 			final Statement simplified = commutativeCrossSearch(left, operator, right);
 			if (simplified != null)
 				return simplified;
 		}
-		if (right instanceof OperationStatement rightO) {
+
+		if (left instanceof Equivalence leftEq && right instanceof Equivalence rightEq
+			&& leftEq.getLeft() instanceof Expression leftEqLeft
+			&& leftEq.getRight() instanceof Expression leftEqRight
+			&& rightEq.getLeft() instanceof Expression rightEqLeft
+			&& rightEq.getRight() instanceof Expression rightEqRight) {
+			if (leftEqLeft.equals(rightEqLeft) && ((leftEqRight instanceof Constant && rightEqRight instanceof Constant) || leftEqRight.equals(rightEqRight))) {
+				return equivalenceSolver(leftEqLeft, leftEqRight, rightEqRight, leftEq.getEquivalenceType(), rightEq.getEquivalenceType());
+			}
+			else if (leftEqLeft.equals(rightEqRight) && ((leftEqRight instanceof Constant && rightEqLeft instanceof Constant) || leftEqRight.equals(rightEqLeft))) {
+				return equivalenceSolver(leftEqLeft, leftEqRight, rightEqLeft, leftEq.getEquivalenceType(), rightEq.getEquivalenceType().flipped());
+			}
+			else if (leftEqRight.equals(rightEqLeft) && ((leftEqLeft instanceof Constant && rightEqRight instanceof Constant) || leftEqLeft.equals(rightEqRight))) {
+				return equivalenceSolver(leftEqRight, leftEqLeft, rightEqRight, leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType());
+			}
+			else if (leftEqRight.equals(rightEqRight) && ((leftEqLeft instanceof Constant && rightEqLeft instanceof Constant) || leftEqLeft.equals(rightEqLeft))) {
+				return equivalenceSolver(leftEqRight, leftEqLeft, rightEqLeft, leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType().flipped());
+			}
+		}
+		else if (right instanceof OperationStatement rightO) {
 			// rightO = rightOp;
 			// <--- TODO if left instanceof operation then you can factor
 			if (rightO.getLeft().equals(left)) {
@@ -243,6 +268,55 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		// if left op and right op
 		// if (checkDeMorgansLaw())
 		return null;
+	}
+
+	private Statement equivalenceSolver(final Expression base, final Expression leftExp, final Expression rightExp,
+										final EquivalenceType leftType, final EquivalenceType rightType) {
+		boolean bLessA = leftExp instanceof Constant && rightExp instanceof Constant &&
+			leftExp.compareTo(rightExp) > 0;
+		return equivalenceSolver0(base,
+								 bLessA ? operator.flipped() : operator,
+								 bLessA ? rightExp : leftExp,
+								 bLessA ? leftExp : rightExp,
+								 bLessA ? rightType : leftType,
+								 bLessA ? leftType : rightType);
+	}
+
+	/**
+	 * must be passed through in the form:
+	 * (base leftType leftExp) operator (base rightType rightExp)
+	 */
+	private Statement equivalenceSolver0(final Expression base, final LogicalOperator operator, final Expression leftExp, final Expression rightExp,
+										final EquivalenceType leftType, final EquivalenceType rightType) {
+		int numLine = 0b00000;
+		if(operator.operate(leftType.lesser(), rightType.lesser()))  numLine |= 0b10000;
+		final boolean leftEqualsRight = leftExp.equals(rightExp);
+		if (leftEqualsRight) {
+			if(operator.operate(leftType.equal(), rightType.equal()))  numLine |= 0b01110;
+		} else {
+			if(operator.operate(leftType.equal(), rightType.lesser()))  numLine |= 0b01000;
+			if(operator.operate(leftType.greater(), rightType.lesser()))  numLine |= 0b00100;
+			if(operator.operate(leftType.greater(), rightType.equal()))   numLine |= 0b00010;
+		}
+		if (operator.operate(leftType.greater(), rightType.greater())) numLine |= 0b00001;
+
+		if (numLine == 0b00000)
+			return CONTRADICTION;
+		if (numLine == 0b11111 || (leftEqualsRight && (numLine | 0b01110) == 0b01110))
+			return TAUTOLOGY;
+
+		final EquivalenceType[] types = { InequalityType.GREATER, EquationType.EQUAL, InequalityType.GREATER_EQUAL,
+				InequalityType.LESS, EquationType.UNEQUAL, InequalityType.LESS_EQUAL };
+
+		final int num8 = numLine % 8;
+		if (num8 == 0 || num8 == 7) // b irrelevant
+			return Equivalence.of(base, types[(numLine >> 2) - 1], leftExp);
+
+		if (numLine <= 0b00011 || numLine >= 0b11100) // a irrelevant
+			return Equivalence.of(base, types[num8 - 1], rightExp);
+
+		LogicalOperator center = (numLine & 0b00100) == 0b00100 ? AND : OR;
+		return new OperationStatement(Equivalence.of(base, types[(numLine >> 2) - 1], leftExp), center, Equivalence.of(base, types[num8 - 1], rightExp));
 	}
 
 	// /**
@@ -356,7 +430,7 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 			case NOR -> NAND;
 			case XOR -> XNOR;
 			case XNOR -> XOR;
-			// case IMPLIES -> REV_IMPLIES; //TODO
+			// case IMPLIES -> REV_IMPLIES; //TODO other results
 			// case REV_IMPLIES -> IMPLIES;
 			default -> null;
 		}, right.not()).not();

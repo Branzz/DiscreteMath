@@ -18,12 +18,13 @@ The entire class of discrete math I took as a library (and some more)
     * Deep exception detection
   * Functions / Operators
   * Simplifier ⭐
+    * Factoring
   * Derivatives ⭐
   * Equations/Inequalities
   * Knows Domain (using Sets)
 * Graphs
   * Simple graphs
-  * Drawer *(unfinished)*
+  * Drawer
 * Gödel Numbers
   * From and to numbers
 * Matrices
@@ -32,12 +33,13 @@ The entire class of discrete math I took as a library (and some more)
     * +, -, ×, ÷ matrices
 * Parser (String input) ⭐
   * Read statements and expressions
-  * Applied to any tree structure *(unfinished)*
+  * Apply to any tree structure *(unfinished)*
   * Syntax error catching
 * Proofs
   * Exhaustive (uses combinatorics)
 * Random generator
-  * Generate randomized expressions or statements with seed
+  * Generate randomized expressions or statements
+  * Custom seed and size
 * Sets
   * In/finite
 * Statements (tree structure)
@@ -45,30 +47,33 @@ The entire class of discrete math I took as a library (and some more)
   * Existential/Universal
   * Laws (to simplify)
   * Logic table display ⭐
+  * Simplifier
+    * Deep search commutative operations
+
 - - -
 Examples:
 
 ```java
 Statement statement = StatementParser.parseStatement("a    and  ~ b or  !(c ^   t) implies b");
 ```
-`((a and (not b)) or (not (c xor t))) implies b    // c is contradiction, t is tautology`
+`a && !b || !(c ^ t) implies b // (c is contradiction, t is tautology)`
 
-*other display style*
+*other display style:*
 
 `((a ⋀ (¬b)) ⋁ (¬(c ⊻ t))) ⇒ b`
 ```java
 statement.getTable()
 ```
-![image](https://user-images.githubusercontent.com/12685201/118528497-06678100-b708-11eb-81c9-20fc8a530bdd.png)
+![img.png](tableSimplified.png)
 - - -
 ```java
-StatementGenerator.generate(37L, 15)
+StatementGenerator.generate(3L, 14)
 ```
-`not (B nand ((not (A nand ((A xor B) rev_implies A))) nand A))`
+`A nand (B implies not A or A xor A xnor A)`
 ```java
 .simplified()
 ```
-`B`
+`not A`
 - - -
 ```java
 Variable varA = new Variable("a");
@@ -77,7 +82,7 @@ Expression exp = varA.pow(LOG.of(varA, varA.pow(varA))).minus(Constant.ZERO);
 ```java
 exp
 ```
-`(a ^ LOG(a, (a ^ a))) - 0`
+`a ^ LOG(a, a ^ a) - 0`
 ```java
 exp.simplified()
 ```
@@ -86,24 +91,24 @@ exp.simplified()
 ```java
 exp.derive()
 ```
-`((a ^ LOG(a, (a ^ a))) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (((a / a) * da) + (LN(a) * da))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))) - 0`
+`a ^ LOG(a, a ^ a) * (LOG(a, a ^ a) / a * 1 + LN a((a ^ a * (a / a * 1 + LN a * 1) - a ^ a * LOG(a, a ^ a) * 1 / a) / a ^ a * LN a)) - 0`
 ```java
 exp.derive().simplified()
 ```
-`(a ^ a) * (((LOG(a, (a ^ a)) / a) * da) + (LN(a) * ((((a ^ a) * (da * (1 + LN(a)))) - ((((a ^ a) * LOG(a, (a ^ a))) * da) / a)) / ((a ^ a) * LN(a)))))`
+`a ^ a * (LOG(a, a ^ a) / a + LN a(1 + LN a - LOG(a, a ^ a) / a) / LN a)`
 ```java
 exp.derive().getUniversalStatement() // the domain
 ```
-`∀a,da∈R((a > 0 ⋀ (a ^ a) > 0) ⋀ (((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0)) ⋀ (a > 0 ⋀ (((((a ≠ 0) ⋀ a > 0) ⋀ ((a > 0 ⋀ (a ^ a) > 0) ⋀ (a ≠ 0))) ⋀ a > 0) ⋀ (((a ^ a) * LN(a)) ≠ 0)))))`
+`∀a∈R a > 0 && a ^ a > 0 && a > 0 && a ^ a > 0 && a != 0 && t && a != 0 && a != 0 && a > 0 && a != 0 && t && a != 0 && a != 0 && a > 0 && t && a != 0 && a != 0 && a > 0 && a ^ a > 0 && t && a != 0 && a != 0 && a != 0 && a > 0 && a ^ a * LN a != 0`
 ```java
 exp.derive().getUniversalStatement().simplified()
 ```
-`∀a∈R (a > 0 && (a ^ a) > 0)`
+`∀a∈R a > 0 && a ^ a > 0 && a != 0 && a ^ a > 0 && a ^ a * LN a != 0`
 - - -
 ```java
 Definition.ODD.test(new Constant(5.0))
 ```
-`for the integer 5, it is odd iff (5 % 2) == 1, which is true, so 5 is odd`
+`for the integer 5, it is odd iff 5 % 2 == 1, which is true, so 5 is odd`
 ```java
 new ExistentialStatement<>(
         a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
@@ -112,19 +117,19 @@ new ExistentialStatement<>(
         new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
 	new Variable("a"))
 ```
-`{∃a∈{2.0, 1.0, 0.0}|∀b∈{9.0, 5.0}, ((a * b) = 0)}`
+`{∃a∈{2.0, 1.0, 0.0}|∀b∈{9.0, 5.0}, a * b = 0}`
 ```java
 exhaustiveProofString()
 ```
 ```
 for a = 2.0, ↴
-	for b = 5.0, (a * b) = 0, which is false. (invalid), which is false... continuing
+	for b = 5.0, a * b = 0, which is false. (invalid), which is false... continuing
 for a = 1.0, ↴
-	for b = 5.0, (a * b) = 0, which is false. (invalid), which is false... continuing
+	for b = 5.0, a * b = 0, which is false. (invalid), which is false... continuing
 for a = 0.0, ↴
-	for b = 9.0, (a * b) = 0, which is true... continuing
-	for b = 5.0, (a * b) = 0, which is true... continuing
-	for b = 9.0, (a * b) = 0
+	for b = 9.0, a * b = 0, which is true... continuing
+	for b = 5.0, a * b = 0, which is true... continuing
+	for b = 9.0, a * b = 0
 	which are all true. (valid)
 which is true. (valid)
 ```

@@ -98,6 +98,10 @@ public enum LogicalOperator implements ForkOperator {
 		return operatorType.associativity();
 	}
 
+	public OperationStatement of(final Statement left,final Statement right) {
+		return new OperationStatement(left, this, right);
+	}
+
 	public LogicalOperator not() {
 		return inverse;
 	}
@@ -110,6 +114,19 @@ public enum LogicalOperator implements ForkOperator {
 		}
 	}
 
+	public boolean isCommutative() {
+		return commutative;
+	}
+
+	public LogicalOperator flipped() {
+		return switch (this) {
+			case IMPLIES -> REV_IMPLIES;
+			case REV_IMPLIES -> IMPLIES;
+			default -> this;
+		};
+	}
+
+	@Override
 	public String toString() {
 		return switch (statementStyle) {
 			case NAME -> name();
@@ -126,10 +143,6 @@ public enum LogicalOperator implements ForkOperator {
 			case LOWERCASE_NAME -> name().toLowerCase();
 			default -> getSymbol(setStyle.index());
 		};
-	}
-
-	public boolean isCommutative() {
-		return commutative;
 	}
 
 	@FunctionalInterface
@@ -150,7 +163,8 @@ public enum LogicalOperator implements ForkOperator {
 		return godelBuffer.get(left, right);
 	}
 
-	@FunctionalInterface public interface AbsorbedOperationStatement {
+	@FunctionalInterface
+	public interface AbsorbedOperationStatement {
 		Statement absorb(Statement a, Statement b);
 		static AbsorbedOperationStatement ofAbsorbed(final Statement A, final Statement B, Statement x) {
 			return x instanceof OperationStatement xO ? (a, b) -> new OperationStatement(a, xO.getOperator(), b)

@@ -14,7 +14,6 @@ import bran.sets.FiniteSet;
 import bran.tree.Holder;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Function;
@@ -74,7 +73,7 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 				for (int i = 0; i < argumentSize; i++)
 					variables[i].set(choices.get(count[i]));
 				sb.append(Arrays.stream(variables)
-											   .map(v -> v.toString() + " = " + v.get())
+											   .map(v -> v.toFullString() + " = " + v.get())
 											   .collect(Collectors.joining(", ", "for ", ", ")));
 				Statement statement = universalStatement.state(variables);
 				if (statement instanceof QuantifiedStatement quantifiedStatement)
@@ -128,6 +127,16 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 	}
 
 	@Override
+	public String toFullString() {
+		return toString(Composition::toFullString);
+	}
+
+	@Override
+	public String toString() {
+		return toString(Composition::toString);
+	}
+
+	@Override
 	public boolean equals(final Object s) {
 		return false;
 	}
@@ -149,11 +158,6 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 		universalStatement.state(variables).appendGodelNumbers(godelNumbers, variablesMap);
 		for (int i = 0; i < variables.length; i++)
 			godelNumbers.push(GodelNumberSymbols.RIGHT);
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

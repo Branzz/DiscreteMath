@@ -1,5 +1,6 @@
 package bran.mathexprs.treeparts.operators;
 
+import bran.logic.statements.VariableStatement;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
@@ -20,8 +21,12 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	private final Operator operator;
 	private Expression right;
 
+	/**
+	 * for x^p, if x doesn't exist and p is 0, then x^p DOES exist (==1) See: {@link java.lang.StrictMath#pow pow}
+	 */
 	public OperatorExpression(final Expression left, final Operator operator, final Expression right) {
-		super(left.getDomainConditions(), right.getDomainConditions(), operator.domain(left, right));
+		super(operator == POW ? operator.domain(left, right)
+					  		  :  left.getDomainConditions().and(right.getDomainConditions()).and(operator.domain(left, right)));
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
@@ -111,7 +116,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL))
 			return "-" + right; // negative is a visual illusion
 		else if (operator == MUL && !(right instanceof Constant rightConstant && (left instanceof Constant || rightConstant.evaluate() < 0)))
@@ -170,7 +175,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	 */
 	@Override
 	public Expression simplified() {
-		return simplifiedNoDomain().limitDomain(domainConditions);
+		return simplifiedNoDomain().limitDomain(domainConditions); // TODO Set new domain???
 	}
 
 	private Expression simplifiedNoDomain() {

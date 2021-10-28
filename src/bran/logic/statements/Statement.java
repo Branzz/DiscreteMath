@@ -35,7 +35,13 @@ public abstract class Statement extends Composition implements Equivalable<State
 		return getTruth();
 	}
 
-	public abstract List<Statement> getChildren();
+	@Override
+	public abstract String toFullString();
+
+	@Override
+	public String toString() {
+		return toFullString();
+	}
 
 	public abstract List<VariableStatement> getVariables();
 
@@ -301,7 +307,8 @@ public abstract class Statement extends Composition implements Equivalable<State
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }
 		@Override public List<VariableStatement> getVariables()		 { return emptyList(); }
-		@Override public String toString()							 { return "()"; }
+		@Override public String toFullString()							 { return "()"; }
+		@Override public String toString()				 { return "()"; }
 	// @Override public Statement clone()							 { return emptyStatement; }
 	// 	@Override protected boolean checkNegateConstantsLaw()		 { return false; }
 	// 	@Override protected boolean checkNegationLaw()				 { return false; }
@@ -321,15 +328,15 @@ public abstract class Statement extends Composition implements Equivalable<State
 		return new UniversalStatementVariables<>(variables);
 	}
 
-	public String getTable() {
-		return TruthTable.getTable(this);
+	public String getFullTable() {
+		return TruthTable.getFullTable(this);
 	}
 
 	public String getTable() {
 		return TruthTable.getTable(this);
 	}
 
-	protected boolean equalsNot(final Statement other) {
+	public boolean equalsNot(final Statement other) {
 		return this instanceof LineStatement thisL && thisL.getChild().equals(other)
 				|| other instanceof LineStatement otherL && otherL.getChild().equals(this);
 	}

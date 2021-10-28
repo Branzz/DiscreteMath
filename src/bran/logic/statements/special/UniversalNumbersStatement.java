@@ -6,7 +6,6 @@ import bran.mathexprs.treeparts.Variable;
 import bran.sets.Set;
 import bran.sets.SpecialSet;
 import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Composition;
 
@@ -54,7 +53,18 @@ public class UniversalNumbersStatement extends SpecialStatement {
 			sb.append(((SpecialSet) domain).toFormalString());
 		else
 			sb.append(domain);
-		return sb.append(" ").append(statement).toString();
+		return sb.append(" ").append(stringMapper.apply(statement)).toString();
+	}
+
+
+	@Override
+	public String toFullString() {
+		return toString(Composition::toFullString);
+	}
+
+	@Override
+	public String toString() {
+		return toString(Composition::toString);
 	}
 
 	@Override
@@ -70,11 +80,6 @@ public class UniversalNumbersStatement extends SpecialStatement {
 	@Override
 	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 		negation().appendGodelNumbers(godelNumbers, variables);
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

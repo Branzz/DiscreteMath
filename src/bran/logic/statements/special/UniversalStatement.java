@@ -73,7 +73,7 @@ public class UniversalStatement<I, E extends Composition & Holder<I> & Equivalab
 				for (int i = 0; i < argumentSize; i++)
 					variables[i].set(choices.get(count[i]));
 				sb.append(Arrays.stream(variables)
-								.map(v -> v.toString() + " = " + v.get())
+								.map(v -> v.toFullString() + " = " + v.get())
 								.collect(Collectors.joining(", ", "for ", ", ")));
 				Statement statement = this.statement.state(variables);
 				if (statement instanceof QuantifiedStatement quantifiedStatement)
@@ -103,7 +103,17 @@ public class UniversalStatement<I, E extends Composition & Holder<I> & Equivalab
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];
 		});
-		return sb.append(domain).append(", ").append(statement.state(variables)).toString();
+		return sb.append(domain).append(", ").append(statementStringMapper.apply(statement.state(variables))).toString();
+	}
+
+	@Override
+	public String toFullString() {
+		return toString(Composition::toFullString, Statement::toFullString);
+	}
+
+	@Override
+	public String toString() {
+		return toString(Composition::toString, Statement::toString);
 	}
 
 	@Override
@@ -119,11 +129,6 @@ public class UniversalStatement<I, E extends Composition & Holder<I> & Equivalab
 	@Override
 	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 		statement.state(this.variables).not().simplified().appendGodelNumbers(godelNumbers, variables);
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

@@ -1,23 +1,26 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
+import bran.mathexprs.treeparts.Constant;
+import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Value;
+import bran.mathexprs.treeparts.Variable;
+import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.MultiLeaf;
-import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
-import static bran.mathexprs.treeparts.operators.Operator.ADD;
-import static bran.mathexprs.treeparts.operators.Operator.MUL;
+import static bran.mathexprs.treeparts.operators.Operator.POW;
 
 public class FunctionExpression extends Expression implements MultiLeaf<Expression, Function> {
 
@@ -66,8 +69,13 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 				constants[i] = ((Constant) simplifiedExpressions[i]).evaluate();
 			return Constant.of(function.function(constants));
 		}
-		if (function instanceof MultivariableFunction mF && mF == LOG && simplifiedExpressions[0].equals(Constant.E))
-			return new FunctionExpression(LN, true, simplifiedExpressions[1]);
+		if (function instanceof MultivariableFunction mF && mF == LOG) {
+			if (simplifiedExpressions[0].equals(Constant.E))
+				return new FunctionExpression(LN, true, simplifiedExpressions[1]);
+			if (simplifiedExpressions[1] instanceof OperatorExpression rightOp && rightOp.getOperator() == POW
+				&& simplifiedExpressions[0].equals(rightOp.getLeft()))
+				return rightOp.getRight();
+		}
 		return new FunctionExpression(function, true, simplifiedExpressions);
 	}
 
@@ -124,8 +132,8 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 	}
 
 	@Override
-	public String toString() {
-		return function + "(" + Arrays.stream(expressions).map(Expression::toString).collect(Collectors.joining(", ")) + ')';
+	public String toFullString() {
+		return function + "(" + Arrays.stream(expressions).map(Expression::toFullString).collect(Collectors.joining(", ")) + ')';
 	}
 
 	@Override

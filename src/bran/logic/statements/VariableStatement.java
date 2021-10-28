@@ -111,7 +111,7 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		this.value = value;
 	}
 
-	public String toString() {
+	public String toFullString() {
 		return name;
 	}
 

@@ -70,7 +70,7 @@ public class LimitExpression extends Expression {
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		return "Lim " + approaches + " -> " + approached + " of " + function;
 	}
 

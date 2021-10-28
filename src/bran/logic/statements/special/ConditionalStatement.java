@@ -26,7 +26,7 @@ public class ConditionalStatement extends SpecialStatement {
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		return "if " + conditional.getLeft() + " then " + conditional.getRight();
 	}
 
@@ -54,11 +54,6 @@ public class ConditionalStatement extends SpecialStatement {
 		conditional.getLeft().appendGodelNumbers(godelNumbers, variables);
 		godelNumbers.push(GodelNumberSymbols.IF_THEN);
 		conditional.getRight().appendGodelNumbers(godelNumbers, variables);
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

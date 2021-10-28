@@ -36,7 +36,7 @@ public class Argument extends SpecialStatement {
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		String str = "";
 		for (Statement s : premises)
 			str += s + ",";
@@ -59,18 +59,13 @@ public class Argument extends SpecialStatement {
 
 	}
 
-	public String toFullString() {
+	public String toValidInValidString() {
 		String str = "";
 		for (Statement s : premises)
 			str += s + "\n";
 		str += "\u2234 " + conclusion.toString();
 		str += getTruth() ? "\nValid" : "\nInvalid";
 		return str;
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

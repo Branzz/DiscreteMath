@@ -1,5 +1,6 @@
 package bran.mathexprs.treeparts;
 
+import bran.logic.statements.VariableStatement;
 import bran.sets.numbers.NumberLiteral;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
@@ -10,15 +11,27 @@ import java.util.*;
 public class Constant extends Value {
 
 	public Constant(double value) {
-		this.number = new NumberLiteral(value);
+		super(value);
 	}
 
-	public static final Expression NEG_ONE = new Constant(-1.0);
+	public Constant(double value, boolean exists) {
+		super(value);
+		domainConditions = VariableStatement.of(exists);
+		// domainConditions = (this.equates(INFINITY).or(this.equates(NEG_INFINITY)).or(this.equates(NAN))).not();
+		// ^^^ REQUIRES static PRE-INIT for these Constants
+	}
+
+	public static final Constant NEG_INFINITY = new Constant(Double.NEGATIVE_INFINITY, false);
+	public static final Constant INFINITY = new Constant(Double.POSITIVE_INFINITY, false);
+	public static final Constant NAN = new Constant(Double.NaN, false);
+	public static final Constant NEG_ONE = new Constant(-1.0);
+	public static final Constant NEG_ZERO = new Constant(-0.0) { @Override public String toFullString() { return "-0"; } };
 	public static final Constant ZERO = new Constant(0.0);
 	public static final Constant ONE = new Constant(1.0);
-	public static final Constant E = new Constant(Math.E) { @Override public String toString() { return "e"; } };
-	public static final Constant PI = new Constant(Math.PI) { @Override public String toString() { return "pi"; } };
-	public static final Constant INFINITY = new Constant(Double.POSITIVE_INFINITY);
+	public static final Constant TWO = new Constant(2.0);
+	public static final Constant E = new Constant(Math.E) { @Override public String toFullString() { return "e"; } };
+	public static final Constant PI = new Constant(Math.PI) { @Override public String toFullString() { return "pi"; } };
+
 
 	public static Constant of(final double value) {
 		return new Constant(value);
@@ -36,7 +49,7 @@ public class Constant extends Value {
 
 	@Override
 	public Expression derive() {
-		return Constant.ZERO;
+		return this.equals(NAN) || this.equals(INFINITY) || this.equals(NEG_INFINITY) ? NAN : ZERO;
 	}
 
 	@Override

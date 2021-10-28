@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
-import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.tree.Composition;
@@ -20,7 +19,15 @@ public class TruthTable {
 	private static boolean truesFirst = false;
 //	private static byte detailLevel = 0;
 
+	public static String getFullTable(Statement... separateStatements) {
+		return getTable(Composition::toFullString, separateStatements);
+	}
+
 	public static String getTable(Statement... separateStatements) {
+		return getTable(Composition::toString, separateStatements);
+	}
+
+	public static String getTable(Function<Composition, String> stringMapper, Statement... separateStatements) {
 		if (separateStatements.length == 0)
 			return "";
 
@@ -163,12 +170,12 @@ public class TruthTable {
 
 		variables.removeIf(VariableStatement::isConstant);
 
-		StringBuilder table = new StringBuilder(statementRoot.toString() + "\n");
+		StringBuilder table = new StringBuilder(statementRoot.toFullString() + "\n");
 
-		table.append("-".repeat(statementRoot.toString().length()));
+		table.append("-".repeat(statementRoot.toFullString().length()));
 		table.append("\n");
 
-		String spacer = " ".repeat(statementRoot.toString().length() / 2);
+		String spacer = " ".repeat(statementRoot.toFullString().length() / 2);
 
 		for (int i = 0; i < Math.pow(2, variables.size()); i++) {
 			for (int j = 0; j < variables.size(); j++)

@@ -114,6 +114,7 @@ public class StatementParser {
 				switch (currentTokenType) {
 					case LEFT_IDENTIFIER:
  						statementBuilder.add(parseStatementExpression(tokens, localVariables, i + 1));
+						// tokens.remove(start);
 						break;
 					case RIGHT_IDENTIFIER:
 						if (inner) { // or if at very end
@@ -134,7 +135,7 @@ public class StatementParser {
 						throw new ParseException("statement parsing, unknown token \"%s\" at index %d", tokenString, tokens.get(tokens.size() - 1).from());
 					case WHITESPACE:
 						assert(i != 0);
-						nextProceedingZone = i == start + 1 ? MIDDLE // "( a"
+						nextProceedingZone = i == start ? MIDDLE // "( a"
 											: tokens.get(i - 1).tokenType().proceedingZone;
 						break;
 					default:

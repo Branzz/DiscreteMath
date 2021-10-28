@@ -13,9 +13,6 @@ public abstract class SpecialStatement extends Statement {
 	}
 
 	@Override
-	public abstract boolean equivalentTo(final Statement other);
-
-	@Override
 	public abstract List<Statement> getChildren();
 
 	@Override

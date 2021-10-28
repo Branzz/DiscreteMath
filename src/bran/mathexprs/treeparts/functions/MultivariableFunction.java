@@ -12,7 +12,7 @@ import static bran.mathexprs.treeparts.functions.DomainSupplier.*;
 import static java.lang.Math.*;
 
 public enum MultivariableFunction implements Function {
-	LOG  (e -> e[0].greater(ZERO).and(e[1].greater(ZERO)),
+	LOG  (e -> ((e[0].greater(ZERO).and(e[0].notEquates(ONE))).or(e[0].equates(INFINITY))).and(e[1].greater(ZERO)),
 		  2, a -> log(a[0]) / log(a[1])),
 	LN   (e -> e[0].greater(ZERO),
 		  1, a -> log(a[0]), a -> a[0].derive().div(a[0])),
@@ -68,7 +68,7 @@ public enum MultivariableFunction implements Function {
 	RNG(0, a -> Math.random(), a -> ZERO);
 
 	static {
-		// d/dx (log(b, a))  =  (da - (a*log(b,a)*db/b)) / a*lnb	// discovered by me
+		// d/dx (log(b, a))  =  (da - (a*log(b,a)*db/b)) / a*lnb
 		LOG.derivable = a -> a[1].derive().minus(a[1].times(LOG.ofS(a[0], a[1])).times(a[0].derive()).div(a[0])).div(a[1].times(LN.ofS(a[0])));
 		SIN.derivable = a -> COS.ofS(a[0]).chain(a[0]);
 		SINH.derivable = a -> COSH.ofS(a[0]).chain(a[0]);
@@ -85,11 +85,11 @@ public enum MultivariableFunction implements Function {
 	private final String[] symbols;
 
 	MultivariableFunction(final int arguments, final Functional functional, final String... symbols) {
-		this(e -> VariableStatement.TAUTOLOGY, arguments, functional, null, symbols);
+		this(Expression::combineDefaultDomains, arguments, functional, null, symbols);
 	}
 
 	MultivariableFunction(final int arguments, final Functional functional, Derivable derivable, final String... symbols) {
-		this(e -> VariableStatement.TAUTOLOGY, arguments, functional, derivable, symbols);
+		this(Expression::combineDefaultDomains, arguments, functional, derivable, symbols);
 	}
 
 	MultivariableFunction(DomainSupplier domainSupplier, final int arguments, final Functional functional, final String... symbols) {

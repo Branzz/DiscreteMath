@@ -10,8 +10,9 @@ import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.logic.statements.special.UniversalStatement;
-import bran.mathexprs.ExpressionGenerator;
+import bran.mathexprs.*;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
@@ -32,6 +33,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static bran.logic.statements.operators.LogicalOperator.AND;
+import static bran.logic.statements.operators.LogicalOperator.OR;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
 import static bran.mathexprs.treeparts.operators.Operator.DIV;
 import static bran.mathexprs.treeparts.operators.Operator.MUL;
@@ -55,15 +58,47 @@ public class MainTest {
 		// visualTest();
 		// godelTest();
 		// factorTest();
+		// powDomainTest();
+		// substituteTest();
 
+		Variable a = new Variable("a");
+		LOG.ofS(a, a.pow(a)).div(a).greater(Constant.NEG_INFINITY).and(LOG.ofS(a, a.pow(a)).div(a).less((Constant.INFINITY)).and(Constant.ONE.greater(Constant.NEG_INFINITY)).and(Constant.ONE.less(Constant.INFINITY))).simplified();
+		// equivalenceSimplificationTest();
+
+		// System.out.println(x.equates(Constant.INFINITY).or(x.greater(Constant.ZERO)).simplified());
+		// for (int i = 0; i <= 0b11111; i++)
+		// 	System.out.println(i + " " + ((i >> 2) - 1));
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().getTable());
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().simplified().getTable());
 
-		// VariableStatement a = new VariableStatement("a");
-		// VariableStatement b = new VariableStatement("b");
-		// VariableStatement c = new VariableStatement("C");
+	}
+
+	private static void substituteTest() { // TODO
 		//
-		// System.out.println(a.and(b.and(a)).simplified());
+		// p == 0 || p % 1 == 0    one can substitute p == 0 in the right to get true, so it becomes p == 0 || t
+		//
+		Variable p = new Variable("p");
+		System.out.println(p.equates(Constant.ZERO).or(p.mod(Constant.ONE).equates(Constant.ZERO)).simplified());
+	}
+
+	private static void equivalenceSimplificationTest() {
+		Variable x = new Variable("x");
+		Arrays.stream(LogicalOperator.values())
+			  .map(o -> o.of(x.greaterEqual(Constant.ONE), x.less(Constant.of(2))))
+			  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
+		Stream.concat(Arrays.stream(InequalityType.values()), Arrays.stream(EquationType.values()))
+			  .map(t -> OR.of(x.less(Constant.of(2)), Equivalence.of(Constant.ONE, t, x)))
+			  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
+	}
+
+	private static void powDomainTest() {
+		Expression[] parts = { Constant.ZERO, Constant.INFINITY, Constant.NEG_INFINITY, Constant.of(.5), Constant.of(-.5) };
+		Variable x = new Variable("x");
+		Variable p = new Variable("p");
+		Arrays.stream(parts).map(e -> x.pow(e)).forEach(pow -> System.out.println(pow + " -> " + pow.getDomainConditions().simplified()));
+		Arrays.stream(parts).map(e -> e.pow(p)).forEach(pow -> System.out.println(pow + " -> " + pow.getDomainConditions().simplified()));
+		// final OperatorExpression pow = SINH.ofS(LN.ofS(x)).pow(x.pow(x));
+		// System.out.println(pow + " -> " + pow.getDomainConditions().simplified());
 	}
 
 	private static record FactorTest(Expression exp, Expression simplified, String expString, String simplifiedString) {}
@@ -225,9 +260,12 @@ public class MainTest {
 	}
 
 	private static void statementGeneratorTest() {
-		// for (int s = 0; s <= 20; s++)
-		// 	System.out.printf("Size: %d Statement: %s\n", s, StatementGenerator.generate(3L, s));
-		System.out.println(StatementGenerator.generate(3L, 20, .8, .5, .5, 0, 1));
+		// VariableStatement a = new VariableStatement("a");
+		System.out.println(StatementGenerator.generate(3, 14));
+		for (long seed = 0; seed <= 10; seed++)
+			for (int s = 15; s <= 15; s++)
+				System.out.printf("%s %d,%d\n%s\n", StatementGenerator.generate(seed, s), seed, s, StatementGenerator.generate(seed, s).simplified());
+		// System.out.println(StatementGenerator.generate(3L, 20, .8, .5, .5, 0, 1));
 	}
 
 	static void parseTest() {
@@ -242,7 +280,7 @@ public class MainTest {
 		VariableStatement b = new VariableStatement("b");
 		LongStream.range(0L, 100L).boxed() // cherry pick an example
 				  .collect(Collectors.toMap(l -> l, s -> StatementGenerator.generate(s, 15))).entrySet().stream()
-				  .sorted(Comparator.comparingInt(s -> s.getValue().toString().length() - s.getValue().simplified().toString().length()))
+				  .sorted(Comparator.comparingInt(s -> s.getValue().toFullString().length() - s.getValue().simplified().toFullString().length()))
 				  .forEach(s -> System.out.println(s + " -> " + s.getValue().simplified()));
 
 // 		for (long seed = 0L; seed <= 5; seed++) {
@@ -336,9 +374,9 @@ public class MainTest {
 		System.out.println(y.compareTo(z));
 
 		Argument arg = new Argument(a.nand(b), b.not(), a);
-		System.out.println(arg.toString());
+		System.out.println(arg.toFullString());
 
-		System.out.println(f.toString());
+		System.out.println(f.toFullString());
 		//∴ 	&#8756; 	&#x2234;
 		//≡ 	&#8801; 	&#x2261;
 	}

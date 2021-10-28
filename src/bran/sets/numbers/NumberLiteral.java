@@ -1,6 +1,7 @@
 package bran.sets.numbers;
 
 import java.io.Serial;
+
 public class NumberLiteral extends java.lang.Number implements Comparable<NumberLiteral> { // Treat like a primitive
 // TODO tie in logic.Variable
 
@@ -26,7 +27,7 @@ public class NumberLiteral extends java.lang.Number implements Comparable<Number
 	}
 
 	public boolean equals(Object other) {
-		return other instanceof NumberLiteral && value == ((NumberLiteral) other).getValue();
+		return other instanceof NumberLiteral && Double.compare(value, ((NumberLiteral) other).getValue()) == 0;
 	}
 
 	public double getValue() {

@@ -51,7 +51,7 @@ public class StatementGenerator {
 		VariableStatement of(char nameChar) {
 			String name = String.valueOf(nameChar);
 			for (VariableStatement v : variablePool)
-				if (v.toString().equals(name))
+				if (v.toFullString().equals(name))
 					return v;
 			VariableStatement next = new VariableStatement(name);
 			variablePool.add(next);

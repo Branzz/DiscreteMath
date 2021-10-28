@@ -1,17 +1,14 @@
 package bran.sets;
 
 import bran.logic.statements.Statement;
-import bran.logic.statements.special.ExistentialNumbersStatement;
 import bran.logic.statements.special.UniversalNumbersStatement;
 import bran.mathexprs.Inequality;
 import bran.mathexprs.InequalityType;
 import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.LimitExpression;
+import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.ABS;
-
-public class Definition <T> {
+public class Definition<T> {
 
 	private final Definable<T> definable;
 	private final String[] symbols;
@@ -22,17 +19,20 @@ public class Definition <T> {
 	}
 
 	public static final Definition<Constant> ODD = new Definition<>(
-			n -> n.mod(Constant.TWO).equates(Constant.of(1)), "integer", "odd");
+			n -> n.mod(Constant.TWO).equates(Constant.ONE), "integer", "odd"); // Actually, should be: there exists a k such that n = 2 * k + 1
 	public static final Definition<Constant> EVEN = new Definition<>(
-			n -> n.mod(Constant.TWO).equates(Constant.of(0)), "integer",  "even");
+			n -> n.mod(Constant.TWO).equates(Constant.ZERO), "integer",  "even");
 	public static final Definition<Constant> PRIME = new Definition<>(n -> {
 				Variable r = new Variable("r"), s = new Variable("s");
 				return n.greater(Constant.ONE).and(
 						new UniversalNumbersStatement(new SpecialSet(SpecialSetType.Z), n.equates(r.times(s)).then(s.equates(n)), r, s));
 			}, "a number is prime");
 	public static final Definition<Constant> COMPOSITE = new Definition<>(
-			n -> new Inequality(n, InequalityType.GREATER, Constant.of(1)).and(PRIME.definable.defined(n).not()),
+			n -> new Inequality(n, InequalityType.GREATER, Constant.ONE).and(PRIME.definable.defined(n).not()),
 			"a number is composite");
+	public static final Definition<Expression> INTEGER = new Definition<>(
+			n -> n.mod(Constant.ONE).equates(Constant.ZERO), "real number", "integer");
+
 	// public static final Definition<Expression> EXISTS = new Definition<>(e -> e.getDomainConditions(), "expression exists"); // if for each of the functions used.
 	// public static final Definition<Expression> DIFFERENTIABLE = new Definition<>(e -> e.getDomainConditions(), "equation is differentiable");
 	// public static final Definition<LimitExpression> LIMIT = new Definition<>(e -> { // https://tutorial.math.lamar.edu/classes/calcI/defnoflimit.aspx
@@ -44,8 +44,12 @@ public class Definition <T> {
 	// 			});
 
 	@FunctionalInterface
-	interface Definable <T> {
+	interface Definable<T> {
 		Statement defined(T t);
+	}
+
+	public Statement of(T t) {
+		return definable.defined(t);
 	}
 
 	@Override

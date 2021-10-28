@@ -7,7 +7,6 @@ import bran.sets.Set;
 import bran.sets.SpecialSet;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariable;
 import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Composition;
 
@@ -56,7 +55,17 @@ public class ExistentialNumbersStatement extends SpecialStatement {
 			sb.append(((SpecialSet) domain).toFormalString());
 		else
 			sb.append(domain);
-		return sb.append(" such that ").append(statement).toString();
+		return sb.append(" such that ").append(stringMapper.apply(statement)).toString();
+	}
+
+	@Override
+	public String toFullString() {
+		return toString(Composition::toFullString);
+	}
+
+	@Override
+	public String toString() {
+		return toString(Composition::toString);
 	}
 
 	@Override
@@ -81,11 +90,6 @@ public class ExistentialNumbersStatement extends SpecialStatement {
 		statement.appendGodelNumbers(godelNumbers, variablesMap);
 		for (int i = 0; i < variables.length; i++)
 			godelNumbers.push(GodelNumberSymbols.RIGHT);
-	}
-
-	@Override
-	public boolean equivalentTo(final Statement other) {
-		return false;
 	}
 
 	@Override

@@ -18,14 +18,14 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 
 	private final static Matcher variableMatcher = Pattern.compile("[A-Za-z][A-Za-z_\\d]*").matcher("");
 
-	public Variable(final String name) {
-		this(name, true);
-	}
-
 	public Variable(final String name, final boolean respects) {
 		super();
 		this.name = name;
 		this.respects = respects;
+	}
+
+	public Variable(final String name) {
+		this(name, true);
 	}
 
 	public Variable(final Character name) {
@@ -89,7 +89,7 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		return name;
 	}
 

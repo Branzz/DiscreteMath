@@ -6,24 +6,33 @@ import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 import static bran.sets.SetDisplayStyle.setStyle;
 
 public enum InequalityType implements EquivalenceType { // TODO Implement order of operations compatibility with other types
-	LESS((l, r) -> l.compareTo(r) < 0, "less than", "<", "<", "<", "<", "<"),
-	LESS_EQUAL((l, r) -> l.compareTo(r) <= 0, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
-	GREATER((l, r) -> l.compareTo(r) > 0,  "greater than", ">", ">", ">", ">", ">"),
-	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, "greater than or equal to", "\u2265", "\u2265", ">=", ">=");
+	LESS(		  (l, r) -> l.compareTo(r) <  0, true,  false, "less than", "<", "<", "<", "<", "<"),
+	LESS_EQUAL(	  (l, r) -> l.compareTo(r) <= 0, true,   true, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
+	GREATER(	  (l, r) -> l.compareTo(r) >  0, false, false, "greater than", ">", ">", ">", ">", ">"),
+	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, false,  true, "greater than or equal to", "\u2265", "\u2265", ">=", ">=");
 
 	private final Comparison comparison;
+	private final boolean lesser;
+	private final boolean equal;
 	private final String[] symbols;
 	private InequalityType opposite;
+	private InequalityType flipped;
 
 	static {
 		LESS.opposite = GREATER_EQUAL;
 		LESS_EQUAL.opposite = GREATER;
 		GREATER_EQUAL.opposite = LESS;
 		GREATER.opposite = LESS_EQUAL;
+		LESS.flipped = GREATER;
+		LESS_EQUAL.flipped = GREATER_EQUAL;
+		GREATER_EQUAL.flipped = LESS_EQUAL;
+		GREATER.flipped = LESS;
 	}
 
-	InequalityType(final Comparison comparison, final String... symbols) {
+	InequalityType(final Comparison comparison, boolean lesser, boolean equal, final String... symbols) {
 		this.comparison = comparison;
+		this.lesser = lesser;
+		this.equal = equal;
 		this.symbols = symbols;
 	}
 
@@ -76,6 +85,26 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 			case LOWERCASE_NAME -> symbols[0].toLowerCase();
 			default -> getSymbol(statementStyle.index() + 1);
 		};
+	}
+
+	@Override
+	public boolean lesser() {
+		return lesser;
+	}
+
+	@Override
+	public boolean greater() {
+		return !lesser;
+	}
+
+	@Override
+	public boolean equal() {
+		return equal;
+	}
+
+	@Override
+	public EquivalenceType flipped() {
+		return flipped;
 	}
 
 }

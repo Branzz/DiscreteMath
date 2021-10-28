@@ -1,10 +1,8 @@
 package bran.draw.exprs;
 
 import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Set;
 
 public class Drawable extends Entry {
@@ -115,7 +113,7 @@ public class Drawable extends Entry {
 
 	@Override
 	public String toString() {
-		return "y = " + expression.toString();
+		return "y = " + expression.toFullString();
 	}
 
 }

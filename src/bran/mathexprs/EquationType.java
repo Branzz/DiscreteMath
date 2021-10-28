@@ -27,13 +27,33 @@ public enum EquationType implements EquivalenceType {
 	}
 
 	@Override
-	public EquivalenceType opposite() {
+	public EquationType opposite() {
 		return this == EQUAL ? UNEQUAL : EQUAL;
 	}
 
 	@Override
 	public boolean evaluate(final Comparable left, final Comparable right) {
 		return (this == EQUAL) == left.equals(right);
+	}
+
+	@Override
+	public boolean lesser() {
+		return this == UNEQUAL;
+	}
+
+	@Override
+	public boolean greater() {
+		return this == UNEQUAL;
+	}
+
+	@Override
+	public boolean equal() {
+		return this == EQUAL;
+	}
+
+	@Override
+	public EquationType flipped() {
+		return this;
 	}
 
 }

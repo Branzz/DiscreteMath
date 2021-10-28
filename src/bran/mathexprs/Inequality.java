@@ -1,6 +1,8 @@
 package bran.mathexprs;
 
 import bran.logic.statements.Statement;
+import bran.logic.statements.VariableStatement;
+import bran.mathexprs.treeparts.Constant;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
@@ -12,8 +14,11 @@ import java.util.Stack;
 
 public class Inequality<T extends Composition> extends Equivalence<T> {
 
-	public Inequality(final T left, final InequalityType equivalenceType, final T right) {
-		super(left, equivalenceType, right);
+	private final InequalityType inequalityType;
+
+	public Inequality(final T left, final InequalityType inequalityType, final T right) {
+		super(left, right);
+		this.inequalityType = inequalityType;
 	}
 
 	// public boolean evaluate() {
@@ -21,8 +26,8 @@ public class Inequality<T extends Composition> extends Equivalence<T> {
 	// }
 
 	@Override
-	public Statement simplified() {
-		return new Inequality<>(left.simplified(), (InequalityType) equivalenceType, right.simplified());
+	public EquivalenceType getEquivalenceType() {
+		return inequalityType;
 	}
 
 	@Override
@@ -34,8 +39,8 @@ public class Inequality<T extends Composition> extends Equivalence<T> {
 		// 			|| (right.equals(inq.left) && left.equals(inq.right) && inequalityType == inequalityType.opposite()));
 		// }
 		// return false;
-		return s instanceof Inequality i && ((left.equals(i.left) && right.equals(i.right) && equivalenceType == i.equivalenceType)
-											 || (right.equals(i.left) && left.equals(i.right) && equivalenceType == equivalenceType.opposite()));
+		return s instanceof Inequality i && ((left.equals(i.left) && right.equals(i.right) && inequalityType == i.inequalityType)
+											 || (right.equals(i.left) && left.equals(i.right) && inequalityType == inequalityType.opposite()));
 	}
 
 	@Override
@@ -47,7 +52,7 @@ public class Inequality<T extends Composition> extends Equivalence<T> {
 
 	@Override
 	public Statement negation() {
-		return new Equation<>(left, (EquationType) equivalenceType.opposite(), right);
+		return new Inequality<>(left, inequalityType.opposite(), right);
 	}
 
 	// @Override

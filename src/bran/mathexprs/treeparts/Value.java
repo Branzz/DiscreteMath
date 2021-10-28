@@ -11,7 +11,11 @@ public abstract class Value extends Expression implements Leaf {
 	protected NumberLiteral number; // non-final; it can/will change in hypothetical - FOR VARIABLES
 
 	public Value() {
-		number = new NumberLiteral(0.0);
+		this(0.0);
+	}
+
+	public Value(double value) {
+		number = new NumberLiteral(value);
 	}
 
 	@Override
@@ -25,7 +29,7 @@ public abstract class Value extends Expression implements Leaf {
 	}
 
 	@Override
-	public String toString() {
+	public String toFullString() {
 		if (number.doubleValue() % 1 == 0)
 			return String.valueOf(number.intValue());
 		else

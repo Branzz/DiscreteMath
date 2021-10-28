@@ -66,7 +66,7 @@ public final class Declaration extends Drawable { // TODO A parser for this
 
 	@Override
 	public String toString() {
-		return variable.toString() + " = " + expression();
+		return variable.toFullString() + " = " + expression();
 	}
 
 }

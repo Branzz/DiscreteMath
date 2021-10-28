@@ -5,19 +5,50 @@ import bran.logic.statements.VariableStatement;
 import bran.mathexprs.ExpressionDisplayStyle;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
+import bran.sets.Definition;
 import bran.tree.Associativity;
 import bran.tree.ForkOperator;
 
 import static bran.mathexprs.ExpressionDisplayStyle.expressionStyle;
+import static bran.mathexprs.treeparts.Constant.*;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
 import static bran.mathexprs.treeparts.operators.DomainSupplier.DENOM_NOT_ZERO;
 import static bran.mathexprs.treeparts.operators.ExpressionOperatorType.*;
 
 public enum Operator implements ForkOperator {
-	POW(E, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))), false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db) TODO DOMAIN
+	/**
+	 * for x**p, {@link java.lang.FdLibm.Pow}
+     *   1.  (anything) ** 0  is 1									p == 0 OR
+	 *   4.  NAN ** (anything except 0) is NAN							(((x exists AND
+     *   14. -0 ** (odd integer) = -( +0 ** (odd integer) )
+	 *   10. +0 ** (+anything except 0, NAN)               is +0
+	 *   11. -0 ** (+anything except 0, NAN, odd integer)  is +0
+     *   12. +0 ** (-anything except 0, NAN)               is +INF
+     *   13. -0 ** (-anything except 0, NAN, odd integer)  is +INF			NOT (x == +-0 AND p < 0)) OR
+	 *   16. +INF ** (-anything except 0,NAN) is +0						// already checked p==0
+	 *   17. -INF ** (anything)  = -0 ** (-anything)					(x == +-INF AND p < 0) ) AND
+	 *   3.  (anything) ** NAN is NAN								(p exists OR
+     *   9.  +-1         ** +-INF is NAN
+	 *   5.  +-(|x| > 1) **  +INF is +INF
+     *   8.  +-(|x| < 1) **  -INF is +INF
+	 *   6.  +-(|x| > 1) **  -INF is +0									(p == -INF AND (x < -1 OR x > 1)) OR
+	 *   7.  +-(|x| < 1) **  +INF is +0									(p == +INF AND (x > -1 AND x < 1)) AND
+	 *   15. +INF ** (+anything except 0,NAN) is +INF
+	 * 	 19. (-anything except 0 and inf) ** (non-integer) is NAN	NOT (x < 0 && p not int)))
+	 */
+	POW(ExpressionOperatorType.E, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))),
+		(x, p) -> p.equates(ZERO)
+				.or(((x.getDomainConditions()
+						.and(((x.equates(ZERO).or(x.equates(NEG_ZERO)).and(p.less(NEG_ZERO))).not())))
+					.or((x.equates(INFINITY).or(x.equates(NEG_INFINITY))).and(p.less(ZERO))))
+					.and(p.getDomainConditions()
+						.or(p.equates(NEG_INFINITY).and(x.less(NEG_ONE).or(x.greater(ONE))))
+						.or(p.equates(INFINITY).and(x.greater(NEG_ONE).and(x.less(ONE)))))
+					.and((x.less(NEG_ZERO).and(Definition.INTEGER.of(p).not())).not())) // only in double pow
+		, false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db)
 	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, "*", "times"),
 	DIV(MD, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
-	MOD(MD, (a, b) -> a % b, (a, b) -> Constant.of(0), DENOM_NOT_ZERO, false, "%", "mod"),
+	MOD(MD, (a, b) -> a % b, (a, b) -> of(0), DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
 	ADD(AS, Double::sum, (a, b) -> a.derive().plus(b.derive()), true, "+", "plus"),
 	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
@@ -26,10 +57,10 @@ public enum Operator implements ForkOperator {
 	private final Derivable derivable;
 	private final DomainSupplier domainSupplier;
 	private final String[] symbols;
-	private boolean commutative;
+	private final boolean commutative;
 
 	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, boolean commutative, final String... symbols) {
-		this(operatorType, operable, derivable, (l, r) -> VariableStatement.TAUTOLOGY, commutative, symbols);
+		this(operatorType, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
 	}
 
 	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier, boolean commutative, final String... symbols) {

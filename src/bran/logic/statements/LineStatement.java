@@ -1,15 +1,16 @@
 package bran.logic.statements;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.LogicalOperator;
+import bran.mathexprs.*;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelVariableMap;
 import bran.tree.Branch;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 import static bran.logic.statements.VariableStatement.CONTRADICTION;
 import static bran.logic.statements.VariableStatement.TAUTOLOGY;
@@ -70,6 +71,7 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 		Statement child = this.child.simplified();
 		if (lineOperator == CONSTANT)
 			return child;
+		// ### operator is NOT ###
 		if (child instanceof LineStatement childLine) // Double Negation Law - since child's simplified, it is a NOT
 			return childLine.child;
 		if (child instanceof VariableStatement childVariable) { // Negate Constants Law
@@ -77,8 +79,11 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 				return CONTRADICTION;
 			else if (childVariable.equals(CONTRADICTION))
 				return TAUTOLOGY;
-		}
-		if (child instanceof OperationStatement childOperation) {
+		} else if (child instanceof Inequality childEquivalence) {
+			return new Inequality(childEquivalence.getLeft(), (InequalityType) childEquivalence.getEquivalenceType().opposite(), childEquivalence.getRight());
+		} else if (child instanceof Equation childEquivalence) {
+			return new Equation(childEquivalence.getLeft(), (EquationType) childEquivalence.getEquivalenceType().opposite(), childEquivalence.getRight());
+		} else if (child instanceof OperationStatement childOperation) {
 			LogicalOperator operator = childOperation.getOperator();
 			if (operator == LogicalOperator.IMPLIES) {
 				if (childOperation.getRight() instanceof LineStatement rightLine)
@@ -140,8 +145,13 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	}
 
 	@Override
+	public String toFullString() {
+		return '(' + lineOperator.toString() + child.toFullString() + ')'; // TODO (parens around function?)
+	}
+
+	@Override
 	public String toString() {
-		return '(' + lineOperator.toString() + child.toString() + ')'; //TODO
+		return lineOperator.toString() + child.toString();
 	}
 
 	// @Override

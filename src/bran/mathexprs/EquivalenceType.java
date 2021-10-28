@@ -6,11 +6,20 @@ public interface EquivalenceType {
 
 	boolean evaluate(Comparable left, Comparable right);
 
+	boolean lesser();
+
+	boolean greater();
+
+	boolean equal();
+
+	/**
+	 * for when two sides are flipped, such as when by multiplying both sides by negative
+	 */
+	EquivalenceType flipped();
+
 	@FunctionalInterface
-	public interface Comparison {
-
+	interface Comparison {
 		boolean evaluate(Comparable left, Comparable right);
-
 	}
 
 }

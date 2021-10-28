@@ -45,6 +45,10 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		this.domainConditions = VariableStatement.TAUTOLOGY;
 	}
 
+	public static Statement defaultConditions(Expression expression) {
+		return expression.greater(Constant.NEG_INFINITY).and(expression.less(Constant.INFINITY));
+	}
+
 	public Expression limitDomain(Statement domain) {
 		this.domainConditions = this.domainConditions.and(domain);
 		return this;
@@ -70,6 +74,10 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		for (int i = 2; i < statements.size(); i++)
 			combinedStatements = new OperationStatement(combinedStatements, AND, statements.get(i));
 		return combinedStatements;
+	}
+
+	public static Statement combineDefaultDomains(Expression... expressionArray) {
+		return combineDomains(Arrays.stream(expressionArray).map(Expression::defaultConditions).toArray(Statement[]::new));
 	}
 
 	public abstract Set<Variable> getVariables();
@@ -99,10 +107,11 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 			godelNumbers.push(GodelNumberSymbols.LEFT);
 			godelNumbers.push(GodelNumberSymbols.RIGHT); // TODO Is this how it'd be in Godel?
 		}
-		// @Override public boolean equivalentTo(final Expression other) { return other == empty(); }
-		@Override public String toString() { return "()"; }
-		// @Override public Expression clone() { return empty(); }
-		@Override public boolean equals(Object o) { return o == empty(); }
+		@Override public boolean equivalentTo(final Expression other) 	{ return other == empty(); }
+		@Override public String toFullString()							{ return "()"; }
+		@Override public String toString()								{ return "()"; }
+		// @Override public Expression clone()							{ return empty(); }
+		@Override public boolean equals(Object o)						{ return this == o; }
 	};
 
 	public static Expression empty() {
@@ -125,6 +134,14 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 
 	@Override
 	public abstract boolean equals(Object other);
+
+	@Override
+	public abstract String toFullString();
+
+	@Override
+	public String toString() {
+		return toFullString();
+	}
 
 	public static String innerString(final String toString) {
 		return toString.length() > 2 ? toString.substring(1, toString.length() - 1) : toString;
