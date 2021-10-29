@@ -4,8 +4,8 @@ public enum GodelNumberSymbols implements GodelNumber {
 	LOGICAL_NOT("¬"), LOGICAL_OR("∨"), IF_THEN("⊃"), EACH("∃"), EQUALS("="), ZERO("0"), SUCCESSOR("s"),
 	LEFT("("), RIGHT(")"), PUNCTUATION("'"), PLUS("+"), TIMES("*"), SYNTAX_ERROR("?");
 
-	private final String string;
 	private final int number;
+	private final String string;
 
 	GodelNumberSymbols(final String string) {
 		this.string = string;

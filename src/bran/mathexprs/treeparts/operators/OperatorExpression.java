@@ -87,6 +87,38 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		// godelNumbers.push(GodelNumberSymbols.LEFT);
 		right.appendGodelNumbers(godelNumbers, variables);
 		godelNumbers.push(GodelNumberSymbols.RIGHT);
+		boolean leftParens;
+		boolean rightParens;
+			if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
+				if (right instanceof OperatorExpression && ExpressionOperatorType.AS.precedence() <= operator.getOrder())
+					leftParens = true;
+//				return '-' + rightString;
+			}
+			boolean leftGiven = true;
+			boolean rightGiven = true;
+			if (left instanceof OperatorExpression leftOperator) {
+				if (leftOperator.getOperator().getOrder() < operator.getOrder()) {
+					leftParens = true;
+				} else
+					leftGiven = false;
+			}
+			if (right instanceof OperatorExpression rightOperator) {
+				if ((rightOperator.getOperator().getOrder() < operator.getOrder()
+						&& !(rightOperator.hideMultiply()))
+						|| (rightOperator.getOperator().getOrder() == operator.getOrder()
+						&& !rightOperator.getOperator().isCommutative())) {
+					rightParens = true;
+				} else
+					rightGiven = false;
+			}
+//			if (leftGiven && rightGiven && operator == MUL
+//					&& !(right instanceof Constant rightConstant && (left instanceof FunctionExpression || left instanceof Constant || rightConstant.evaluate() < 0))
+//					&& !(left instanceof Variable && right instanceof Variable))
+//				// && !(left instanceof Variable leftVariable && right instanceof Variable rightVariable && leftVariable.equals(rightVariable)))
+//				return leftString + rightString;
+			//return leftString + " " + operator + " " + rightString;
+
+
 	}
 
 	@Override
@@ -104,7 +136,8 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	@Override
 	public boolean equals(Object o) {
-		return this == o || (o instanceof OperatorExpression opExp && operator == opExp.getOperator() && left.equals(opExp.getLeft()) && right.equals(opExp.getRight()));
+		return this == o || (o instanceof OperatorExpression opExp &&
+				operator == opExp.getOperator() && left.equals(opExp.getLeft()) && right.equals(opExp.getRight()));
 	}
 
 	@Override

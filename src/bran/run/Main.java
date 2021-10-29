@@ -3,6 +3,7 @@ package bran.run;
 import bran.logic.StatementGenerator;
 import bran.logic.statements.Statement;
 import bran.logic.statements.StatementDisplayStyle;
+import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.ExistentialStatement;
 import bran.logic.statements.special.UniversalStatement;
 import bran.mathexprs.treeparts.Constant;
@@ -12,6 +13,8 @@ import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.parser.StatementParser;
 import bran.sets.Definition;
 import bran.sets.FiniteSet;
+import bran.sets.SpecialSet;
+import bran.sets.SpecialSetType;
 import bran.sets.numbers.NumberLiteral;
 import bran.sets.numbers.godel.GodelNumberFactors;
 
@@ -69,7 +72,7 @@ public class Main {
 		// DisplayStyle.displayStyle;
 		String statementString = "a    and  ~ b or  !(c ^   t) implies b"; // where t is a tautology
 		Statement statement = StatementParser.parseStatement(statementString);
-		StatementDisplayStyle.statementStyle = StatementDisplayStyle.JAVA_LOGICAL;
+		StatementDisplayStyle.statementStyle = StatementDisplayStyle.MATH;
 		Variable varA = new Variable("a", true);
 		Expression expression = Expression.empty();
 		try {
@@ -98,6 +101,10 @@ public class Main {
 						   + "\n" + new GodelNumberFactors(243_000_000L).symbols()
 				// + "\n" +
 		);
+		VariableStatement x = new VariableStatement('x');
+		System.out.println(Statement.forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
+				.implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var"))).godelNumber());
+
 	}
 
 	private static <T> T[] toArray(List<T> list) {

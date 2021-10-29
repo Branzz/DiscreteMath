@@ -58,9 +58,12 @@ Statement statement = StatementParser.parseStatement("a    and  ~ b or  !(c ^   
 ```
 `a && !b || !(c ^ t) implies b // (c is contradiction, t is tautology)`
 
-*other display style:*
+*other display styles:*
 
 `((a ⋀ (¬b)) ⋁ (¬(c ⊻ t))) ⇒ b`
+`A ⊼ B ⇒ (¬A ⋁ A ⊻ A ⊙ A)`
+`A nand B implies (~A | A ^ A == A)`
+
 ```java
 statement.getTable()
 ```
@@ -112,8 +115,8 @@ Definition.ODD.test(new Constant(5.0))
 ```java
 new ExistentialStatement<>(
         a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
-		  new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)), true,
-		  new Variable("b")),
+		new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)),
+        true, new Variable("b")),
         new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
 	new Variable("a"))
 ```

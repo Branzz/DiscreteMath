@@ -113,9 +113,12 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 		if (lineOperator == NOT) {
 			godelNumbers.push(GodelNumberSymbols.LOGICAL_NOT);
-			godelNumbers.push(GodelNumberSymbols.LEFT);
+			boolean childIsVar = child instanceof VariableStatement;
+			if (!childIsVar)
+				godelNumbers.push(GodelNumberSymbols.LEFT);
 			child.appendGodelNumbers(godelNumbers, variables);
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			if (!childIsVar)
+				godelNumbers.push(GodelNumberSymbols.RIGHT);
 		}
 		else
 			child.appendGodelNumbers(godelNumbers, variables);

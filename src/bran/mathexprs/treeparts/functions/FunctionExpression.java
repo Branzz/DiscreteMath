@@ -113,12 +113,15 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 	@Override
 	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
 		godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
-		godelNumbers.push(GodelNumberSymbols.LEFT);
+		boolean childIsVar = getChildren()[0] instanceof Value;
+		if (!childIsVar)
+			godelNumbers.push(GodelNumberSymbols.LEFT);
 		if (expressions.length == 1)
 			expressions[0].appendGodelNumbers(godelNumbers, variables);
 		else
 			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
-		godelNumbers.push(GodelNumberSymbols.RIGHT);
+		if (!childIsVar)
+			godelNumbers.push(GodelNumberSymbols.RIGHT);
 	}
 
 	// @Override
@@ -128,7 +131,8 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 
 	@Override
 	public boolean equals(final Object other) {
-		return this == other || other instanceof FunctionExpression func && function.equals(func.getFunction()) && Arrays.equals(expressions, func.getChildren());
+		return this == other || other instanceof FunctionExpression func && function.equals(func.getFunction())
+				&& Arrays.equals(expressions, func.getChildren());
 	}
 
 	@Override
