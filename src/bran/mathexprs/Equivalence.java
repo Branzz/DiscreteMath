@@ -1,38 +1,42 @@
 package bran.mathexprs;
 
+import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.SpecialStatement;
 import bran.mathexprs.treeparts.Constant;
+import bran.mathexprs.treeparts.Expression;
+import bran.mathexprs.treeparts.operators.Operator;
+import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.tree.Composition;
 
 import java.util.List;
 
-public abstract class Equivalence<T extends Composition> extends SpecialStatement {
+public abstract class Equivalence extends SpecialStatement {
 
-	protected final T left;
-	protected final T right;
+	protected final Expression left;
+	protected final Expression right;
 
-	public Equivalence(final T left, final T right) {
+	public Equivalence(final Expression left, final Expression right) {
 		this.left = left;
 		this.right = right;
 	}
 
-	public static <T extends Composition> Equivalence<T> of(final T left, final EquivalenceType equivalenceType, final T right) {
+	public static Equivalence of(final Expression left, final EquivalenceType equivalenceType, final Expression right) {
 		if (equivalenceType instanceof InequalityType inequalityType)
-			return new Inequality<>(left, inequalityType, right);
+			return new Inequality(left, inequalityType, right);
 		else if (equivalenceType instanceof EquationType equationType)
-			return new Equation<>(left, equationType, right);
+			return new Equation(left, equationType, right);
 		return null;
 	}
 
-	public T getLeft() {
+	public Expression getLeft() {
 		return left;
 	}
 
 	public abstract EquivalenceType getEquivalenceType();
 
-	public T getRight() {
+	public Expression getRight() {
 		return right;
 	}
 
@@ -53,21 +57,37 @@ public abstract class Equivalence<T extends Composition> extends SpecialStatemen
 
 	@Override
 	public Statement simplified() {
-		final Composition leftSimplified = left.simplified();
-		final Composition rightSimplified = right.simplified();
+		Expression leftSimplified = left.simplified();
+		Expression rightSimplified = right.simplified();
+
 		if (leftSimplified instanceof Constant && rightSimplified instanceof Constant)
 			return VariableStatement.of(getEquivalenceType().evaluate(leftSimplified, rightSimplified));
+
+		// if (leftSimplified instanceof Expression lExp && rightSimplified instanceof Expression rExp) {
+		// 	final OperatorExpression.FactorParts factorParts = OperatorExpression.factor(lExp, rExp);
+		// 	if (factorParts != null) {
+		// 		leftSimplified = factorParts.leftPart();
+		// 		rightSimplified = factorParts.rightPart();
+		// 	}
+		// }
+		//TODO actually simplify an equivalence
 		boolean equal = leftSimplified.equals(rightSimplified);
-		boolean notEqual = false;
-		if (leftSimplified instanceof Statement leftStatement && rightSimplified instanceof Statement rightStatement)
-			notEqual = leftStatement.equalsNot(rightStatement);
-		if (equal || notEqual)
+		// boolean notEqual = false;
+		// if (leftSimplified instanceof Statement leftStatement && rightSimplified instanceof Statement rightStatement)
+		// 	notEqual = leftStatement.equalsNot(rightStatement);
+		if (equal /*|| notEqual*/)
 			return VariableStatement.of(equal ^ (getEquivalenceType() == EquationType.EQUAL
 							|| getEquivalenceType() == InequalityType.GREATER_EQUAL || getEquivalenceType() == InequalityType.LESS_EQUAL));
+		final OperatorExpression oneSide = new OperatorExpression(leftSimplified, Operator.SUB, rightSimplified);
+		final Expression oneSideSimplified = oneSide.simplified(leftSimplified, rightSimplified);
+		if (!oneSide.equals(oneSideSimplified)) {
+			leftSimplified = oneSideSimplified;
+			rightSimplified = Constant.ZERO;
+		}
 		if (getEquivalenceType() instanceof EquationType equationType)
-			return new Equation<>(leftSimplified, equationType, rightSimplified);
+			return new Equation(leftSimplified, equationType, rightSimplified);
 		else if (getEquivalenceType() instanceof InequalityType inequalityType)
-			return new Inequality<>(leftSimplified, inequalityType, rightSimplified);
+			return new Inequality(leftSimplified, inequalityType, rightSimplified);
 		else
 			return Statement.empty();
 	}

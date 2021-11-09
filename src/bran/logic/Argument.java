@@ -2,13 +2,11 @@ package bran.logic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.SpecialStatement;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 
 public class Argument extends SpecialStatement {
 
@@ -55,7 +53,7 @@ public class Argument extends SpecialStatement {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 
 	}
 

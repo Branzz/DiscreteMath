@@ -6,15 +6,13 @@ import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Value;
 import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.MultiLeaf;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -111,17 +109,17 @@ public class FunctionExpression extends Expression implements MultiLeaf<Expressi
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
 		boolean childIsVar = getChildren()[0] instanceof Value;
 		if (!childIsVar)
-			godelNumbers.push(GodelNumberSymbols.LEFT);
+			godelBuilder.push(GodelNumberSymbols.LEFT);
 		if (expressions.length == 1)
-			expressions[0].appendGodelNumbers(godelNumbers, variables);
+			expressions[0].appendGodelNumbers(godelBuilder);
 		else
-			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+			godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
 		if (!childIsVar)
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
 	}
 
 	// @Override

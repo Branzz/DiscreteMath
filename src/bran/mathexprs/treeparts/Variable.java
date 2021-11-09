@@ -1,7 +1,6 @@
 package bran.mathexprs.treeparts;
 
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Holder;
 import bran.sets.numbers.NumberLiteral;
 
@@ -108,8 +107,8 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		godelNumbers.push(variables.get(this, true));
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		godelBuilder.push(godelBuilder.getVar(this, true));
 	}
 
 }

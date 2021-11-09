@@ -3,17 +3,18 @@ package bran.logic.statements.special;
 import bran.combinatorics.Counter;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.logic.statements.operators.LineOperator;
+import bran.logic.statements.operators.LogicalOperator;
 import bran.sets.Set;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 import bran.sets.FiniteSet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -123,22 +124,26 @@ public class UniversalStatement<I, E extends Composition & Holder<I> & Equivalab
 
 	@Override
 	public Statement simplified() {
+		// TODO return truth?
 		return new UniversalStatement<>(e -> statement.state(e).simplified(), domain, proven, variables);
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		statement.state(this.variables).not().simplified().appendGodelNumbers(godelNumbers, variables);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		LineOperator.NOT.of(negation()).appendGodelNumbers(godelBuilder); // No Godel Universal Symbol, so convert to Existential
 	}
 
 	@Override
 	public List<Statement> getChildren() {
-		return null;
+		ArrayList<Statement> current = new ArrayList<>();
+		current.add(this);
+		current.addAll(statement.state(variables).getChildren());
+		return current;
 	}
 
 	@Override
 	public List<VariableStatement> getVariables() {
-		return null;
+		return statement.state(variables).getVariables();
 	}
 
 	@Override

@@ -12,13 +12,13 @@ import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.SpecialSet;
 import bran.sets.SpecialSetType;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
 import bran.tree.Equivalable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bran.logic.statements.operators.LogicalOperator.AND;
@@ -84,28 +84,40 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 
 	public abstract double evaluate();
 
+	// public abstract boolean hasImaginary();
+	//
+	// public Expression evaluateNonReal() {
+	// 	return Constant.of(evaluate());
+	// }
+
 	/**
-	 * A derivative isn't discrete math, but the tree structure was the perfect opportunity to set it up.
+	 * derivatives aren't discrete math, but the tree structure was the perfect opportunity to set it up.
  	 */
 	public abstract Expression derive();
+
+	public <R, T> R traverse(T t, Function<T, R> function) {
+		return null;
+	}
 
 	public abstract boolean respect(final Collection<Variable> respectsTo);
 
 	public abstract void replaceAll(final Expression approaches, final Expression approached);
 
 	@Override
-	public abstract void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
+	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
 
 	private static final Expression emptyExpression = new Expression() {
 		@Override public Set<Variable> getVariables()					{ return Collections.emptySet(); }
 		@Override public Expression simplified()						{ return empty(); }
 		@Override public double evaluate()								{ return 0.0; }
+		// @Override public boolean hasImaginary() { return false; }
 		@Override public Expression derive()							{ return empty(); }
+		@Override public <R, T> R traverse(final T t, final Function<T, R> function) { return null; } // TODO
 		@Override public boolean respect(final Collection<Variable> respectsTo) { return false; }
 		@Override public void replaceAll(final Expression approaches, final Expression approached) { }
-		@Override public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-			godelNumbers.push(GodelNumberSymbols.LEFT);
-			godelNumbers.push(GodelNumberSymbols.RIGHT); // TODO Is this how it'd be in Godel?
+		@Override public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+			godelBuilder.push(GodelNumberSymbols.LEFT);
+			godelBuilder.push(GodelNumberSymbols.RIGHT); // TODO Is this how it'd be in Godel?
 		}
 		@Override public boolean equivalentTo(final Expression other) 	{ return other == empty(); }
 		@Override public String toFullString()							{ return "()"; }
@@ -211,28 +223,28 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		return null;
 	}
 
-	public Equation<Expression> equates(Expression right) {
-		return new Equation<>(this, right);
+	public Equation equates(Expression right) {
+		return new Equation(this, right);
 	}
 
-	public Equation<Expression> notEquates(Expression right) {
-		return new Equation<>(this, EquationType.UNEQUAL, right);
+	public Equation notEquates(Expression right) {
+		return new Equation(this, EquationType.UNEQUAL, right);
 	}
 
-	public Inequality<Expression> greater(Expression right) {
-		return new Inequality<>(this, GREATER, right);
+	public Inequality greater(Expression right) {
+		return new Inequality(this, GREATER, right);
 	}
 
-	public Inequality<Expression> greaterEqual(Expression right) {
-		return new Inequality<>(this, GREATER_EQUAL, right);
+	public Inequality greaterEqual(Expression right) {
+		return new Inequality(this, GREATER_EQUAL, right);
 	}
 
-	public Inequality<Expression> less(Expression right) {
-		return new Inequality<>(this, LESS, right);
+	public Inequality less(Expression right) {
+		return new Inequality(this, LESS, right);
 	}
 
-	public Inequality<Expression> lessEqual(Expression right) {
-		return new Inequality<>(this, LESS_EQUAL, right);
+	public Inequality lessEqual(Expression right) {
+		return new Inequality(this, LESS_EQUAL, right);
 	}
 
 	public LimitApproachesPart approaches(final Expression approached) {

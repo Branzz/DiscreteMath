@@ -1,22 +1,16 @@
 package bran.mathexprs;
 
 import bran.logic.statements.Statement;
-import bran.logic.statements.VariableStatement;
-import bran.mathexprs.treeparts.Constant;
-import bran.sets.numbers.godel.GodelNumber;
+import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
-import bran.tree.Equivalable;
-import bran.tree.TreePart;
 
-import java.util.Stack;
-
-public class Inequality<T extends Composition> extends Equivalence<T> {
+public class Inequality extends Equivalence {
 
 	private final InequalityType inequalityType;
 
-	public Inequality(final T left, final InequalityType inequalityType, final T right) {
+	public Inequality(final Expression left, final InequalityType inequalityType, final Expression right) {
 		super(left, right);
 		this.inequalityType = inequalityType;
 	}
@@ -44,15 +38,15 @@ public class Inequality<T extends Composition> extends Equivalence<T> {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		left.appendGodelNumbers(godelNumbers, variables);
-		godelNumbers.push(GodelNumberSymbols.EQUALS); // TODO not possible, but the user can do it
-		right.appendGodelNumbers(godelNumbers, variables);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		left.appendGodelNumbers(godelBuilder);
+		godelBuilder.push(GodelNumberSymbols.EQUALS); // TODO not possible, but the user can do it
+		right.appendGodelNumbers(godelBuilder);
 	}
 
 	@Override
 	public Statement negation() {
-		return new Inequality<>(left, inequalityType.opposite(), right);
+		return new Inequality(left, inequalityType.opposite(), right);
 	}
 
 	// @Override

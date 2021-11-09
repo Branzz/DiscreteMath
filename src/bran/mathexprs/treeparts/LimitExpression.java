@@ -1,12 +1,8 @@
 package bran.mathexprs.treeparts;
 
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 
 import java.util.Collection;
-import java.util.Stack;
 
 public class LimitExpression extends Expression {
 
@@ -55,7 +51,7 @@ public class LimitExpression extends Expression {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 
 	}
 

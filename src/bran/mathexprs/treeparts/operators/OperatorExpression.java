@@ -1,9 +1,7 @@
 package bran.mathexprs.treeparts.operators;
 
-import bran.logic.statements.VariableStatement;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Fork;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
@@ -11,6 +9,7 @@ import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.functions.FunctionExpression;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static bran.mathexprs.treeparts.operators.Operator.*;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
@@ -57,6 +56,12 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return operator.derive(left, right);
 	}
 
+	public <R, T> R traverse(T t, Function<T, R> function) {
+		left.traverse(t, function);
+		right.traverse(t, function);
+		return function.apply(t);
+	}
+
 	@Override
 	public boolean respect(final Collection<Variable> respectsTo) {
 		return left.respect(respectsTo) || right.respect(respectsTo);
@@ -75,50 +80,23 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		godelNumbers.push(GodelNumberSymbols.LEFT);
-		left.appendGodelNumbers(godelNumbers, variables);
-		// godelNumbers.push(GodelNumberSymbols.RIGHT);
-		godelNumbers.push(switch (operator) {
-			case MUL -> GodelNumberSymbols.TIMES;
-			case ADD -> GodelNumberSymbols.PLUS;
-			default -> GodelNumberSymbols.SYNTAX_ERROR;
-		});
-		// godelNumbers.push(GodelNumberSymbols.LEFT);
-		right.appendGodelNumbers(godelNumbers, variables);
-		godelNumbers.push(GodelNumberSymbols.RIGHT);
-		boolean leftParens;
-		boolean rightParens;
-			if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
-				if (right instanceof OperatorExpression && ExpressionOperatorType.AS.precedence() <= operator.getOrder())
-					leftParens = true;
-//				return '-' + rightString;
-			}
-			boolean leftGiven = true;
-			boolean rightGiven = true;
-			if (left instanceof OperatorExpression leftOperator) {
-				if (leftOperator.getOperator().getOrder() < operator.getOrder()) {
-					leftParens = true;
-				} else
-					leftGiven = false;
-			}
-			if (right instanceof OperatorExpression rightOperator) {
-				if ((rightOperator.getOperator().getOrder() < operator.getOrder()
-						&& !(rightOperator.hideMultiply()))
-						|| (rightOperator.getOperator().getOrder() == operator.getOrder()
-						&& !rightOperator.getOperator().isCommutative())) {
-					rightParens = true;
-				} else
-					rightGiven = false;
-			}
-//			if (leftGiven && rightGiven && operator == MUL
-//					&& !(right instanceof Constant rightConstant && (left instanceof FunctionExpression || left instanceof Constant || rightConstant.evaluate() < 0))
-//					&& !(left instanceof Variable && right instanceof Variable))
-//				// && !(left instanceof Variable leftVariable && right instanceof Variable rightVariable && leftVariable.equals(rightVariable)))
-//				return leftString + rightString;
-			//return leftString + " " + operator + " " + rightString;
-
-
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		boolean leftParens = left instanceof OperatorExpression leftOperator
+							 && leftOperator.getOperator().godelOrder() < operator.godelOrder();
+		boolean rightParens = right instanceof OperatorExpression rightOperator &&
+							  (rightOperator.getOperator().godelOrder() <= operator.godelOrder()
+							   && operator.godelOperator() != GodelNumberSymbols.SYNTAX_ERROR);
+		if (leftParens)
+			godelBuilder.push(GodelNumberSymbols.LEFT);
+		left.appendGodelNumbers(godelBuilder);
+		if (leftParens)
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
+		godelBuilder.push(operator.godelOperator());
+		if (rightParens)
+			godelBuilder.push(GodelNumberSymbols.LEFT);
+		right.appendGodelNumbers(godelBuilder);
+		if (rightParens)
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
 	}
 
 	@Override
@@ -449,7 +427,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return new OperatorExpression(leftSimplified, operator, rightSimplified);
 	}
 
-	private static record FactorParts(Expression factor, Expression leftPart, Expression rightPart) { }
+	public static record FactorParts(Expression factor, Expression leftPart, Expression rightPart) { }
 
 	private FactorParts factor0(Expression leftSimplified, Expression rightSimplified) {
 		if (leftSimplified instanceof OperatorExpression leftOperator) { // tree search for all mults
@@ -498,7 +476,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	}
 
-	public FactorParts factor(Expression leftExp, Expression rightExp) {
+	public static FactorParts factor(Expression leftExp, Expression rightExp) {
 		return new FactorSystem(leftExp, rightExp).factor();
 	}
 

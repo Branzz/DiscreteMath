@@ -9,14 +9,12 @@ import bran.logic.statements.special.QuantifiedStatementArguments;
 import bran.logic.statements.special.UniversalStatement;
 import bran.mathexprs.Equation;
 import bran.sets.Set;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 
 import java.util.List;
-import java.util.Stack;
 
 import static bran.logic.statements.operators.LogicalOperator.*;
 import static java.util.Collections.emptyList;
@@ -75,7 +73,7 @@ public abstract class Statement extends Composition implements Equivalable<State
 
 	public abstract List<Statement> getChildren();
 
-	public abstract void appendGodelNumbers(Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
+	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
 
 // 	@Deprecated
 // 	public void simplify() { // another variant where it compares statements with other expressions (p, ~p, t, c)
@@ -294,15 +292,15 @@ public abstract class Statement extends Composition implements Equivalable<State
 		return new ConditionalStatement(this, conclusion);
 	}
 
-	public Statement equates(final Statement right) {
-		return new Equation<>(this, right);
-	}
+	// public Statement equates(final Statement right) {
+	// 	return new Equation(this, right);
+	// }
 
 	private static final Statement emptyStatement = new Statement() {
 		@Override public boolean equivalentTo(final Statement other) { return this == other; }
 		@Override public boolean equals(final Object s)				 { return false; }
 		@Override public Statement simplified()						 { return empty(); }
-		@Override public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) { }
+		@Override public void appendGodelNumbers(final GodelBuilder godelBuilder) { }
 		@Override protected boolean isConstant()					 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }

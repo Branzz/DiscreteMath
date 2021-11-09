@@ -1,33 +1,23 @@
 package bran.mathexprs;
 
-import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
-import bran.logic.statements.VariableStatement;
-import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
-import bran.tree.Equivalable;
-import bran.tree.TreePart;
-
-import java.util.List;
-import java.util.Stack;
 
 import static bran.mathexprs.EquationType.EQUAL;
 
-public class Equation<T extends Composition> extends Equivalence<T> {
+public class Equation extends Equivalence {
 
 	private final EquationType equationType;
 
-	public Equation(T left, EquationType equationType, T right) {
+	public Equation(Expression left, EquationType equationType, Expression right) {
 		super(left, right);
 		this.equationType = equationType;
 	}
 
-	public Equation(T left, T right) {
+	public Equation(Expression left, Expression right) {
 		this(left, EQUAL, right);
 	}
 
@@ -49,25 +39,25 @@ public class Equation<T extends Composition> extends Equivalence<T> {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		if (equationType == EQUAL) {
-			left.appendGodelNumbers(godelNumbers, variables);
-			godelNumbers.push(GodelNumberSymbols.EQUALS);
-			right.appendGodelNumbers(godelNumbers, variables);
+			left.appendGodelNumbers(godelBuilder);
+			godelBuilder.push(GodelNumberSymbols.EQUALS);
+			right.appendGodelNumbers(godelBuilder);
 		}
 		else {
-			godelNumbers.push(GodelNumberSymbols.LOGICAL_NOT);
-			godelNumbers.push(GodelNumberSymbols.LEFT);
-			left.appendGodelNumbers(godelNumbers, variables);
-			godelNumbers.push(GodelNumberSymbols.EQUALS);
-			right.appendGodelNumbers(godelNumbers, variables);
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			godelBuilder.push(GodelNumberSymbols.LOGICAL_NOT);
+			godelBuilder.push(GodelNumberSymbols.LEFT);
+			left.appendGodelNumbers(godelBuilder);
+			godelBuilder.push(GodelNumberSymbols.EQUALS);
+			right.appendGodelNumbers(godelBuilder);
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
 		}
 	}
 
 	@Override
 	public Statement negation() {
-		return new Equation<>(left, equationType.opposite(), right);
+		return new Equation(left, equationType.opposite(), right);
 	}
 
 	// @Override // TODO

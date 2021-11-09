@@ -6,6 +6,8 @@ import bran.mathexprs.ExpressionDisplayStyle;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.sets.Definition;
+import bran.sets.numbers.godel.GodelNumber;
+import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.tree.Associativity;
 import bran.tree.ForkOperator;
 
@@ -44,12 +46,12 @@ public enum Operator implements ForkOperator {
 					.and(p.getDomainConditions()
 						.or(p.equates(NEG_INFINITY).and(x.less(NEG_ONE).or(x.greater(ONE))))
 						.or(p.equates(INFINITY).and(x.greater(NEG_ONE).and(x.less(ONE)))))
-					.and((x.less(NEG_ZERO).and(Definition.INTEGER.of(p).not())).not())) // only in double pow
+					.and((x.less(NEG_ZERO).and(Definition.INTEGER.of(p).not())).not())) // only in double's version of pow
 		, false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db)
-	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, "*", "times"),
+	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, GodelNumberSymbols.TIMES, "*", "times"),
 	DIV(MD, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
-	MOD(MD, (a, b) -> a % b, (a, b) -> of(0), DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
-	ADD(AS, Double::sum, (a, b) -> a.derive().plus(b.derive()), true, "+", "plus"),
+	MOD(MD, (a, b) -> a % b, (a, b) -> a.derive().limitDomain(a.mod(b).notEquates(ZERO)) /*jump not diff.*/, DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
+	ADD(AS, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
 	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
 	private final ExpressionOperatorType operatorType;
@@ -58,17 +60,31 @@ public enum Operator implements ForkOperator {
 	private final DomainSupplier domainSupplier;
 	private final String[] symbols;
 	private final boolean commutative;
+	private final GodelNumberSymbols godelNumberSymbols;
 
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, boolean commutative, final String... symbols) {
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable,
+			 boolean commutative, final String... symbols) {
 		this(operatorType, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
 	}
 
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier, boolean commutative, final String... symbols) {
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier,
+			 boolean commutative, final String... symbols) {
+		this(operatorType, operable, derivable, domainSupplier, commutative, GodelNumberSymbols.SYNTAX_ERROR, symbols);
+	}
+
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable,
+			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
+		this(operatorType, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, godelNumberSymbols, symbols);
+	}
+
+	Operator(final ExpressionOperatorType operatorType, final Operable operable, final Derivable derivable, final DomainSupplier domainSupplier,
+			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
 		this.operatorType = operatorType;
 		this.operable = operable;
 		this.derivable = derivable;
 		this.domainSupplier = domainSupplier;
 		this.commutative = commutative;
+		this.godelNumberSymbols = godelNumberSymbols;
 		this.symbols = symbols;
 	}
 
@@ -125,4 +141,17 @@ public enum Operator implements ForkOperator {
 	public boolean isCommutative() {
 		return commutative;
 	}
+
+	public GodelNumber godelOperator() {
+		return godelNumberSymbols;
+	}
+
+	public int godelOrder() {
+		return switch (godelNumberSymbols) {
+			case TIMES -> 12;
+			case PLUS -> 11;
+			default -> 13;
+		};
+	}
+
 }

@@ -1,10 +1,6 @@
 package bran.tree;
 
-import bran.logic.statements.Statement;
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
-
-import java.util.Stack;
+import bran.sets.numbers.godel.GodelBuilder;
 
 public abstract class Composition implements TreePart, Comparable<Composition> {
 
@@ -25,6 +21,6 @@ public abstract class Composition implements TreePart, Comparable<Composition> {
 	@Override
 	public abstract int compareTo(Composition statement);
 
-	public abstract void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables);
+	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
 
 }

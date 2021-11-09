@@ -64,7 +64,16 @@ public class Main {
 		// Statement x = StatementParser.parseStatement("!(a or b) and C or a and b");
 		// System.out.println(TruthTable.getTable(x) + "\n" + TruthTable.getTable(x.simplified()));
 
-		showcase();
+		Variable x = new Variable("x");
+		final Expression derive = x.squared()
+								   .div(x.inc())
+								   .minus(x.squared()
+										   .inc()
+										   .sqrt())
+								   .derive();
+		System.out.println(derive + "\n" + derive.simplified());
+
+		// showcase();
 
 	}
 

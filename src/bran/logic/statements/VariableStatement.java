@@ -2,12 +2,10 @@ package bran.logic.statements;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import bran.sets.numbers.godel.GodelNumber;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Holder;
 import bran.tree.Leaf;
 
@@ -73,8 +71,8 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		godelNumbers.push(variables.get(this, false));
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		godelBuilder.push(godelBuilder.getVar(this, false));
 	}
 
 	public boolean getTruth() {

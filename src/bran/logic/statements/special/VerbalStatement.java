@@ -2,13 +2,11 @@ package bran.logic.statements.special;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class VerbalStatement extends Statement {
 
@@ -60,8 +58,8 @@ public class VerbalStatement extends Statement {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
-		godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
 	}
 
 }

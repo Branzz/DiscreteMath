@@ -3,14 +3,12 @@ package bran.logic.statements;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.LogicalOperator;
 import bran.mathexprs.*;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Branch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import static bran.logic.statements.VariableStatement.CONTRADICTION;
 import static bran.logic.statements.VariableStatement.TAUTOLOGY;
@@ -67,7 +65,7 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	}
 
 	@Override
-	public Statement simplified() {
+	public Statement simplified() { // TODO child Special statement switch
 		Statement child = this.child.simplified();
 		if (lineOperator == CONSTANT)
 			return child;
@@ -110,18 +108,18 @@ public class LineStatement extends Statement implements Branch<Statement, LineOp
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		if (lineOperator == NOT) {
-			godelNumbers.push(GodelNumberSymbols.LOGICAL_NOT);
+			godelBuilder.push(GodelNumberSymbols.LOGICAL_NOT);
 			boolean childIsVar = child instanceof VariableStatement;
 			if (!childIsVar)
-				godelNumbers.push(GodelNumberSymbols.LEFT);
-			child.appendGodelNumbers(godelNumbers, variables);
+				godelBuilder.push(GodelNumberSymbols.LEFT);
+			child.appendGodelNumbers(godelBuilder);
 			if (!childIsVar)
-				godelNumbers.push(GodelNumberSymbols.RIGHT);
+				godelBuilder.push(GodelNumberSymbols.RIGHT);
 		}
 		else
-			child.appendGodelNumbers(godelNumbers, variables);
+			child.appendGodelNumbers(godelBuilder);
 	}
 
 	@Override

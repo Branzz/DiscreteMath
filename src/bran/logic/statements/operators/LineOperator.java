@@ -1,8 +1,13 @@
 package bran.logic.statements.operators;
 
+import bran.logic.statements.LineStatement;
+import bran.logic.statements.Statement;
 import bran.logic.statements.StatementOperatorType;
 import bran.tree.BranchOperator;
 import bran.tree.Associativity;
+import bran.tree.Equivalable;
+
+import javax.sound.sampled.Line;
 
 import static bran.logic.statements.StatementOperatorType.REVERSE;
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
@@ -57,6 +62,10 @@ public enum LineOperator implements BranchOperator {
 	@Override
 	public Associativity getDirection() {
 		return operatorType.associativity();
+	}
+
+	public LineStatement of(final Statement statement) {
+		return new LineStatement(statement, this);
 	}
 
 	@FunctionalInterface

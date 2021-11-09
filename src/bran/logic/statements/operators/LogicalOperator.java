@@ -98,7 +98,7 @@ public enum LogicalOperator implements ForkOperator {
 		return operatorType.associativity();
 	}
 
-	public OperationStatement of(final Statement left,final Statement right) {
+	public OperationStatement of(final Statement left, final Statement right) {
 		return new OperationStatement(left, this, right);
 	}
 
@@ -168,7 +168,7 @@ public enum LogicalOperator implements ForkOperator {
 		Statement absorb(Statement a, Statement b);
 		static AbsorbedOperationStatement ofAbsorbed(final Statement A, final Statement B, Statement x) {
 			return x instanceof OperationStatement xO ? (a, b) -> new OperationStatement(a, xO.getOperator(), b)
-						: x == A ? ((a, b) -> a) : x == B ? ((a, b) -> b)
+						: x == A ? (a, b) -> a : x == B ? (a, b) -> b
 						: x instanceof LineStatement xL ? xL.getChild() instanceof OperationStatement xLC ? (a, b) -> new OperationStatement(a, xLC.getOperator(), b).not()
 						: (a, b) -> (xL.getChild() == A ? a : b).not()
 						: x == TAUTOLOGY ? (a, b) -> TAUTOLOGY : (a, b) ->  CONTRADICTION;

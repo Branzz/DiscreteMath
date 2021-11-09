@@ -65,6 +65,8 @@ public enum MultivariableFunction implements Function {
 	ACOTH(e -> e[0].less(NEG_ONE).or(e[0].greater(ONE)),
 		  1, a -> .5 * Math.log((1 + a[0]) / (a[0] - 1)), a -> a[0].derive().div(a[0].squared().dec())),
 
+	//TODO derivative and integral functions
+
 	RNG(0, a -> Math.random(), a -> ZERO);
 
 	static {

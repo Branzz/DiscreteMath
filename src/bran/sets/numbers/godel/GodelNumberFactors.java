@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class GodelNumberFactors {
@@ -33,7 +32,7 @@ public class GodelNumberFactors {
 		BigInteger currentDivisor;
 		int i = 0;
 		List<GodelNumber> godelNumbers = new ArrayList<>();
-		GodelVariableMap variables = new GodelVariableMap();
+		GodelBuilder variables = new GodelBuilder();
 		while (!reduction.equals(BigInteger.ZERO) && !reduction.equals(BigInteger.ONE)) {
 			int factors = 0;
 			currentDivisor = BigInteger.valueOf(PublicPrimes.getInstance().get(i++).longValue());
@@ -69,7 +68,7 @@ public class GodelNumberFactors {
 
 	@Override
 	public String toString() {
-		return symbols() + " Gödel Number: " + number.toString();
+		return symbols() + " Gödel Number: " + number;
 	}
 
 }

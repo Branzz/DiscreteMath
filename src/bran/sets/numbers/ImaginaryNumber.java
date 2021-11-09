@@ -25,17 +25,13 @@ public class ImaginaryNumber {
 		return new ImaginaryNumber(a + n.a, b + n.b);
 	}
 
-	public ImaginaryNumber multiply(ImaginaryNumber n) {
+	public ImaginaryNumber times(ImaginaryNumber n) {
 		return new ImaginaryNumber(a + n.a, b + n.b);
 	}
 
 	@Override
 	public String toString() {
 		return a + " + " + b + "i";
-	}
-
-	public static void main(String[] args) {
-
 	}
 
 }

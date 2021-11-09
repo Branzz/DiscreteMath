@@ -1,10 +1,8 @@
 package bran.mathexprs.treeparts;
 
 import bran.logic.statements.VariableStatement;
-import bran.sets.numbers.NumberLiteral;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 
 import java.util.*;
 
@@ -39,7 +37,7 @@ public class Constant extends Value {
 
 	@Override
 	public Set<Variable> getVariables() {
-		return Collections.emptySet();
+		return Collections.emptySet(); // TODO represent null as empty set?
 	}
 
 	@Override
@@ -63,15 +61,29 @@ public class Constant extends Value {
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variables) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		int num = number.intValue();
 		if (num < 0) {
-			godelNumbers.push(GodelNumberSymbols.SYNTAX_ERROR);
+			godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
 			num = -num;
 		}
 		while (num-- > 0)
-			godelNumbers.push(GodelNumberSymbols.SUCCESSOR);
-		godelNumbers.push(GodelNumberSymbols.ZERO);
+			godelBuilder.push(GodelNumberSymbols.SUCCESSOR);
+		godelBuilder.push(GodelNumberSymbols.ZERO);
 	}
+
+	public static Constant i = new Constant(Math.sqrt(-1)) {
+
+		@Override
+		public Expression derive() {
+			return ZERO;
+		}
+
+		@Override
+		public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+			godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
+		}
+
+	};
 
 }

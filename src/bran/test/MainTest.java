@@ -60,9 +60,10 @@ public class MainTest {
 		// factorTest();
 		// powDomainTest();
 		// substituteTest();
+		equivalenceSimplificationTest();
 
-		Variable a = new Variable("a");
-		LOG.ofS(a, a.pow(a)).div(a).greater(Constant.NEG_INFINITY).and(LOG.ofS(a, a.pow(a)).div(a).less((Constant.INFINITY)).and(Constant.ONE.greater(Constant.NEG_INFINITY)).and(Constant.ONE.less(Constant.INFINITY))).simplified();
+		// Variable a = new Variable("a");
+		// LOG.ofS(a, a.pow(a)).div(a).greater(Constant.NEG_INFINITY).and(LOG.ofS(a, a.pow(a)).div(a).less((Constant.INFINITY)).and(Constant.ONE.greater(Constant.NEG_INFINITY)).and(Constant.ONE.less(Constant.INFINITY))).simplified();
 		// equivalenceSimplificationTest();
 
 		// System.out.println(x.equates(Constant.INFINITY).or(x.greater(Constant.ZERO)).simplified());
@@ -83,12 +84,20 @@ public class MainTest {
 
 	private static void equivalenceSimplificationTest() {
 		Variable x = new Variable("x");
-		Arrays.stream(LogicalOperator.values())
-			  .map(o -> o.of(x.greaterEqual(Constant.ONE), x.less(Constant.of(2))))
-			  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
-		Stream.concat(Arrays.stream(InequalityType.values()), Arrays.stream(EquationType.values()))
-			  .map(t -> OR.of(x.less(Constant.of(2)), Equivalence.of(Constant.ONE, t, x)))
-			  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
+		Variable y = new Variable("y");
+		// Arrays.stream(LogicalOperator.values())
+		// 	  .map(o -> o.of(x.greaterEqual(Constant.ONE), x.less(Constant.of(2))))
+		// 	  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
+		// Stream.concat(Arrays.stream(InequalityType.values()), Arrays.stream(EquationType.values()))
+		// 	  .map(t -> OR.of(x.less(Constant.of(2)), Equivalence.of(Constant.ONE, t, x)))
+		// 	  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
+		final Equation eq = x.squared()
+											  .plus(y)
+											  .minus(Constant.of(20))
+											  .equates(x.cubed()
+														.minus(y.times(Constant.of(2)))
+														.plus(Constant.of(3)));
+		System.out.println(eq + "\n" + eq.simplified());
 	}
 
 	private static void powDomainTest() {
@@ -156,7 +165,7 @@ public class MainTest {
 		Statement s = Statement.forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
 							   .implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")));
 		System.out.println(s.godelNumber());
-		System.out.println(new GodelNumberFactors(s.godelNumber().getNumber()).toString()); // 25 30
+		System.out.println(new GodelNumberFactors(s.godelNumber().getNumber())); // 25 30
 	}
 
 	public static void visualTest() {

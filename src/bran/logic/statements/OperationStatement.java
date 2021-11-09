@@ -11,7 +11,7 @@ import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Fork;
 
 import static bran.logic.statements.VariableStatement.*;
@@ -226,22 +226,18 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 				return simplified;
 		}
 
-		if (left instanceof Equivalence leftEq && right instanceof Equivalence rightEq
-			&& leftEq.getLeft() instanceof Expression leftEqLeft
-			&& leftEq.getRight() instanceof Expression leftEqRight
-			&& rightEq.getLeft() instanceof Expression rightEqLeft
-			&& rightEq.getRight() instanceof Expression rightEqRight) {
-			if (leftEqLeft.equals(rightEqLeft) && ((leftEqRight instanceof Constant && rightEqRight instanceof Constant) || leftEqRight.equals(rightEqRight))) {
-				return equivalenceSolver(leftEqLeft, leftEqRight, rightEqRight, leftEq.getEquivalenceType(), rightEq.getEquivalenceType());
+		if (left instanceof Equivalence leftEq && right instanceof Equivalence rightEq) {
+			if (leftEq.getLeft().equals(rightEq.getLeft()) && ((leftEq.getRight() instanceof Constant && rightEq.getRight() instanceof Constant) || leftEq.getRight().equals(rightEq.getRight()))) {
+				return equivalenceSolver(leftEq.getLeft(), leftEq.getRight(), rightEq.getRight(), leftEq.getEquivalenceType(), rightEq.getEquivalenceType());
 			}
-			else if (leftEqLeft.equals(rightEqRight) && ((leftEqRight instanceof Constant && rightEqLeft instanceof Constant) || leftEqRight.equals(rightEqLeft))) {
-				return equivalenceSolver(leftEqLeft, leftEqRight, rightEqLeft, leftEq.getEquivalenceType(), rightEq.getEquivalenceType().flipped());
+			else if (leftEq.getLeft().equals(rightEq.getRight()) && ((leftEq.getRight() instanceof Constant && rightEq.getLeft() instanceof Constant) || leftEq.getRight().equals(rightEq.getLeft()))) {
+				return equivalenceSolver(leftEq.getLeft(), leftEq.getRight(), rightEq.getLeft(), leftEq.getEquivalenceType(), rightEq.getEquivalenceType().flipped());
 			}
-			else if (leftEqRight.equals(rightEqLeft) && ((leftEqLeft instanceof Constant && rightEqRight instanceof Constant) || leftEqLeft.equals(rightEqRight))) {
-				return equivalenceSolver(leftEqRight, leftEqLeft, rightEqRight, leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType());
+			else if (leftEq.getRight().equals(rightEq.getLeft()) && ((leftEq.getLeft() instanceof Constant && rightEq.getRight() instanceof Constant) || leftEq.getLeft().equals(rightEq.getRight()))) {
+				return equivalenceSolver(leftEq.getRight(), leftEq.getLeft(), rightEq.getRight(), leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType());
 			}
-			else if (leftEqRight.equals(rightEqRight) && ((leftEqLeft instanceof Constant && rightEqLeft instanceof Constant) || leftEqLeft.equals(rightEqLeft))) {
-				return equivalenceSolver(leftEqRight, leftEqLeft, rightEqLeft, leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType().flipped());
+			else if (leftEq.getRight().equals(rightEq.getRight()) && ((leftEq.getLeft() instanceof Constant && rightEq.getLeft() instanceof Constant) || leftEq.getLeft().equals(rightEq.getLeft()))) {
+				return equivalenceSolver(leftEq.getRight(), leftEq.getLeft(), rightEq.getLeft(), leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType().flipped());
 			}
 		}
 		else if (right instanceof OperationStatement rightO) {
@@ -401,18 +397,18 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> g, final GodelVariableMap vs) {
-		appendGodelOpBuffer(operator.buffer(left, right), g, vs);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+		appendGodelOpBuffer(operator.buffer(left, right), godelBuilder);
 	}
 
-	private void appendGodelOpBuffer(Object[] buffer, final Stack<GodelNumber> g, final GodelVariableMap vs) {
+	private void appendGodelOpBuffer(Object[] buffer, final GodelBuilder godelBuilder) {
 		for (Object o : buffer) {
 			if (o instanceof GodelNumberSymbols gns)
-				g.push(gns);
+				godelBuilder.push(gns);
 			else if (o instanceof Statement statement)
-				statement.appendGodelNumbers(g, vs);
+				statement.appendGodelNumbers(godelBuilder);
 			else if (o instanceof Object[] innerBuffer)
-				appendGodelOpBuffer(innerBuffer, g, vs);
+				appendGodelOpBuffer(innerBuffer, godelBuilder);
 			else
 				new Exception("this shouldn't happen").printStackTrace();
 		}

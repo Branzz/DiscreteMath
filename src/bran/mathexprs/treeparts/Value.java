@@ -1,10 +1,14 @@
 package bran.mathexprs.treeparts;
 
+import bran.sets.numbers.godel.GodelBuilder;
+import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.tree.Composition;
 import bran.tree.Leaf;
 import bran.sets.numbers.NumberLiteral;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class Value extends Expression implements Leaf {
 
@@ -25,7 +29,7 @@ public abstract class Value extends Expression implements Leaf {
 
 	@Override
 	public void replaceAll(final Expression approaches, final Expression approached) {
-
+		//TODO ?
 	}
 
 	@Override

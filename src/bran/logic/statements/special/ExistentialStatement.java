@@ -5,9 +5,8 @@ import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.sets.Set;
 import bran.sets.SpecialSet;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
-import bran.sets.numbers.godel.GodelVariableMap;
+import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;
 import bran.tree.Equivalable;
 import bran.sets.FiniteSet;
@@ -15,7 +14,6 @@ import bran.tree.Holder;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -147,17 +145,17 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 	}
 
 	@Override
-	public void appendGodelNumbers(final Stack<GodelNumber> godelNumbers, final GodelVariableMap variablesMap) {
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		for (final E variable : variables) {
-			godelNumbers.push(GodelNumberSymbols.LEFT);
-			godelNumbers.push(GodelNumberSymbols.EACH);
-			godelNumbers.push(variablesMap.get(variable));
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
-			godelNumbers.push(GodelNumberSymbols.LEFT);
+			godelBuilder.push(GodelNumberSymbols.LEFT);
+			godelBuilder.push(GodelNumberSymbols.EACH);
+			godelBuilder.push(godelBuilder.getVar(variable));
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
+			godelBuilder.push(GodelNumberSymbols.LEFT);
 		}
-		universalStatement.state(variables).appendGodelNumbers(godelNumbers, variablesMap);
+		universalStatement.state(variables).appendGodelNumbers(godelBuilder);
 		for (int i = 0; i < variables.length; i++)
-			godelNumbers.push(GodelNumberSymbols.RIGHT);
+			godelBuilder.push(GodelNumberSymbols.RIGHT);
 	}
 
 	@Override
