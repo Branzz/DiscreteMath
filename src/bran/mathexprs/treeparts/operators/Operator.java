@@ -14,6 +14,7 @@ import bran.tree.ForkOperator;
 import static bran.mathexprs.ExpressionDisplayStyle.expressionStyle;
 import static bran.mathexprs.treeparts.Constant.*;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LN;
+import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
 import static bran.mathexprs.treeparts.operators.DomainSupplier.DENOM_NOT_ZERO;
 import static bran.mathexprs.treeparts.operators.ExpressionOperatorType.*;
 
@@ -54,6 +55,7 @@ public enum Operator implements ForkOperator {
 	ADD(AS, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
 	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
+	private bran.tree.Operator inverse;
 	private final ExpressionOperatorType operatorType;
 	private final Operable operable;
 	private final Derivable derivable;
@@ -86,6 +88,15 @@ public enum Operator implements ForkOperator {
 		this.commutative = commutative;
 		this.godelNumberSymbols = godelNumberSymbols;
 		this.symbols = symbols;
+	}
+
+	static {
+		POW.inverse = LOG;
+		MUL.inverse = DIV; // 1 / x
+		DIV.inverse = MUL; // 1 / x
+		MOD.inverse = MOD;
+		ADD.inverse = SUB; // 0 - x
+		SUB.inverse = ADD; // 0 - x
 	}
 
 	@Override
@@ -136,6 +147,11 @@ public enum Operator implements ForkOperator {
 	@Override
 	public String[] getSymbols() {
 		return symbols;
+	}
+
+	@Override
+	public bran.tree.Operator inverse() {
+		return inverse;
 	}
 
 	public boolean isCommutative() {

@@ -1,6 +1,8 @@
 package bran.mathexprs.treeparts;
 
 import bran.logic.statements.VariableStatement;
+import bran.mathexprs.treeparts.functions.FunctionExpression;
+import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
 
@@ -85,5 +87,40 @@ public class Constant extends Value {
 		}
 
 	};
+
+	// @Override
+	// public Constant squared() {
+	// 	return Constant.of(Math.pow(number.doubleValue(), 2));
+	// }
+	//
+	// @Override
+	// public Constant cubed() {
+	// 	return Constant.of(Math.pow(number.doubleValue(), 3));
+	// }
+	//
+	// @Override
+	// public Constant reciprocal() {
+	// 	return Constant.of(1 / number.doubleValue());
+	// }
+	//
+	// @Override
+	// public Constant negate() {
+	// 	return Constant.of(-number.doubleValue());
+	// }
+	//
+	// @Override
+	// public Constant inc() {
+	// 	return Constant.of(number.doubleValue() + 1);
+	// }
+	//
+	// @Override
+	// public Constant dec() {
+	// 	return Constant.of((number.doubleValue() - 1));
+	// }
+	//
+	// @Override
+	// public Constant sqrt() {
+	// 	return Constant.of(Math.sqrt(number.doubleValue()));
+	// }
 
 }

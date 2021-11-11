@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static bran.logic.statements.operators.LogicalOperator.AND;
 import static bran.mathexprs.InequalityType.*;
+import static bran.mathexprs.treeparts.Constant.*;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.SQRT;
 import static bran.mathexprs.treeparts.operators.Operator.*;
@@ -46,7 +47,7 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 	}
 
 	public static Statement defaultConditions(Expression expression) {
-		return expression.greater(Constant.NEG_INFINITY).and(expression.less(Constant.INFINITY));
+		return expression.greater(NEG_INFINITY).and(expression.less(INFINITY));
 	}
 
 	public Expression limitDomain(Statement domain) {
@@ -168,7 +169,7 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 	}
 
 	public OperatorExpression squared() {
-		return pow(Constant.TWO);
+		return pow(TWO);
 	}
 
 	public OperatorExpression cubed() {
@@ -196,26 +197,26 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 	}
 
 	public OperatorExpression reciprocal() {
-		return Constant.ONE.div(this);
+		return ONE.div(this);
 	}
 
 	public OperatorExpression negate() {
-		return Constant.of(0).minus(this);
+		return ZERO.minus(this);
 	}
 
 	public OperatorExpression inc() {
-		return this.plus(Constant.ONE);
+		return this.plus(ONE);
 	}
 
 	public OperatorExpression dec() {
-		return this.minus(Constant.ONE);
+		return this.minus(ONE);
 	}
 
-	public OperatorExpression chain(Expression next) {
+	public Expression chain(Expression next) {
 		return this.times(next.derive());
 	}
 
-	public FunctionExpression sqrt() {
+	public Expression sqrt() {
 		try {
 			return new FunctionExpression(SQRT, this);
 		} catch (IllegalArgumentAmountException ignored) {

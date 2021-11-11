@@ -10,7 +10,9 @@ import bran.mathexprs.treeparts.operators.Operator;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.tree.Composition;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class Equivalence extends SpecialStatement {
 
@@ -76,13 +78,26 @@ public abstract class Equivalence extends SpecialStatement {
 		// if (leftSimplified instanceof Statement leftStatement && rightSimplified instanceof Statement rightStatement)
 		// 	notEqual = leftStatement.equalsNot(rightStatement);
 		if (equal /*|| notEqual*/)
-			return VariableStatement.of(equal ^ (getEquivalenceType() == EquationType.EQUAL
+			return VariableStatement.of(/*equal ^ */(getEquivalenceType() == EquationType.EQUAL
 							|| getEquivalenceType() == InequalityType.GREATER_EQUAL || getEquivalenceType() == InequalityType.LESS_EQUAL));
 		final OperatorExpression oneSide = new OperatorExpression(leftSimplified, Operator.SUB, rightSimplified);
 		final Expression oneSideSimplified = oneSide.simplified(leftSimplified, rightSimplified);
 		if (!oneSide.equals(oneSideSimplified)) {
-			leftSimplified = oneSideSimplified;
-			rightSimplified = Constant.ZERO;
+			// commutativeSearch(leftStatement, leftTerms, false);
+			// commutativeSearch(rightStatement, rightTerms, inverted);
+			List<OperatorExpression.Term> terms = new ArrayList<>();
+			OperatorExpression.commutativeSearch(oneSideSimplified, terms, false, Operator.ADD, Operator.SUB);
+			for (OperatorExpression.Term term : terms) {
+				if (term.inverted())
+					;
+				else
+					;
+			}
+			final Map<Boolean, List<OperatorExpression.Term>> sides
+					= terms.stream().collect(Collectors.groupingBy(OperatorExpression.Term::inverted, Collectors.toList()));
+
+			leftSimplified = OperatorExpression.combine(sides.get(false), Operator.ADD);
+			rightSimplified = OperatorExpression.combine(sides.get(true), Operator.ADD);
 		}
 		if (getEquivalenceType() instanceof EquationType equationType)
 			return new Equation(leftSimplified, equationType, rightSimplified);

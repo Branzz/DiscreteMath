@@ -2,18 +2,100 @@ package bran.logic.puzzle;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.special.VerbalStatement;
+import bran.mathexprs.Equation;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Value;
 import bran.mathexprs.treeparts.Variable;
+import bran.sets.numbers.godel.GodelBuilder;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class SudokuBoard {
 
+	void printConditions() {
+		forAllTiles(tile -> {
+			System.out.println(tile + ": " + tile.conditions());
+		});
+	}
+
+	private static class SudokuTile extends Expression {
+
+		private Expression exp; // wrapper
+		private boolean solved;
+
+		public SudokuTile(final Expression exp) {
+			update(exp);
+		}
+
+		public void update(final Expression exp) {
+			this.exp = exp;
+			solved = exp instanceof Constant;
+		}
+
+		public boolean solved() {
+			return solved;
+		}
+
+		public Statement conditions() {
+			return getDomainConditions();
+		}
+
+		public void setConditions(Statement conditions) {
+			domainConditions = conditions;
+		}
+
+		public void condition(Statement condition) {
+			limitDomain(condition);
+		}
+
+		public void reduceConditions() {
+			domainConditions = domainConditions.simplified();
+		}
+
+		public boolean solve() {
+			if (conditions() instanceof Equation equation) {
+				final Expression left = equation.getLeft();
+				final Expression right = equation.getRight();
+				if (left == this || left == exp) {
+					update(right);
+					return true;
+				} else if (right == this || right == exp) {
+					update(left);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public Expression simplified() {
+			return exp.simplified();
+		}
+
+		@Override
+		public double evaluate() {
+			return exp.evaluate();
+		}
+
+		@Override
+		public String toFullString() {
+			return exp.toFullString();
+		}
+
+		@Override public Set<Variable> getVariables() { return exp.getVariables(); }
+		@Override public Expression derive() { return null; }
+		@Override public boolean respect(final Collection<Variable> respectsTo) { return false; }
+		@Override public void replaceAll(final Expression approaches, final Expression approached) { }
+		@Override public void appendGodelNumbers(final GodelBuilder godelBuilder) { }
+		@Override public boolean equals(final Object other) { return false; }
+
+	}
+
 	private final int length;
-	private final Value[][] board;
+	private final SudokuTile[][] board;
 
 	private Statement conditions; // Eager
 	private final Constant lengthConstant;
@@ -25,9 +107,9 @@ public class SudokuBoard {
 			for (int j = 0; j < length; j++) {
 				final int num = seed.charAt(i * length + j) - '0';
 				if (num <= 0)
-					board[i][j] = new Variable("(" + i + "," + j + ")");
+					board[i][j] = new SudokuTile(new Variable("(" + i + "," + j + ")"));
 				else
-					board[i][j] = Constant.of(num);
+					board[i][j] = new SudokuTile(Constant.of(num));
 			}
 		}
 	}
@@ -35,9 +117,9 @@ public class SudokuBoard {
 	public SudokuBoard() {
 		this(9);
 		for (int i = 0; i < length; i++) {
-			board[i] = new Value[length];
+			board[i] = new SudokuTile[length];
 			for (int j = 0; j < length; j++) {
-				board[i][j] = new Variable("(" + i + "," + j + ")");
+				board[i][j] = new SudokuTile(new Variable("(" + i + "," + j + ")"));
 			}
 		}
 	}
@@ -46,7 +128,7 @@ public class SudokuBoard {
 		this.length = length;
 		lengthConstant = Constant.of(length);
 		barSum = Constant.of(length * (length + 1) / 2);
-		this.board = new Value[length][length];
+		board = new SudokuTile[length][length];
 		// for (int i = 0; i < length; i++) {
 		// 	board[i] = new Variable[length];
 		// 	for (int j = 0; j < length; j++) {
@@ -57,45 +139,57 @@ public class SudokuBoard {
 	}
 
 	public void applyDefaultConditions() {
-		for (final Value[] row : board) {
-			Expression rowConds = Constant.ZERO;
+		// for (int row = 0; row < length; row++) {
+		// 	for (int col = 0; col < length; col++) {
+		// 		Statement conditions = VariableStatement.TAUTOLOGY;
+		// 	}
+		// }
+
+		for (final SudokuTile[] row : board) {
+			// Expression rowConds = Constant.ZERO;
 			for (int i = 0; i < length; i++) {
-				final Value tile = row[i];
-				for (int j = i + 1; j < length; j++)
-					conditions.and(tile.notEquates(board[i][j]));
+				final SudokuTile tile = row[i];
+				for (int j = i + 1; j < length; j++) {
+					final Equation cond = tile.notEquates(board[i][j]);
+					conditions = conditions.and(cond);
+					tile.condition(cond);
+				}
 				Statement numRange = tile.equates(Constant.ONE);
 				for (int n = 2; n <= length; n++)
 					numRange = numRange.or(tile.equates(Constant.of(n)));
 				conditions = conditions.and(numRange);
-				rowConds = rowConds.plus(tile);
+				tile.condition(numRange);
+				// rowConds = rowConds.plus(tile);
 			}
-			conditions = conditions.and(rowConds.equates(barSum));
+			// conditions = conditions.and(rowConds.equates(barSum));
 		}
-		for (int j = 0; j < length; j++) {
-			Expression rowConds = Constant.ZERO;
-			for (int i = 0; i < length; i++) {
-				rowConds = rowConds.plus(board[i][j]);
-			}
-			conditions = conditions.and(rowConds.equates(barSum));
-		}
+		// for (int j = 0; j < length; j++) {
+		// 	Expression rowConds = Constant.ZERO;
+		// 	for (int i = 0; i < length; i++) {
+		// 		rowConds = rowConds.plus(board[i][j]);
+		// 	}
+		// 	conditions = conditions.and(rowConds.equates(barSum));
+		// }
 		final double N = Math.sqrt(length);
 		if (N % 1 == 0) {
 			final int boxSize = (int) N;
 			for (int boxRow = 0; boxRow < length; boxRow += boxSize)
 				for (int boxCol = 0; boxCol < length; boxCol += boxSize) {
-					Expression rowConds = Constant.ZERO;
+					// Expression rowConds = Constant.ZERO;
 					for (int i = 0; i < length; i++) {
-						for (int j = i + 1; j < length; j++) {
-							if (i % boxSize != j % boxSize && i / boxSize != j / boxSize) // already covered in row/col
-								conditions.and(board[i % boxSize + boxRow][i / boxSize + boxCol]
-													   .notEquates(board[j % boxSize + boxRow][j / boxSize + boxCol]));
+						final SudokuTile iTile = board[i % boxSize + boxRow][i / boxSize + boxCol];
+						for (int j = 0; j < length; j++) {
+							if (i != j && i % boxSize != j % boxSize && i / boxSize != j / boxSize) { // already covered in row/col
+								final SudokuTile jTile = board[j % boxSize + boxRow][j / boxSize + boxCol];
+								final Equation cond = iTile.notEquates(jTile);
+								conditions = conditions.and(cond);
+								// iTile.condition(cond);
+								jTile.condition(cond);
+							}
 						}
-						rowConds = rowConds.plus(board[i % boxSize + boxRow][i / boxSize + boxCol]);
+						// rowConds = rowConds.plus(board[i % boxSize + boxRow][i / boxSize + boxCol]);
 					}
-					conditions = conditions.and(rowConds.equates(barSum));
-
-					// for (int r = 0; r < boxSize; r++)
-					// 	for (int c = 0; c < boxSize; c++)
+					// conditions = conditions.and(rowConds.equates(barSum));
 				}
 		}
 	}
@@ -105,7 +199,86 @@ public class SudokuBoard {
 	}
 
 	public void fillIn(int r, int c, Constant num) {
-		board[r][c] = num;
+		board[r][c].update(num);
+	}
+
+	public void resetConditions(int tileRow, int tileCol) {
+		final SudokuTile tile = board[tileRow][tileCol];
+		if (tile.solved())
+			tile.setConditions(VariableStatement.TAUTOLOGY);
+		else {
+			Statement conditions = VariableStatement.TAUTOLOGY;
+			final int boxSize = (int) Math.sqrt(length);
+			int boxRow = tileRow / boxSize;
+			int boxCol = tileCol / boxSize;
+			for (int r = 0; r < boxSize; r++)
+				for (int c = 0; c < boxSize; c++) {
+					if (r != c && r != tileRow && c != tileCol)
+						conditions = conditions.and(tile.notEquates(board[boxRow * boxSize + r][boxCol * boxSize + c].exp));
+				}
+			for (int r = 0; r < boxSize; r++)
+				if (r != tileRow)
+					conditions = conditions.and(tile.notEquates(board[r][tileCol].exp));
+			for (int c = 0; c < boxSize; c++)
+				if (c != tileCol)
+					conditions = conditions.and(tile.notEquates(board[tileRow][c].exp));
+
+			Statement numRange = tile.equates(Constant.ONE);
+			for (int n = 2; n <= length; n++)
+				numRange = numRange.or(tile.equates(Constant.of(n)));
+			conditions = conditions.and(numRange);
+
+			tile.setConditions(conditions);
+		}
+	}
+
+	public void solve() {
+		for (int layers = 1; layers <= 10; layers++) {
+			resetTileConditions();
+			reduceTileConditions();
+			if (!solveTiles())
+				break;
+			System.out.println(this);
+		}
+	}
+
+	public void resetTileConditions() {
+		for (int r = 0; r < length; r++) {
+			for (int c = 0; c < length; c++) {
+				resetConditions(r, c);
+			}
+		}
+	}
+
+	public Statement applyTileConditions() {
+		final Statement[] conditions = { VariableStatement.TAUTOLOGY };
+		forAllTiles(tile -> {
+				if (!tile.solved())
+					conditions[0] = conditions[0].and(tile.conditions());
+		});
+		return conditions[0];
+	}
+
+	public void reduceTileConditions() {
+		forAllTiles(tile -> {
+			if (!tile.solved())
+				tile.reduceConditions();
+		});
+	}
+
+	public boolean solveTiles() {
+		final AtomicBoolean solvedATile = new AtomicBoolean(false);
+		forAllTiles(tile -> {
+			if (!tile.solved())
+				solvedATile.set(solvedATile.get() | tile.solve());
+		});
+		return solvedATile.get();
+	}
+
+	void forAllTiles(Consumer<SudokuTile> consumer) {
+		for (final SudokuTile[] row : board)
+			for (final SudokuTile tile : row)
+				consumer.accept(tile);
 	}
 
 	@Override
@@ -120,7 +293,7 @@ public class SudokuBoard {
 			for (int j = 0; j < length; j++) {
 				b.append(j % boxSize == 0 ? '\u2503' : '\u2502')
 				 .append(' ')
-				 .append(board[i][j] instanceof Constant constant ? constant : ' ')
+				 .append(board[i][j].solved() ? board[i][j] : ' ')
 				 .append(' ');
 			}
 			b.append("\u2503\n");

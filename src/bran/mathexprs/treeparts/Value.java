@@ -1,5 +1,7 @@
 package bran.mathexprs.treeparts;
 
+import bran.mathexprs.treeparts.functions.FunctionExpression;
+import bran.mathexprs.treeparts.operators.OperatorExpression;
 import bran.sets.numbers.godel.GodelBuilder;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.tree.Composition;

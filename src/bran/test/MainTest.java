@@ -92,11 +92,11 @@ public class MainTest {
 		// 	  .map(t -> OR.of(x.less(Constant.of(2)), Equivalence.of(Constant.ONE, t, x)))
 		// 	  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
 		final Equation eq = x.squared()
-											  .plus(y)
-											  .minus(Constant.of(20))
-											  .equates(x.cubed()
-														.minus(y.times(Constant.of(2)))
-														.plus(Constant.of(3)));
+							 .plus(y)
+							 .minus(Constant.of(20))
+							 .equates(x.cubed()
+							 			.minus(y.times(Constant.of(2)))
+							 			.plus(Constant.of(3)));
 		System.out.println(eq + "\n" + eq.simplified());
 	}
 
