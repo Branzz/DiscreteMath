@@ -1,15 +1,14 @@
 package bran.mathexprs.treeparts.operators;
 
 import bran.logic.statements.Statement;
-import bran.logic.statements.VariableStatement;
 import bran.mathexprs.ExpressionDisplayStyle;
-import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.sets.Definition;
 import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.tree.Associativity;
 import bran.tree.ForkOperator;
+import bran.tree.Mapper;
 
 import static bran.mathexprs.ExpressionDisplayStyle.expressionStyle;
 import static bran.mathexprs.treeparts.Constant.*;
@@ -55,7 +54,7 @@ public enum Operator implements ForkOperator {
 	ADD(AS, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
 	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
-	private bran.tree.Operator inverse;
+	private Mapper inverse;
 	private final ExpressionOperatorType operatorType;
 	private final Operable operable;
 	private final Derivable derivable;
@@ -150,7 +149,7 @@ public enum Operator implements ForkOperator {
 	}
 
 	@Override
-	public bran.tree.Operator inverse() {
+	public Mapper inverse() {
 		return inverse;
 	}
 

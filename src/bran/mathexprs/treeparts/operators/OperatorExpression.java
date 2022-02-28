@@ -212,7 +212,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	private Expression simplifiedNoDomain(Expression leftSimplified, Operator operator, Expression rightSimplified, boolean commutativeSearch) {
 		if (leftSimplified instanceof Constant && rightSimplified instanceof Constant rightConst
 			&& !((operator == DIV || operator == MUL) && rightConst.equals(Constant.ZERO)))
-			return Constant.of(operator.operate(leftSimplified.evaluate(), rightSimplified.evaluate()));
+			return Constant.of(operator.operate(leftSimplified.evaluate(), rightSimplified.evaluate())); // causes negative token to be evaluated as highest precedence
 		switch (operator) {
 			case POW:
 				if (rightSimplified instanceof Constant rightConstant) {

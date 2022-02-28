@@ -10,6 +10,7 @@ import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
+import bran.parser.ExpressionParser;
 import bran.parser.StatementParser;
 import bran.sets.Definition;
 import bran.sets.FiniteSet;
@@ -64,14 +65,19 @@ public class Main {
 		// Statement x = StatementParser.parseStatement("!(a or b) and C or a and b");
 		// System.out.println(TruthTable.getTable(x) + "\n" + TruthTable.getTable(x.simplified()));
 
-		Variable x = new Variable("x");
-		final Expression derive = x.squared()
-								   .div(x.inc())
-								   .minus(x.squared()
-										   .inc()
-										   .sqrt())
-								   .derive();
-		System.out.println(derive + "\n" + derive.simplified());
+		// Variable x = new Variable("x");
+		// final Expression derive = x.squared()
+		// 						   .div(x.inc())
+		// 						   .minus(x.squared()
+		// 								   .inc()
+		// 								   .sqrt())
+		// 						   .derive();
+		// System.out.println(derive + "\n" + derive.simplified());
+
+		// System.out.println(StatementParser.parseStatement("a == a"));
+		// System.out.println(ExpressionParser.parseExpression("log(3, 27)"));
+
+		// System.out.println(ExpressionParser.parseExpression("e^xy+yxe^xy").summaryString());
 
 		// showcase();
 

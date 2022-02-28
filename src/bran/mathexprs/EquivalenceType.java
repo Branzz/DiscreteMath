@@ -1,6 +1,8 @@
 package bran.mathexprs;
 
-public interface EquivalenceType {
+import bran.tree.Mapper;
+
+public interface EquivalenceType extends Mapper {
 
 	EquivalenceType opposite();
 

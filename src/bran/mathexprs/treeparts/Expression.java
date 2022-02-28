@@ -164,6 +164,13 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		return "the derivative of " + this + " is\n" + this.derive();
 	}
 
+	public String summaryString() {
+		final Expression derivative = derive();
+		return String.format("%s\nDomain: %s\nWith Parens: %s\nSimplified: %s\nDerivative: %s\nDerivative Simplified: %s",
+							 toString(), domainConditions.toString(), toFullString(),
+							 simplified(), derivative.toString(), derivative.simplified().toString());
+	}
+
 	public OperatorExpression pow(Expression exp) {
 		return new OperatorExpression(this, POW, exp);
 	}

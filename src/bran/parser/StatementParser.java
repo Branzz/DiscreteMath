@@ -7,8 +7,8 @@ import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.LogicalOperator;
 
 import java.util.*;
-import java.util.stream.Stream;
 
+import static bran.parser.CompositionParser.*;
 import static bran.parser.StatementParser.TokenType.*;
 import static bran.parser.StatementParser.TokenType.ExpressionZone.*;
 import static java.util.stream.Collectors.joining;
@@ -25,21 +25,8 @@ public class StatementParser {
 	// 		.replaceAll("x", "\\s*\\(" + lineOperatorsRegex + "\\)\\s+)*[A-Za-z][A-Za-z_\\d]*\\s+\\(" + operatorsRegex + "\\)\\s*X")
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
-	private static final Map<String, LogicalOperator> statementOperators =
-			Stream.of(LogicalOperator.values())
-				  .flatMap(o -> Arrays.stream(o.getSymbols())
-									  .distinct()
-									  .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
-				  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	private static final Map<String, LineOperator> statementLineOperators =
-			Stream.of(LineOperator.values())
-				  .flatMap(o -> Arrays.stream(o.getSymbols())
-									  .distinct()
-									  .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
-				  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-	private static final Set<String> statementLeftIdentifiers = Set.of("(", "[", "{");
-	private static final Set<String> statementRightIdentifiers = Set.of(")", "]", "}");
+	static final Map<String, LogicalOperator> statementOperators = Parser.getSymbolMapping(LogicalOperator.values());
+	static final Map<String, LineOperator> statementLineOperators = Parser.getSymbolMapping(LineOperator.values());
 
 	enum TokenType {
 
@@ -47,28 +34,23 @@ public class StatementParser {
 		RIGHT_IDENTIFIER(MIDDLE, MIDDLE), VARIABLE(START, MIDDLE), WHITESPACE(ANY, NOWHERE), // the previous type
 		UNKNOWN(NOWHERE, NOWHERE);
 
-		private final ExpressionZone expressionZone;
+		private final ExpressionZone currentZone;
 		private final ExpressionZone proceedingZone; // zone after current one
 
-		TokenType(ExpressionZone expressionZone, ExpressionZone proceedingZone) {
-			this.expressionZone = expressionZone;
+		TokenType(ExpressionZone currentZone, ExpressionZone proceedingZone) {
+			this.currentZone = currentZone;
 			this.proceedingZone = proceedingZone;
 		}
 
 		static TokenType tokenTypeOf(String prefix) {
 			return statementOperators.containsKey(prefix) ? OPERATOR
 			: statementLineOperators.containsKey(prefix) ? LINE_OPERATOR
-			: statementLeftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
-			: statementRightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
+			: leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
+			: rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
 			: VariableStatement.validName(prefix) ? VARIABLE
 			: prefix.isBlank() ? WHITESPACE
 			: UNKNOWN;
 		}
-
-		final static String startExceptionMessage = "expected a variable or not";
-		final static String startBracketsExceptionMessage = "expected a variable, not, or right bracket";
-		final static String middleExceptionMessage = "expected an operator";
-		final static String middleBracketsExceptionMessage = "expected an operator or left bracket";
 
 		enum ExpressionZone {
 			START,		// Start or of expression - or end of one, to start a new one
@@ -87,6 +69,7 @@ public class StatementParser {
 		// 	str = str.substring(7);
 		return null;
 	}
+
 	public static Statement parseStatement(String str) {
 		str = str.trim();
 		if (str.length() == 0)
@@ -106,7 +89,7 @@ public class StatementParser {
 		for (int i = start; i < tokens.size(); i++) {
 			TokenType currentTokenType = tokens.get(i).tokenType();
 			ExpressionZone nextProceedingZone = currentTokenType.proceedingZone;
-			if (!currentTokenType.expressionZone.inZoneOf(expectingZone)) {
+			if (!currentTokenType.currentZone.inZoneOf(expectingZone)) {
 				// if (currentTokenType == RIGHT_IDENTIFIER && tokens.get(i - 1))
 				throw new ParseException("statement parsing, unexpected token %s at index %d", tokens.get(i).string(), tokens.get(i).from());
 			} else {
@@ -123,14 +106,11 @@ public class StatementParser {
 						} else
 							throw new ParseException("statement parsing, unbalanced right bracket \"%s\" at index %d", tokens.get(i).string(), tokens.get(i).from());
 					case OPERATOR:
-						statementBuilder.add(statementOperators.get(tokenString));
-						break;
+						statementBuilder.add(statementOperators.get(tokenString)); break;
 					case LINE_OPERATOR:
-						statementBuilder.add(statementLineOperators.get(tokenString));
-						break;
+						statementBuilder.add(statementLineOperators.get(tokenString)); break;
 					case VARIABLE:
-						statementBuilder.add(localVariables.computeIfAbsent(tokenString, VariableStatement::new));
-						break;
+						statementBuilder.add(localVariables.computeIfAbsent(tokenString, VariableStatement::new)); break;
 					case UNKNOWN:
 						throw new ParseException("statement parsing, unknown token \"%s\" at index %d", tokenString, tokens.get(tokens.size() - 1).from());
 					case WHITESPACE:
@@ -205,9 +185,9 @@ public class StatementParser {
 
 		List<StringPart> lastParts = tokenParts[tokenParts.length - 1].prefixes();
 		if (lastParts.size() == 0)
-			throw new ParseException("statement parsing, unknown token");
+			throw new ParseException("unknown token");
 		else if (lastParts.get(lastParts.size() - 1).tokenType == UNKNOWN)
-			throw new ParseException("statement parsing, unknown token: %s at index %d",
+			throw new ParseException("unknown token: %s at index %d",
 									 lastParts.get(lastParts.size() - 1).string(), lastParts.get(lastParts.size() - 1).from());
 
 		return lastParts;

@@ -7,6 +7,8 @@ import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Constant extends Value {
 
@@ -31,10 +33,62 @@ public class Constant extends Value {
 	public static final Constant TWO = new Constant(2.0);
 	public static final Constant E = new Constant(Math.E) { @Override public String toFullString() { return "e"; } };
 	public static final Constant PI = new Constant(Math.PI) { @Override public String toFullString() { return "pi"; } };
+	public static final Constant NEG_E = new Constant(Math.E) { @Override public String toFullString() { return "-e"; } };
+	public static final Constant NEG_PI = new Constant(Math.PI) { @Override public String toFullString() { return "-pi"; } };
 
+	private final static Matcher constantMatcher
+			= Pattern.compile("[+-]?([iI]|[eE]|[pP][iI]|NaN|Infinity|((((\\d+)(\\.)?((\\d+)?)" +
+							  "([eE][+-]?(\\d+))?)|(\\.(\\d+)([eE][+-]?(\\d+))?)|" +
+							  "(((0[xX]([\\da-fA-F]+)(\\.)?)|(0[xX]([\\da-fA-F]+)?(\\.)([\\da-fA-F]+)))" +
+							  "[pP][+-]?(\\d+)))[fFdD]?))").matcher("");
 
 	public static Constant of(final double value) {
+		var x = 0x5p-5;
 		return new Constant(value);
+	}
+
+	/**
+	 * returns +-infinity if value exceeds range
+	 */
+	public static Constant of(final String value) {
+		try {
+			return new Constant(Double.parseDouble(value));
+		} catch (NumberFormatException e) {
+			final char[] valueChars = value.toCharArray();
+			int firstInd = 0;
+			boolean negative = false;
+			switch (valueChars[0]){
+				case '-':
+					negative = true;
+					//FALLTHROUGH
+				case '+':
+					firstInd++;
+			}
+			int length = valueChars.length - firstInd;
+			switch(valueChars[firstInd]) {
+				case 'i', 'I':
+					if (length == 1)
+						return negative ? NEG_i : i;
+				case 'e', 'E':
+					if (length == 1)
+						return negative ? NEG_E : E;
+				case 'p', 'P':
+					if (length == 2) {
+						final char secInd = valueChars[firstInd + 1];
+						if (secInd == 'i' || secInd == 'I')
+							return negative ? NEG_PI : PI;
+					}
+			}
+			return null;
+		}
+	}
+
+	public static boolean validName(final String prefix) {
+		return constantMatcher.reset(prefix).matches();
+	}
+
+	Constant negative() {
+		return new Constant(-number.doubleValue());
 	}
 
 	@Override
@@ -74,7 +128,11 @@ public class Constant extends Value {
 		godelBuilder.push(GodelNumberSymbols.ZERO);
 	}
 
-	public static Constant i = new Constant(Math.sqrt(-1)) {
+	private static class iBase extends Constant {
+
+		public iBase(final double value) {
+			super(value);
+		}
 
 		@Override
 		public Expression derive() {
@@ -86,6 +144,19 @@ public class Constant extends Value {
 			godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
 		}
 
+		@Override
+		public String toString() {
+			return "i";
+		}
+
+	}
+
+	public static Constant i = new iBase(Math.sqrt(-1));
+	public static Constant NEG_i = new iBase(-Math.sqrt(-1)) {
+		@Override
+		public String toString() {
+			return "-i";
+		}
 	};
 
 	// @Override

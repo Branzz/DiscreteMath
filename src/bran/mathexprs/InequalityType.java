@@ -1,6 +1,7 @@
 package bran.mathexprs;
 
 import bran.sets.SetDisplayStyle;
+import bran.tree.Mapper;
 
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 import static bran.sets.SetDisplayStyle.setStyle;
@@ -85,6 +86,16 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 			case LOWERCASE_NAME -> symbols[0].toLowerCase();
 			default -> getSymbol(statementStyle.index() + 1);
 		};
+	}
+
+	@Override
+	public String[] getSymbols() {
+		return symbols;
+	}
+
+	@Override
+	public Mapper inverse() {
+		return opposite();
 	}
 
 	@Override

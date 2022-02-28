@@ -1,10 +1,10 @@
 package bran.mathexprs.treeparts.functions;
 
 import bran.logic.statements.Statement;
-import bran.tree.Operator;
+import bran.tree.Mapper;
 import bran.mathexprs.treeparts.Expression;
 
-public interface Function extends Operator {
+public interface Function extends Mapper {
 
 	double function(double... a);
 

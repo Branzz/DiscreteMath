@@ -3,7 +3,16 @@ package bran.logic.puzzle;
 public class Sudoku {
 
 	public static void main(String[] args) {
-		SudokuBoard board = new SudokuBoard("400230000259670018031980264090008720000409031500100000805000140000002007017800000");
+		SudokuBoard board = new SudokuBoard(
+				  "400230000"
+				+ "259670018"
+				+ "031980264"
+				+ "090008720"
+			    + "000409031"
+				+ "500100000"
+				+ "805000140"
+				+ "000002007"
+				+ "017800000");
 		board.applyDefaultConditions();
 		System.out.println(board);
 		System.out.println(board.getConditions());

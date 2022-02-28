@@ -298,7 +298,7 @@ public abstract class Statement extends Composition implements Equivalable<State
 
 	private static final Statement emptyStatement = new Statement() {
 		@Override public boolean equivalentTo(final Statement other) { return this == other; }
-		@Override public boolean equals(final Object s)				 { return false; }
+		@Override public boolean equals(final Object s)				 { return this == s; }
 		@Override public Statement simplified()						 { return empty(); }
 		@Override public void appendGodelNumbers(final GodelBuilder godelBuilder) { }
 		@Override protected boolean isConstant()					 { return false; }

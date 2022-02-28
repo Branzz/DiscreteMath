@@ -1,6 +1,7 @@
 package bran.mathexprs;
 
 import bran.logic.statements.StatementDisplayStyle;
+import bran.tree.Mapper;
 
 import static bran.logic.statements.StatementDisplayStyle.statementStyle;
 
@@ -24,6 +25,16 @@ public enum EquationType implements EquivalenceType {
 			case LOWERCASE_NAME -> symbols[0].toLowerCase();
 			default -> symbols[statementStyle.index() + 1];
 		};
+	}
+
+	@Override
+	public String[] getSymbols() {
+		return symbols;
+	}
+
+	@Override
+	public Mapper inverse() {
+		return opposite();
 	}
 
 	@Override

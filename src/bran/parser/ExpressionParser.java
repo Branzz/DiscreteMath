@@ -1,16 +1,20 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
+import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
 import bran.mathexprs.treeparts.functions.MultivariableFunction;
 import bran.mathexprs.treeparts.operators.Operator;
+import bran.tree.TreePart;
 
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
+import static bran.parser.CompositionParser.*;
 import static bran.parser.ExpressionParser.TokenType.ExpressionZone.*;
+import static bran.parser.ExpressionParser.TokenType.*;
 import static java.util.stream.Collectors.toMap;
 
 public class ExpressionParser {
@@ -28,57 +32,64 @@ public class ExpressionParser {
 	// 		.replaceAll("x", "\\s*\\(" + lineOperatorsRegex + "\\)\\s+)*[A-Za-z][A-Za-z_\\d]*\\s+\\(" + operatorsRegex + "\\)\\s*X")
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
-	private static final Map<String, Operator> statementOperators =
-			Stream.of(Operator.values())
-				  .flatMap(o -> Arrays.stream(o.getSymbols())
-									  .distinct()
-									  .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
-				  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	private static final Map<String, MultivariableFunction> statementLineOperators =
-			Stream.of(MultivariableFunction.values())
-				  .flatMap(o -> Arrays.stream(o.getSymbols())
-									  .distinct()
-									  .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
-				  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+	static final Map<String, Operator> expressionOperators = Parser.getSymbolMapping(Operator.values());
+	static final Map<String, MultivariableFunction> expressionLineOperators = Parser.getSymbolMapping(MultivariableFunction.values());
 
-	private static final Set<String> statementLeftIdentifiers = Set.of("(", "[", "{");
-	private static final Set<String> statementRightIdentifiers = Set.of(")", "]", "}");
+	// private static final Set<String> statementLeftIdentifiers = "([{".chars().mapToObj(Character::toString).collect(Collectors.toSet());
 
 	enum TokenType {
-		FUNCTION(START, START), COMMA(START, START), OPERATOR(MIDDLE, START), LEFT_IDENTIFIER(START, MIDDLE), // becomes middle after the (expression) is simplified
-		RIGHT_IDENTIFIER(MIDDLE, MIDDLE), VARIABLE(START, MIDDLE), CONSTANT(START, MIDDLE), WHITESPACE(ANY, NOWHERE), // the previous type
+		FUNCTION(START, START, expressionLineOperators::get),
+		COMMA(MIDDLE, START),
+		OPERATOR(MIDDLE, START, expressionOperators::get),
+		LEFT_IDENTIFIER(START, MIDDLE), // becomes middle after the (expression) is simplified
+		RIGHT_IDENTIFIER(MIDDLE, MIDDLE),
+		VARIABLE(START, MIDDLE),
+		CONSTANT(START, MIDDLE, Constant::of),
+		WHITESPACE(ANY, NOWHERE), // the previous type
 		UNKNOWN(NOWHERE, NOWHERE);
 
-		private final ExpressionZone expressionZone;
+		private final ExpressionZone currentZone;
 		private final ExpressionZone proceedingZone; // zone after current one
+		private Function<String, TreePart> toOperator;
 
-		TokenType(ExpressionZone expressionZone, ExpressionZone proceedingZone) {
-			this.expressionZone = expressionZone;
+		TokenType(ExpressionZone currentZone, ExpressionZone proceedingZone,
+				  Function<String, TreePart> toOperator) {
+			this.currentZone = currentZone;
+			this.proceedingZone = proceedingZone;
+			this.toOperator = toOperator;
+		}
+
+		TokenType(ExpressionZone currentZone, ExpressionZone proceedingZone) {
+			this.currentZone = currentZone;
 			this.proceedingZone = proceedingZone;
 		}
 
 		static TokenType tokenTypeOf(String prefix) {
 			return prefix.equals(",") ? COMMA
-					: statementOperators.containsKey(prefix) ? OPERATOR
-					: statementLineOperators.containsKey(prefix) ? FUNCTION
-					: statementLeftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
-					: statementRightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
-					: Variable.validName(prefix) ? VARIABLE
 					: prefix.isBlank() ? WHITESPACE
+					: expressionOperators.containsKey(prefix) ? OPERATOR
+					: expressionLineOperators.containsKey(prefix) ? FUNCTION
+					: leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
+					: rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
+					: Constant.validName(prefix) ? CONSTANT
+					: Variable.validName(prefix) ? VARIABLE
 					: UNKNOWN;
 		}
 
-		final static String startExceptionMessage = "expected a variable or not";
-		final static String startBracketsExceptionMessage = "expected a variable, not, or right bracket";
-		final static String middleExceptionMessage = "expected an operator";
-		final static String middleBracketsExceptionMessage = "expected an operator or left bracket";
+		public boolean canConvertToOperator() {
+			return toOperator != null;
+		}
+
+		public TreePart getOperator(final String tokenString) {
+			return toOperator.apply(tokenString);
+		}
 
 		enum ExpressionZone {
 			START,		// Start or of expression - or end of one, to start a new one
 			MIDDLE,		// After right bracket or variable
 			ANY,		//
 			NOWHERE;	//
-			public boolean inZoneOf(TokenType.ExpressionZone other) {
+			public boolean inZoneOf(ExpressionZone other) {
 				return this == other || other == ANY || this == ANY;
 			}
 		}
@@ -98,45 +109,52 @@ public class ExpressionParser {
 
 		final Map<String, Variable> localVariables = new HashMap<>();
 
-		return parseExpression(tokenizeStatement(str), localVariables, 0).get(0);
+		final CommaSeparatedExpression expression = parseExpression(tokenizeExpression(str), localVariables, 0);
+		if (!expression.isSingleton())
+			throw new ParseException("misplaced comma or function call");
+		return expression.getAsSingleton();
 	}
 
 	// private static record StatementEnd(Expression statement, int last) { }
 
-	private static List<Expression> parseExpression(List<StringPart> tokens, final Map<String, Variable> localVariables, int start) {
+	private static CommaSeparatedExpression parseExpression(List<StringPart> tokens, final Map<String, Variable> localVariables, int start) {
 		boolean inner = start != 0;
 		TokenType.ExpressionZone expectingZone = START;
 		ExpressionBuilder expBuilder = new ExpressionBuilder();
+		CommaSeparatedExpression commaSeparatedExpression;
 		for (int i = start; i < tokens.size(); i++) {
 			TokenType currentTokenType = tokens.get(i).tokenType();
 			TokenType.ExpressionZone nextProceedingZone = currentTokenType.proceedingZone;
-			if (!currentTokenType.expressionZone.inZoneOf(expectingZone)) {
+			if (!currentTokenType.currentZone.inZoneOf(expectingZone)) {
 				// if (currentTokenType == RIGHT_IDENTIFIER && tokens.get(i - 1))
 				throw new ParseException("unexpected token %s at index %d", tokens.get(i).string(), tokens.get(i).from());
 			} else {
 				String tokenString = tokens.get(i).string();
-				switch (currentTokenType) {		// NO FALL THROUGH
+				if (currentTokenType.canConvertToOperator()) {
+					expBuilder.add(currentTokenType.getOperator(tokenString));
+				} else switch (currentTokenType) {		// NO FALL THROUGH
 					case LEFT_IDENTIFIER:
-						List<Expression> innerExpressions = parseExpression(tokens, localVariables, i + 1);
-						expBuilder.add(innerExpressions.get(0)); break;
+						CommaSeparatedExpression innerExpressions = parseExpression(tokens, localVariables, i + 1);
+						expBuilder.add(innerExpressions); break;
 					case RIGHT_IDENTIFIER:
 						if (inner) {
 							tokens.subList(start, i + 1).clear();
 							try {
-								return Collections.singletonList(expBuilder.build());
+								return new CommaSeparatedExpression(expBuilder.build());
 							} catch (IllegalArgumentAmountException e) {
 								throw new ParseException("illegal amount of arguments near %s near index %d: %s",
 														 tokens.get(i).string(), tokens.get(i).from(), e.getMessage());
 							}
 						} else
 							throw new ParseException("unbalanced right bracket \"%s\" at index %d", tokens.get(i).string(), tokens.get(i).from());
-					case OPERATOR:
-						expBuilder.add(statementOperators.get(tokenString)); break;
-					case FUNCTION:
-						expBuilder.add(statementLineOperators.get(tokenString)); break;
 					case COMMA:
-						parseExpression(tokens, localVariables, i + 1); // TODO
-						// expBuilder.add()
+						try {
+							return new CommaSeparatedExpression(expBuilder.build(),
+																parseExpression(tokens, localVariables, i + 1));
+						} catch (IllegalArgumentAmountException e) {
+							throw new ParseException("illegal amount of arguments near %s near index %d: %s",
+													 tokens.get(i).string(), tokens.get(i).from(), e.getMessage());
+						}
 					case VARIABLE:
 						expBuilder.add(localVariables.computeIfAbsent(tokenString, Variable::new)); break;
 					case UNKNOWN:
@@ -155,13 +173,13 @@ public class ExpressionParser {
 		if (!expectingZone.inZoneOf(MIDDLE))
 			throw new ParseException("unfinished expression at the end");
 		try {
-			return Collections.singletonList(expBuilder.build());
+			return new CommaSeparatedExpression(expBuilder.build());
 		} catch (IllegalArgumentAmountException e) {
 			throw new ParseException("illegal amount of arguments in the last function: " + e.getMessage());
 		}
 	}
 
-	private static List<StringPart> tokenizeStatement(String str) {
+	private static List<StringPart> tokenizeExpression(String str) {
 		TokenPart[] tokenParts = new TokenPart[str.length() + 1];
 		tokenParts[0] = new TokenPart(true, Collections.emptyList());
 		for (int i = 1; i <= str.length(); i++) {
@@ -170,7 +188,7 @@ public class ExpressionParser {
 				if (tokenParts[j].splittable()) {
 					String prefix = str.substring(j, i);
 					TokenType currentTokenType = TokenType.tokenTypeOf(prefix);
-					if (currentTokenType != TokenType.UNKNOWN) { // valid
+					if (currentTokenType != UNKNOWN) { // valid
 						prefixes.addAll(tokenParts[j].prefixes());
 						prefixes.add(new StringPart(prefix, j, i, currentTokenType));
 						break;
@@ -183,7 +201,7 @@ public class ExpressionParser {
 		List<StringPart> lastParts = tokenParts[tokenParts.length - 1].prefixes();
 		if (lastParts.size() == 0)
 			throw new ParseException("unknown token");
-		else if (lastParts.get(lastParts.size() - 1).tokenType == TokenType.UNKNOWN)
+		else if (lastParts.get(lastParts.size() - 1).tokenType == UNKNOWN)
 			throw new ParseException("unknown token: %s at index %d",
 									 lastParts.get(lastParts.size() - 1).string(), lastParts.get(lastParts.size() - 1).from());
 

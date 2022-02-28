@@ -1,6 +1,6 @@
 package bran.tree;
 
-public interface OrderedOperator extends Operator {
+public interface OrderedOperator extends Mapper {
 
 	int getOrder();
 

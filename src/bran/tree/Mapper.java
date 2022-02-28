@@ -1,10 +1,10 @@
 package bran.tree;
 
-public interface Operator extends TreePart {
+public interface Mapper extends TreePart {
 
 	String[] getSymbols();
 
-	default Operator inverse() {
+	default Mapper inverse() {
 		return null;
 	}
 

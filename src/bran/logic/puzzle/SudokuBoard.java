@@ -3,6 +3,7 @@ package bran.logic.puzzle;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.mathexprs.Equation;
+import bran.mathexprs.EquationType;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
@@ -56,7 +57,7 @@ public class SudokuBoard {
 		}
 
 		public boolean solve() {
-			if (conditions() instanceof Equation equation) {
+			if (conditions() instanceof Equation equation && equation.getEquivalenceType() == EquationType.EQUAL) {
 				final Expression left = equation.getLeft();
 				final Expression right = equation.getRight();
 				if (left == this || left == exp) {

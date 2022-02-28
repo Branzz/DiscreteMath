@@ -24,7 +24,7 @@ public enum ExpressionOperatorType implements OperatorType {
 		return associativity;
 	}
 
-	public static final int MIN_ORDER = 0;
-	public static final int MAX_ORDER = 9;
+	public static final int MIN_ORDER = 11;
+	public static final int MAX_ORDER = 13;
 
 }
