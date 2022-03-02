@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
+import bran.logic.statements.special.proofs.Argument;
 import bran.tree.Composition;
 
 public class TruthTable {

@@ -1,4 +1,4 @@
-package bran.logic;
+package bran.logic.statements.special.proofs;
 
 import java.util.ArrayList;
 import java.util.List;

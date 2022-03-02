@@ -1,17 +1,17 @@
-package bran.test;
+package bran.run;
 
 import bran.draw.StartViewer;
 import bran.draw.exprs.StartExpressionViewer;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
 import bran.graphs.Vertex;
-import bran.logic.Argument;
+import bran.logic.statements.special.proofs.Argument;
 import bran.logic.StatementGenerator;
 import bran.logic.TruthTable;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.logic.statements.operators.LogicalOperator;
 import bran.logic.statements.special.UniversalStatement;
+import bran.logic.statements.special.equivalence.Equation;
 import bran.mathexprs.*;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
@@ -33,8 +33,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static bran.logic.statements.operators.LogicalOperator.AND;
-import static bran.logic.statements.operators.LogicalOperator.OR;
 import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
 import static bran.mathexprs.treeparts.operators.Operator.DIV;
 import static bran.mathexprs.treeparts.operators.Operator.MUL;

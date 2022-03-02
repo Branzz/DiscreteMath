@@ -1,7 +1,7 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.logic.Argument;
+import bran.logic.statements.special.proofs.Argument;
 import bran.logic.statements.*;
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.LogicalOperator;

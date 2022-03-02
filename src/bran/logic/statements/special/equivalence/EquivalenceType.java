@@ -1,4 +1,4 @@
-package bran.mathexprs;
+package bran.logic.statements.special.equivalence;
 
 import bran.tree.Mapper;
 

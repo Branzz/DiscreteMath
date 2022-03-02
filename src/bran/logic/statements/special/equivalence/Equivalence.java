@@ -1,6 +1,5 @@
-package bran.mathexprs;
+package bran.logic.statements.special.equivalence;
 
-import bran.logic.statements.OperationStatement;
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
 import bran.logic.statements.special.SpecialStatement;
@@ -8,10 +7,8 @@ import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.operators.Operator;
 import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.tree.Composition;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class Equivalence extends SpecialStatement {

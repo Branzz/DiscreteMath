@@ -1,5 +1,6 @@
-package bran.mathexprs;
+package bran.logic.statements.special.equivalence;
 
+import bran.mathexprs.ExpressionDisplayStyle;
 import bran.sets.SetDisplayStyle;
 import bran.tree.Mapper;
 

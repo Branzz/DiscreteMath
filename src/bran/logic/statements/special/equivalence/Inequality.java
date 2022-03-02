@@ -1,10 +1,9 @@
-package bran.mathexprs;
+package bran.logic.statements.special.equivalence;
 
 import bran.logic.statements.Statement;
 import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
-import bran.tree.Composition;
 
 public class Inequality extends Equivalence {
 

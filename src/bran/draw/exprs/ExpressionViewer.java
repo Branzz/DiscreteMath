@@ -1,15 +1,12 @@
 package bran.draw.exprs;
 
-import bran.applet.Applet;
-import bran.mathexprs.Equivalence;
+import bran.logic.statements.special.equivalence.Equivalence;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 
-import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.text.DateFormatter;
-import javax.swing.text.DefaultFormatter;
+import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.DecimalFormat;
@@ -32,12 +29,12 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 
 	private ExpressionCalculator calculator;
 
-	double xMin = -10.0;
-	double xMax = 10.0;
-	double xScale = xMax - xMin;
-	double yMin = -10.0;
-	double yMax = 10.0;
-	double yScale = yMax - yMin;
+	double xMin;
+	double xMax;
+	double xScale;
+	double yMin;
+	double yMax;
+	double yScale;
 
 	private double mouseDownX;
 	private double mouseDownY;
@@ -56,6 +53,7 @@ public final class ExpressionViewer extends Applet implements MouseListener, Com
 		this.addMouseListener(this);
 		this.addComponentListener(this);
 		this.addMouseWheelListener(this);
+		resetView();
 		// addExpression(COS.ofS(of("b").sqrt()));
 		addExpression(COS.ofS(of("b").sqrt()));
 		addExpression(LOG.ofS(LOG.ofS(x, Constant.E), LOG.ofS(Constant.E, x)).derive().simplified());

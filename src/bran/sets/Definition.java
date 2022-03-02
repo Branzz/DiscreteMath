@@ -2,8 +2,8 @@ package bran.sets;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.special.UniversalNumbersStatement;
-import bran.mathexprs.Inequality;
-import bran.mathexprs.InequalityType;
+import bran.logic.statements.special.equivalence.Inequality;
+import bran.logic.statements.special.equivalence.InequalityType;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;

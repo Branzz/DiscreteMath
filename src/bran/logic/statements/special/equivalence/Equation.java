@@ -1,12 +1,11 @@
-package bran.mathexprs;
+package bran.logic.statements.special.equivalence;
 
 import bran.logic.statements.Statement;
 import bran.mathexprs.treeparts.Expression;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
-import bran.tree.Composition;
 
-import static bran.mathexprs.EquationType.EQUAL;
+import static bran.logic.statements.special.equivalence.EquationType.EQUAL;
 
 public class Equation extends Equivalence {
 

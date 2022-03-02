@@ -2,7 +2,10 @@ package bran.logic.statements;
 
 import bran.logic.statements.operators.LineOperator;
 import bran.logic.statements.operators.LogicalOperator;
-import bran.mathexprs.*;
+import bran.logic.statements.special.equivalence.Equation;
+import bran.logic.statements.special.equivalence.EquationType;
+import bran.logic.statements.special.equivalence.Inequality;
+import bran.logic.statements.special.equivalence.InequalityType;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Branch;

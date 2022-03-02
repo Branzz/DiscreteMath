@@ -7,7 +7,6 @@ import bran.logic.statements.operators.LogicalOperator;
 import bran.logic.statements.special.ConditionalStatement;
 import bran.logic.statements.special.QuantifiedStatementArguments;
 import bran.logic.statements.special.UniversalStatement;
-import bran.mathexprs.Equation;
 import bran.sets.Set;
 import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Composition;

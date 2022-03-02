@@ -2,8 +2,8 @@ package bran.logic.puzzle;
 
 import bran.logic.statements.Statement;
 import bran.logic.statements.VariableStatement;
-import bran.mathexprs.Equation;
-import bran.mathexprs.EquationType;
+import bran.logic.statements.special.equivalence.Equation;
+import bran.logic.statements.special.equivalence.EquationType;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;

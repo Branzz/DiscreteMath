@@ -3,13 +3,12 @@ package bran.logic.statements;
 import java.util.*;
 
 import bran.logic.statements.operators.LogicalOperator;
-import bran.mathexprs.EquationType;
-import bran.mathexprs.Equivalence;
-import bran.mathexprs.EquivalenceType;
-import bran.mathexprs.InequalityType;
+import bran.logic.statements.special.equivalence.EquationType;
+import bran.logic.statements.special.equivalence.Equivalence;
+import bran.logic.statements.special.equivalence.EquivalenceType;
+import bran.logic.statements.special.equivalence.InequalityType;
 import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
-import bran.sets.numbers.godel.GodelNumber;
 import bran.sets.numbers.godel.GodelNumberSymbols;
 import bran.sets.numbers.godel.GodelBuilder;
 import bran.tree.Fork;

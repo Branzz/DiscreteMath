@@ -10,6 +10,7 @@ import bran.mathexprs.treeparts.Constant;
 import bran.mathexprs.treeparts.Expression;
 import bran.mathexprs.treeparts.Variable;
 import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
+import bran.matrices.Matrix;
 import bran.parser.ExpressionParser;
 import bran.parser.StatementParser;
 import bran.sets.Definition;
@@ -39,6 +40,9 @@ public class Main {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		System.out.println(new Matrix("2,0,-1;0,1,0").multiply(new Matrix("1,2;5,-4;-3,3")));
+
+		StatementGenerator;
 		// Variable x = new Variable("x");
 
 		// final Expression exp = Constant.TWO.div(x.div(x.div(x.div(x))));
