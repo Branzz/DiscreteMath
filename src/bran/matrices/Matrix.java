@@ -3,6 +3,8 @@ package bran.matrices;
 import bran.exceptions.IllegalMatrixSizeException;
 import bran.graphs.Graph;
 
+import java.util.Arrays;
+
 public class Matrix {
 
 	double[][] values;
@@ -25,6 +27,28 @@ public class Matrix {
 			values[i][i] = 1;
 	}
 
+	public Matrix(final String str) {
+		final String[] rows = str.split(";");
+		final String[] firstCols = rows[0].split(",");
+		final int columns = firstCols.length;
+		values = new double[rows.length][columns];
+		values[0] = strToArr(firstCols);
+		for (int i = 1; i < rows.length; i++) {
+			final String[] cols = rows[i].split(",");
+			if (cols.length != columns)
+				throw new IllegalMatrixSizeException();
+			values[i] = strToArr(cols);
+		}
+	}
+
+	private static double[] strToArr(String[] nums) {
+		double[] row = new double[nums.length];
+		for (int i = 0; i < nums.length; i++) {
+			row[i] = Double.parseDouble(nums[i]);
+		}
+		return row;
+	}
+
 	public Matrix add(Matrix m) {
 		if (getRows() != m.getRows() || getColumns() != m.getColumns())
 				throw new IllegalMatrixSizeException();
@@ -45,17 +69,19 @@ public class Matrix {
 		return new Matrix(sub);
 	}
 
-	public Matrix multiply(Matrix m) {
-		if (!(getRows() == m.getColumns() && getColumns() == m.getRows()))
+	public Matrix multiply(Matrix other) {
+		if (this.getColumns() != other.getRows())
 			throw new IllegalMatrixSizeException();
-		double[][] prod = new double[getRows()][getRows()];
-		for (int r = 0; r < getRows(); r++)
-			for (int c = 0; c < m.getColumns(); c++) {
+		final int size = getColumns(); // == other.getRows()
+		double[][] prod = new double[this.getRows()][other.getColumns()];
+		for (int r = 0; r < prod.length; r++) {
+			for (int c = 0; c < prod[r].length; c++) {
 				double dotProduct = 0.0;
-				for (int i = 0; i < getRows(); i++)
-					dotProduct += getValues()[r][i] + m.getValues()[i][c];
+				for (int i = 0; i < size; i++)
+					dotProduct += this.getValues()[r][i] * other.getValues()[i][c];
 				prod[r][c] = dotProduct;
 			}
+		}
 		return new Matrix(prod);
 	}
 
@@ -104,6 +130,19 @@ public class Matrix {
 
 	public void setValues(double[][] values) {
 		this.values = values;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sB = new StringBuilder();
+		for (final double[] row : values) {
+			for (final double num : row) {
+				sB.append(num % 1 == 0 ? Integer.toString((int) num) : Double.toString(num))
+				  .append(' ');
+			}
+			sB.append('\n');
+		}
+		return sB.substring(0, sB.length() - 1);
 	}
 
 }
