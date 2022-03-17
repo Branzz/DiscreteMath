@@ -1,17 +1,17 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.LogicalOperator;
-import bran.logic.statements.special.equivalence.EquationType;
-import bran.logic.statements.special.equivalence.InequalityType;
-import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Variable;
-import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
-import bran.mathexprs.treeparts.functions.MultivariableFunction;
-import bran.mathexprs.treeparts.operators.Operator;
-import bran.tree.Composition;
-import bran.tree.Mapper;
+import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.LogicalOperator;
+import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
+import bran.tree.compositions.statements.special.equivalences.inequality.InequalityType;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.exceptions.IllegalArgumentAmountException;
+import bran.tree.compositions.expressions.functions.MultiArgFunction;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.Composition;
+import bran.tree.structure.mapper.Mapper;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
@@ -31,7 +31,7 @@ public class CompositionParser {
 
 
 	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = //expected zone param
-			Map.of(MultivariableFunction.class, FUNCTION,
+			Map.of(MultiArgFunction.class, FUNCTION,
 				   LineOperator.class, LINE_OPERATOR,
 				   Operator.class, EXP_OPERATOR,
 				   LogicalOperator.class, SNT_OPERATOR,

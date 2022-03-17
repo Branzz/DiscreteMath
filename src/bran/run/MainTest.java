@@ -1,30 +1,35 @@
 package bran.run;
 
-import bran.draw.StartViewer;
-import bran.draw.exprs.StartExpressionViewer;
+import bran.tree.compositions.sets.regular.MultiRangedSet;
+import bran.tree.compositions.statements.StatementImpl;
+import bran.tree.compositions.statements.special.VerbalStatement;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.application.draw.StartViewer;
+import bran.application.draw.exprs.StartExpressionViewer;
+import bran.tree.generators.ExpressionGenerator;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
 import bran.graphs.Vertex;
-import bran.logic.statements.special.proofs.Argument;
-import bran.logic.StatementGenerator;
-import bran.logic.TruthTable;
-import bran.logic.statements.Statement;
-import bran.logic.statements.VariableStatement;
-import bran.logic.statements.special.UniversalStatement;
-import bran.logic.statements.special.equivalence.Equation;
-import bran.mathexprs.*;
-import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
-import bran.mathexprs.treeparts.operators.OperatorExpression;
+import bran.tree.compositions.statements.special.proofs.Argument;
+import bran.tree.generators.StatementGenerator;
+import bran.tree.compositions.statements.TruthTable;
+import bran.tree.compositions.statements.Statement;
+import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
+import bran.tree.compositions.statements.special.equivalences.equation.Equation;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.matrices.Matrix;
 import bran.parser.StatementParser;
-import bran.sets.FiniteSet;
-import bran.sets.NumberToText;
-import bran.sets.SpecialSet;
-import bran.sets.SpecialSetType;
-import bran.sets.numbers.NumberLiteral;
-import bran.sets.numbers.godel.GodelNumberFactors;
+import bran.tree.compositions.sets.regular.FiniteSet;
+import bran.tree.compositions.expressions.values.numbers.NumberToText;
+import bran.tree.compositions.sets.regular.SpecialSet;
+import bran.tree.compositions.sets.regular.SpecialSetType;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
+import bran.tree.compositions.godel.GodelNumberFactors;
+import bran.tree.Holder;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -33,9 +38,9 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.*;
-import static bran.mathexprs.treeparts.operators.Operator.DIV;
-import static bran.mathexprs.treeparts.operators.Operator.MUL;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
+import static bran.tree.compositions.expressions.operators.Operator.DIV;
+import static bran.tree.compositions.expressions.operators.Operator.MUL;
 
 public class MainTest {
 
@@ -49,6 +54,7 @@ public class MainTest {
 		// hamiltonianPathTestingEdges();
 		// parseTest();
 		// statementGeneratorTest();
+		// expressionGeneratorTest();
 		// Stream.of("111", "50").map(Main::solve).forEach(System.out::println);
 		// expressionTest();
 		// System.out.println(maxProfit(new int[] {2, 0, -1}));
@@ -58,7 +64,9 @@ public class MainTest {
 		// factorTest();
 		// powDomainTest();
 		// substituteTest();
-		equivalenceSimplificationTest();
+		// equivalenceSimplificationTest();
+		// inverseTest();
+		compareTest();
 
 		// Variable a = new Variable("a");
 		// LOG.ofS(a, a.pow(a)).div(a).greater(Constant.NEG_INFINITY).and(LOG.ofS(a, a.pow(a)).div(a).less((Constant.INFINITY)).and(Constant.ONE.greater(Constant.NEG_INFINITY)).and(Constant.ONE.less(Constant.INFINITY))).simplified();
@@ -69,7 +77,19 @@ public class MainTest {
 		// 	System.out.println(i + " " + ((i >> 2) - 1));
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().getTable());
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().simplified().getTable());
+	}
 
+	private static void compareTest() {
+		Variable x = new Variable("x");
+		// System.out.println(x.squared().less(x.squared().plus(Constant.ONE)).truth());
+		// System.out.println(x.sqrt().div(x).getDomainConditions());
+		new MultiRangedSet(List.of(x.less(Constant.of(4)), x.greater(Constant.of(2)))).getRanges().forEach(System.out::println);
+	}
+
+	private static void inverseTest() {
+		Variable x = new Variable("x");
+		Expression a = LOG.ofS(x.minus(x).plus(Constant.E), SIN.ofS(Constant.of(3).times(x.squared().plus(Constant.of(2)))));
+		System.out.println(a + "\n" + a.inverse());
 	}
 
 	private static void substituteTest() { // TODO
@@ -268,11 +288,37 @@ public class MainTest {
 
 	private static void statementGeneratorTest() {
 		// VariableStatement a = new VariableStatement("a");
-		System.out.println(StatementGenerator.generate(3, 14));
 		for (long seed = 0; seed <= 10; seed++)
 			for (int s = 15; s <= 15; s++)
 				System.out.printf("%s %d,%d\n%s\n", StatementGenerator.generate(seed, s), seed, s, StatementGenerator.generate(seed, s).simplified());
 		// System.out.println(StatementGenerator.generate(3L, 20, .8, .5, .5, 0, 1));
+	}
+
+	private static void expressionGeneratorTest() {
+		int seedOffset = 0;
+		final int sampleSize = 30;
+		for (double i = 0.0; i < 1.01; i += 0.05) {
+			ExpressionGenerator.DEEP_CHANCE = i;
+			double avg = 0;
+			for (long seed = 0; seed < sampleSize; seed++) {
+				final Expression generation = ExpressionGenerator.generate(seed, 20, 1, 0.5, 0.5, 0.5);
+				avg += generation.depthProb();
+			}
+			System.out.println(i + " : " + avg / sampleSize);
+		}
+		ExpressionGenerator.DEEP_CHANCE = .35;
+		for (long seed = 0; seed < 5; seed++) {
+			final Expression generation = ExpressionGenerator.generate(seed + seedOffset++, 20, 1, 0.5, 0.5, 0.5);
+			System.out.printf("%s %f\n", generation.toFullString(), generation.depthProb());
+		}
+		// System.out.println((((PI.times(PI)).times(PI.times(PI))).times(((PI.times(PI)).times(PI.times(PI)))))
+		// 				.times((((PI.times(PI)).times(PI.times(PI))).times(((PI.times(PI)).times(PI.times(PI)))))).depthProb());
+		// System.out.println(PI.times(PI.times(PI.times(PI.times(PI.times(PI.times(PI.times(PI.times(
+		// 		PI.times(PI.times(PI.times(PI.times(PI.times(PI.times(PI.times(PI))))))))))))))).depthProb());
+	}
+
+	private static double truncate(double d) {
+		return Math.floor((d) * 100) / 100;
 	}
 
 	static void parseTest() {
@@ -480,6 +526,62 @@ public class MainTest {
 				values[col][row] = decision;
 			}
 		return new Matrix(values);
+	}
+
+	private static void mountainProof() {
+		class Mountain extends VerbalStatement {
+			private boolean borderSeparatesReligon;
+			public Mountain(final String name, final boolean borderSeparatesReligion) {
+				super(name);
+				this.borderSeparatesReligon = borderSeparatesReligion;
+			}
+			@Override public boolean getTruth() {
+				return borderSeparatesReligon;
+			}
+			@Override
+			public String toString() {
+				return super.toString() + ", " + (borderSeparatesReligon ? "Separates" : "Doesn't Separate");
+			}
+		}
+
+		class MountainVariable extends StatementImpl implements Holder<Mountain> {
+			private String name;
+			private Mountain mountain;
+
+			public MountainVariable(final String name, final Mountain mountain) {
+				this.name = name;
+				this.mountain = mountain;
+			}
+			@Override
+			public Mountain get() {
+				return mountain;
+			}
+			@Override
+			public void set(final Mountain mountain) {
+				this.mountain = mountain;
+			}
+			@Override public boolean getTruth() {
+				return mountain.borderSeparatesReligon;
+			}
+			@Override
+			public String toFullString() {
+				return name;
+			}
+		}
+
+		final MountainVariable m = new MountainVariable("Mountain", null);
+		System.out.println(Statement.forAll(m).in(
+				new FiniteSet<>(Map.of("Caucus", true, "Tibet", true, "Alps", true, "Rocky", false).entrySet().stream()
+								   .map(e -> new Mountain(e.getKey(), e.getValue()))
+								   .toArray(Mountain[]::new)), args1 -> m)
+									.unProven()
+									.exhaustiveProofString());
+
+		System.out.println(new ExistentialStatement<>(args1 -> m,
+													  new FiniteSet<>(Map.of("Caucus", true, "Tibet", true, "Alps", true, "Rocky", false).entrySet().stream()
+																		 .map(e -> new Mountain(e.getKey(), e.getValue()))
+																		 .toArray(Mountain[]::new)),
+													  false, m).exhaustiveProofString());
 	}
 
 }

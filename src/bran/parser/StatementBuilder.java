@@ -1,9 +1,9 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.logic.statements.*;
-import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.LogicalOperator;
+import bran.tree.compositions.statements.*;
+import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.LogicalOperator;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;

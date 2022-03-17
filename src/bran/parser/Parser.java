@@ -3,14 +3,11 @@ package bran.parser;
 // import bran.logic.tree.TreeBuilder;
 
 
-import bran.exceptions.ParseException;
-import bran.tree.Mapper;
+import bran.tree.structure.mapper.Mapper;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static bran.parser.StatementParser.TokenType.UNKNOWN;
-import static bran.parser.StatementParser.TokenType.tokenTypeOf;
 import static java.util.stream.Collectors.toMap;
 
 public class Parser {

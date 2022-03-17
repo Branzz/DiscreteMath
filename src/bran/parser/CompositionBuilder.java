@@ -1,18 +1,16 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.special.equivalence.EquivalenceType;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.functions.Function;
-import bran.mathexprs.treeparts.functions.FunctionExpression;
-import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
-import bran.mathexprs.treeparts.operators.ExpressionOperatorType;
-import bran.mathexprs.treeparts.operators.Operator;
-import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.tree.Composition;
-import bran.tree.ForkOperator;
-import bran.tree.TreePart;
+import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.functions.ExpFunction;
+import bran.exceptions.IllegalArgumentAmountException;
+import bran.tree.compositions.expressions.operators.ExpressionOperatorType;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.Composition;
+import bran.tree.structure.mapper.ForkOperator;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -42,7 +40,7 @@ public class CompositionBuilder {
 			add(statement);
 		else if (obj instanceof Operator operator)
 			add(operator);
-		else if (obj instanceof Function lineOperator)
+		else if (obj instanceof ExpFunction lineOperator)
 			add(lineOperator);
 		else if (obj instanceof CommaSeparatedExpression expressions)
 			add(expressions);
@@ -52,12 +50,12 @@ public class CompositionBuilder {
 		statementChain.addNode(new CompositionChain.CompositionNode(statement));
 	}
 
-	public void add(Operator operator) {
-		statementChain.addNode(new CompositionChain.OperatorNode(operator));
+	public void add(LineOperator lineOperator) {
+		statementChain.addNode(new CompositionChain.LineOperatorNode(lineOperator));
 	}
 
-	public void add(Function lineOperator) {
-		statementChain.addNode(new CompositionChain.LineOperatorNode(lineOperator));
+	public void add(ForkOperator forkOperator) {
+		statementChain.addNode(new CompositionChain.OperatorNode(forkOperator));
 	}
 
 	public void add(List<Expression> expressions) {
@@ -154,20 +152,22 @@ public class CompositionBuilder {
 		}
 
 		Composition lineStream(LineOperatorNode x, Node start) throws IllegalArgumentAmountException {
-			return new FunctionExpression(x.function, lineStream0(x.next, start));
+			return null;
+			// return x.isExpression() ? new FunctionExpression(x.function, lineStream0(x.next, start))
+			// 			   :
 		}
 
 		Composition[] lineStream0(Node x, Node start) throws IllegalArgumentAmountException {
 			if (x instanceof LineOperatorNode lONnext) {
-				return new Expression[] { lineStream(lONnext, start) };
+				return new Composition[] { lineStream(lONnext, start) };
 			} else if (x instanceof CompositionNode nextStatement) { // base case
 				start.next = x.next;
-				return new Expression[] { nextStatement.expression } ;
+				return new Composition[] { nextStatement.composition } ;
 			} else if (x instanceof MultiExpressionNode nextStatement) {
 				start.next = x.next;
 				return nextStatement.expressions.toArray(Expression[]::new);
 			}
-			unknownParsing();
+			throw unknownParsing();
 		}
 
 		void collectOperators() { // TODO
@@ -208,7 +208,7 @@ public class CompositionBuilder {
 
 		private static abstract class Node {
 			protected Node next = null;
-			abstract TreePart value();
+			abstract Object value();
 			abstract Node append(Object next) throws ParseException;
 			static Node of(Object o) {
 				if (o instanceof Composition c)
@@ -217,7 +217,7 @@ public class CompositionBuilder {
 					return new OperatorNode(op);
 				else if (o instanceof LineOperator lO)
 					return new LineOperatorNode(lO);
-				else if (o instanceof Function f)
+				else if (o instanceof ExpFunction f)
 					return new FunctionNode(f);
 				else if (o instanceof CommaSeparatedExpression cE)
 					return new MultiExpressionNode(cE.expressions());
@@ -232,7 +232,7 @@ public class CompositionBuilder {
 				this.equivalenceType = equivalenceType;
 			}
 			@Override
-			TreePart value() { return null; }
+			Object value() { return null; }
 			@Override Node append(final Object next) throws ParseException {
 				return null;
 			}
@@ -243,7 +243,7 @@ public class CompositionBuilder {
 			final Composition composition;
 			final boolean isExpression;
 			@Override
-			TreePart value() { return composition; }
+			Object value() { return composition; }
 			public CompositionNode(final Composition composition) {
 				this.composition = composition;
 				this.isExpression = composition instanceof Expression;
@@ -259,7 +259,7 @@ public class CompositionBuilder {
 			final ForkOperator operator;
 			final boolean isExpression;
 			@Override
-			TreePart value() { return operator; }
+			Object value() { return operator; }
 			public OperatorNode(final ForkOperator operator) {
 				this.operator = operator;
 				this.isExpression = operator instanceof Operator; // !ForkOperator
@@ -272,7 +272,7 @@ public class CompositionBuilder {
 
 		private static class LineOperatorNode extends Node {
 			final LineOperator operator;
-			TreePart value() { return operator; }
+			Object value() { return operator; }
 			public LineOperatorNode(final LineOperator operator) {
 				this.operator = operator;
 			}
@@ -287,10 +287,10 @@ public class CompositionBuilder {
 		}
 
 		private static class FunctionNode extends Node {
-			final Function function;
+			final ExpFunction function;
 			@Override
-			TreePart value() { return function; }
-			public FunctionNode(final Function function) {
+			Object value() { return function; }
+			public FunctionNode(final ExpFunction function) {
 				this.function = function;
 			}
 			@Override
@@ -310,7 +310,7 @@ public class CompositionBuilder {
 				this.expressions = expressions;
 			}
 			@Override
-			TreePart value() { return expressions; }
+			Object value() { return expressions; }
 			@Override Node append(final Object next) throws ParseException {
 				return this.next = (MultiExpressionNode) next;
 			}

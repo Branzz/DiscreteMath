@@ -1,30 +1,36 @@
 package bran.run;
 
-import bran.logic.StatementGenerator;
-import bran.logic.statements.Statement;
-import bran.logic.statements.StatementDisplayStyle;
-import bran.logic.statements.VariableStatement;
-import bran.logic.statements.special.ExistentialStatement;
-import bran.logic.statements.special.UniversalStatement;
-import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
-import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
-import bran.matrices.Matrix;
-import bran.parser.ExpressionParser;
+import bran.tree.compositions.expressions.functions.ExpFunction;
+import bran.tree.compositions.expressions.functions.FunctionExpression;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.sets.LineSet;
+import bran.tree.compositions.sets.OperationSet;
+import bran.tree.compositions.sets.Set;
+import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.LogicalOperator;
+import bran.tree.generators.StatementGenerator;
+import bran.tree.compositions.statements.*;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.parser.StatementParser;
-import bran.sets.Definition;
-import bran.sets.FiniteSet;
-import bran.sets.SpecialSet;
-import bran.sets.SpecialSetType;
-import bran.sets.numbers.NumberLiteral;
-import bran.sets.numbers.godel.GodelNumberFactors;
+import bran.tree.compositions.Definition;
+import bran.tree.compositions.sets.regular.FiniteSet;
+import bran.tree.compositions.sets.regular.SpecialSet;
+import bran.tree.compositions.sets.regular.SpecialSetType;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
+import bran.tree.compositions.godel.GodelNumberFactors;
+import bran.tree.structure.TreePart;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static bran.mathexprs.treeparts.Constant.ZERO;
-import static bran.mathexprs.treeparts.functions.MultivariableFunction.LOG;
+import static bran.tree.compositions.expressions.values.Constant.ZERO;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 
 public class Main {
 
@@ -40,10 +46,20 @@ public class Main {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		System.out.println(new Matrix("2,0,-1;0,1,0").multiply(new Matrix("1,2;5,-4;-3,3")));
+		// System.out.println(new Matrix("2,0,-1;0,1,0").multiply(new Matrix("1,2;5,-4;-3,3")));
 
-		StatementGenerator;
+		// mountainProof();
+		// StartExpressionViewer.start();
+
+		verify();
+
 		// Variable x = new Variable("x");
+		//
+		// final Expression expression = x.pow(x.times(LOG.of(PI, x)));
+		// System.out.println(expression);
+		// System.out.println(expression.getDomainConditions());
+		// System.out.println(expression.derive());
+		// System.out.println(expression.derive().simplified());
 
 		// final Expression exp = Constant.TWO.div(x.div(x.div(x.div(x))));
 		// System.out.println(exp);
@@ -112,9 +128,9 @@ public class Main {
 						   + "\n" + expression.derive().getUniversalStatement().simplified()
 						   + "\n" + Definition.ODD.test(new Constant(5.0))
 						   + "\n" + new ExistentialStatement<>(a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(ZERO),
-																							 new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)), true,
+																							 new FiniteSet(new NumberLiteral(9), new NumberLiteral(5)), true,
 																							 new Variable("b")),
-															   new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
+															   new FiniteSet(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
 															   new Variable("a"))
 						   + "\n" + Arrays.toString(ZERO.equates(ZERO).godelNumber().getGodelNumberArray())
 						   + "\n" + new GodelNumberFactors(243_000_000L).symbols()
@@ -126,6 +142,12 @@ public class Main {
 
 	}
 
+	public static void verify() {
+		System.out.println(TreePart.treeVerifier(Statement.class, LogicalOperator.class, OperationStatement.class, LineOperator.class, LineStatement.class));
+		System.out.println(TreePart.treeVerifier(Expression.class, Operator.class, OperatorExpression.class, ExpFunction.class, FunctionExpression.class));
+		System.out.println(TreePart.treeVerifier(Set.class, LogicalOperator.class, OperationSet.class, LineOperator.class, LineSet.class));
+	}
+
 	private static <T> T[] toArray(List<T> list) {
 		T[] toR = (T[]) java.lang.reflect.Array.newInstance(list.get(0).getClass(), list.size());
 		for (int i = 0; i < list.size(); i++) {
@@ -133,5 +155,6 @@ public class Main {
 		}
 		return toR;
 	}
+
 
 }

@@ -1,10 +1,10 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.logic.statements.special.proofs.Argument;
-import bran.logic.statements.*;
-import bran.logic.statements.operators.LineOperator;
-import bran.logic.statements.operators.LogicalOperator;
+import bran.tree.compositions.statements.special.proofs.Argument;
+import bran.tree.compositions.statements.*;
+import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.LogicalOperator;
 
 import java.util.*;
 
@@ -191,6 +191,10 @@ public class StatementParser {
 									 lastParts.get(lastParts.size() - 1).string(), lastParts.get(lastParts.size() - 1).from());
 
 		return lastParts;
+	}
+
+	public static Statement parseWithRegex(String str) {
+		return null;
 	}
 
 }

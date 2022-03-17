@@ -1,13 +1,13 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.mathexprs.treeparts.Constant;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.Variable;
-import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
-import bran.mathexprs.treeparts.functions.MultivariableFunction;
-import bran.mathexprs.treeparts.operators.Operator;
-import bran.tree.TreePart;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.exceptions.IllegalArgumentAmountException;
+import bran.tree.compositions.expressions.functions.MultiArgFunction;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.structure.TreePart;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,7 +33,7 @@ public class ExpressionParser {
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
 	static final Map<String, Operator> expressionOperators = Parser.getSymbolMapping(Operator.values());
-	static final Map<String, MultivariableFunction> expressionLineOperators = Parser.getSymbolMapping(MultivariableFunction.values());
+	static final Map<String, MultiArgFunction> expressionLineOperators = Parser.getSymbolMapping(MultiArgFunction.values());
 
 	// private static final Set<String> statementLeftIdentifiers = "([{".chars().mapToObj(Character::toString).collect(Collectors.toSet());
 

@@ -1,6 +1,6 @@
 package bran.parser;
 
-import bran.mathexprs.treeparts.Expression;
+import bran.tree.compositions.expressions.Expression;
 
 import java.util.ArrayList;
 import java.util.List;

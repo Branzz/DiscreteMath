@@ -1,13 +1,13 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
-import bran.mathexprs.treeparts.Expression;
-import bran.mathexprs.treeparts.functions.Function;
-import bran.mathexprs.treeparts.functions.FunctionExpression;
-import bran.mathexprs.treeparts.functions.IllegalArgumentAmountException;
-import bran.mathexprs.treeparts.operators.Operator;
-import bran.mathexprs.treeparts.operators.OperatorExpression;
-import bran.mathexprs.treeparts.operators.ExpressionOperatorType;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.functions.ExpFunction;
+import bran.tree.compositions.expressions.functions.FunctionExpression;
+import bran.exceptions.IllegalArgumentAmountException;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ExpressionOperatorType;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -36,7 +36,7 @@ public class ExpressionBuilder {
 			add(statement);
 		else if (obj instanceof Operator operator)
 			add(operator);
-		else if (obj instanceof Function lineOperator)
+		else if (obj instanceof ExpFunction lineOperator)
 			add(lineOperator);
 		else if (obj instanceof CommaSeparatedExpression expressions)
 			add(expressions);
@@ -50,7 +50,7 @@ public class ExpressionBuilder {
 		statementChain.addNode(new ExpressionChain.OperatorNode(operator));
 	}
 
-	public void add(Function lineOperator) {
+	public void add(ExpFunction lineOperator) {
 		statementChain.addNode(new ExpressionChain.LineOperatorNode(lineOperator));
 	}
 
@@ -213,7 +213,7 @@ public class ExpressionBuilder {
 					return new ExpressionNode(st);
 				else if (o instanceof Operator op)
 					return new OperatorNode(op);
-				else if (o instanceof Function lO)
+				else if (o instanceof ExpFunction lO)
 					return new LineOperatorNode(lO);
 				else if (o instanceof CommaSeparatedExpression cE)
 					return new MultiExpressionNode(cE.expressions());
@@ -245,9 +245,9 @@ public class ExpressionBuilder {
 		}
 
 		private static class LineOperatorNode extends ExpressionNode {
-			final Function function;
+			final ExpFunction function;
 			@Override Object value() { return function; }
-			public LineOperatorNode(final Function function) {
+			public LineOperatorNode(final ExpFunction function) {
 				super(null);
 				this.function = function;
 			}
