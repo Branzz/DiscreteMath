@@ -25,6 +25,11 @@ public record CustomFunction(int arguments, ExpFunction inverse, Functional func
 	}
 
 	@Override
+	public int getArgAmount() {
+		return arguments;
+	}
+
+	@Override
 	public Expression derive(Expression... exp) {
 		return functionDerivable.derive(exp);
 	}
@@ -43,6 +48,11 @@ public record CustomFunction(int arguments, ExpFunction inverse, Functional func
 	@Override
 	public ExpFunction inverse() {
 		return inverse;
+	}
+
+	@Override
+	public Expression inverse(final int arg, final Expression... expressions) {
+		return inverse.ofS(expressions);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.Holder;
 import bran.tree.structure.Leaf;
@@ -14,8 +15,6 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 	protected final String name;
 	protected boolean value;
 	protected final boolean constant;
-
-	private final static Matcher variableMatcher = Pattern.compile("[A-Za-z][A-Za-z_\\d]*").matcher("");
 
 	public static final VariableStatement TAUTOLOGY = new VariableStatement("t", true, true);
 	public static final VariableStatement CONTRADICTION = new VariableStatement("c", false, true);
@@ -45,7 +44,7 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 	}
 
 	public static boolean validName(final String prefix) {
-		return variableMatcher.reset(prefix).matches();
+		return Variable.validName(prefix);
 	}
 
 	public static Statement of(final boolean truth) {

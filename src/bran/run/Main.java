@@ -106,7 +106,7 @@ public class Main {
 	public static void showcase() {
 		// DisplayStyle.displayStyle;
 		String statementString = "a    and  ~ b or  !(c ^   t) implies b"; // where t is a tautology
-		Statement statement = StatementParser.parseStatement(statementString);
+		Statement statement = StatementParser.parse(statementString);
 		StatementDisplayStyle.statementStyle = StatementDisplayStyle.MATH;
 		Variable varA = new Variable("a", true);
 		Expression expression = Expression.empty();

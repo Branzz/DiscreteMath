@@ -232,6 +232,19 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		< is not > and not ==
 		 */
 
+		/*
+
+		o : { <, <=, >, >=, ==?, !=? }
+		p:(a o b) op q:(c o d)
+		let E = P:(b - a) * Q:(d - c)
+		XOR		= 0 o E, !P opposite Q, P opposite !Q
+		NOR		= 0 o.opposite E
+		p & !q	= P*sqrt(Q) o 0
+		NAND    = P*sqrt(Q) opposite 0, sqrt(P)*Q opposite 0, !P*sqrt(Q)
+		!p & q	= sqrt(P)*Q o 0
+		XNOR	= P*!Q < 0, !P*Q < 0, pq opposite 0
+		AND		= sqrt(!P)*sqrt(!Q) opposite 0, sqrt(!P)*Q < 0
+		 */
 		if (commutativeSearch && operator.isCommutative()) {
 			final Statement simplified = commutativeCrossSearch(left, operator, right);
 			if (simplified != null)
@@ -280,15 +293,11 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 
 	private Statement equivalenceSolver(final Expression base, final Expression leftExp, final Expression rightExp,
 										final EquivalenceType leftType, final EquivalenceType rightType) {
-		boolean bLessA = leftExp instanceof Constant
-						 && rightExp instanceof Constant
-						 && leftExp.compareTo(rightExp) > 0;
-		return equivalenceSolver0(base,
-								 bLessA ? operator.flipped() : operator,
-								 bLessA ? rightExp : leftExp,
-								 bLessA ? leftExp : rightExp,
-								 bLessA ? rightType : leftType,
-								 bLessA ? leftType : rightType);
+		return leftExp instanceof Constant // bLessA
+			   && rightExp instanceof Constant
+			   && leftExp.compareTo(rightExp) > 0
+					  ? equivalenceSolver0(base, operator,			 leftExp, rightExp, leftType, rightType)
+					  : equivalenceSolver0(base, operator.flipped(), rightExp, leftExp, rightType, leftType);
 	}
 
 	/**

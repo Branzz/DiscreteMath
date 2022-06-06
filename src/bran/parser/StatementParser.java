@@ -30,8 +30,12 @@ public class StatementParser {
 
 	enum TokenType {
 
-		LINE_OPERATOR(START, START), OPERATOR(MIDDLE, START), LEFT_IDENTIFIER(START, MIDDLE), // becomes middle after the (expression) is simplified
-		RIGHT_IDENTIFIER(MIDDLE, MIDDLE), VARIABLE(START, MIDDLE), WHITESPACE(ANY, NOWHERE), // the previous type
+		LINE_OPERATOR(START, START),
+		OPERATOR(MIDDLE, START),
+		LEFT_IDENTIFIER(START, MIDDLE), // becomes middle after the (expression) is simplified
+		RIGHT_IDENTIFIER(MIDDLE, MIDDLE),
+		VARIABLE(START, MIDDLE),
+		WHITESPACE(ANY, NOWHERE), // the previous type
 		UNKNOWN(NOWHERE, NOWHERE);
 
 		private final ExpressionZone currentZone;
@@ -70,19 +74,20 @@ public class StatementParser {
 		return null;
 	}
 
-	public static Statement parseStatement(String str) {
+	@Deprecated
+	public static Statement parse(String str) {
 		str = str.trim();
 		if (str.length() == 0)
 			return Statement.empty();
 
 		final Map<String, VariableStatement> localVariables = new HashMap<>();
 
-		return parseStatementExpression(tokenizeStatement(str), localVariables, 0);
+		return parse(tokenizeStatement(str), localVariables, 0);
 	}
 
 	private static record StatementEnd(Statement statement, int last) { }
 
-	private static Statement parseStatementExpression(List<StringPart> tokens, final Map<String, VariableStatement> localVariables, int start) {
+	private static Statement parse(List<StringPart> tokens, final Map<String, VariableStatement> localVariables, int start) {
 		boolean inner = start != 0;
 		ExpressionZone expectingZone = START;
 		StatementBuilder statementBuilder = new StatementBuilder();
@@ -96,7 +101,7 @@ public class StatementParser {
 				String tokenString = tokens.get(i).string();
 				switch (currentTokenType) {
 					case LEFT_IDENTIFIER:
- 						statementBuilder.add(parseStatementExpression(tokens, localVariables, i + 1));
+ 						statementBuilder.add(parse(tokens, localVariables, i + 1));
 						// tokens.remove(start);
 						break;
 					case RIGHT_IDENTIFIER:

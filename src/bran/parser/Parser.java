@@ -3,9 +3,12 @@ package bran.parser;
 // import bran.logic.tree.TreeBuilder;
 
 
+import bran.exceptions.ParseException;
+import bran.tree.compositions.Composition;
 import bran.tree.structure.mapper.Mapper;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -25,6 +28,24 @@ public class Parser {
 										 .distinct()
 										 .map(s -> new AbstractMap.SimpleEntry<>(s, o)))
 					 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	public static <C extends Composition> String parseAndExcept(String str, Function<String, C> parser) {
+		return parseAndExcept(str, C::toString, Throwable::getMessage, parser);
+	}
+
+	public static <C extends Composition> String parseAndExcept(String str, Function<C, String> toString, Function<String, C> parser) {
+		return parseAndExcept(str, toString, Throwable::getMessage, parser);
+	}
+
+	public static <C extends Composition, T> T parseAndExcept(String str, Function<C, T> toT,
+															  Function<ParseException, T> onFailure,
+															  Function<String, C> parser) {
+		try {
+			return toT.apply(parser.apply(str));
+		} catch (ParseException e) {
+			return onFailure.apply(e);
+		}
 	}
 
 	// private static List<StringPart> tokenizeStatement(String str) {

@@ -42,7 +42,7 @@ public class Constant extends Value {
 							  "[pP][+-]?(\\d+)))[fFdD]?))").matcher("");
 
 	public static Constant of(final double value) {
-		var x = 0x5p-5;
+		// var x = 0x5p-5;
 		return new Constant(value);
 	}
 
@@ -108,6 +108,14 @@ public class Constant extends Value {
 	@Override
 	public boolean respect(final Collection<Variable> respectsTo) {
 		return false;
+	}
+
+	@Override
+	public int compareTo(Expression expression) {
+		if (expression instanceof Constant other)
+			return this.value().compareTo(other.value());
+		else
+			return super.compareTo(expression);
 	}
 
 	@Override

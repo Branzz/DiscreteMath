@@ -1,11 +1,10 @@
 package bran.tree.compositions.expressions;
 
 import bran.exceptions.IllegalInverseExpressionException;
-import bran.tree.compositions.expressions.functions.MultiArgFunction;
+import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
-import bran.tree.compositions.sets.regular.RangedSet;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -163,23 +162,30 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		// the range of f(x) is the domain of f'(x)
 		// TODO; simplify first? you can prove if a function is less somehow; you can with given variables for sure
 		// return Double.compare(evaluate(), expression.evaluate());
-		final Expression inverse = subtraction.inverse();
+		final Expression inverse = subtraction.inverse().iterator().next();
 		final Set<Variable> variables = subtraction.getVariables();
-		if (variables.size() != 1)
-			return 0;
+		// if (variables.size() != 1)
+		// 	return 0;
 		Variable variable = variables.iterator().next();
 		final Statement range = inverse.domainConditions; // TODO getAll method needed to replace everything properly (?)
 		// new RangedSet(new SpecialSet(SpecialSetType.R), range);
-		if (range.and(variable.lessEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
-			 return 1;
-		if (range.and(variable.greaterEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
-			 return -1;
+		// if (!expression.equals(ZERO)) {
+		// 	if (range.and(variable.lessEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
+		// 		 return 1;
+		// 	if (range.and(variable.greaterEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
+		// 		return -1;
+		// }
 		return 0;
 	}
 
-	public Expression inverse() {
-		final Variable reserved = new Variable("reserved");
-		Expression otherSide = reserved;
+	public List<Expression> inverse() {
+		return inverse(null);
+	}
+
+	public List<Expression> inverse(Expression replacement) {
+		final Expression reserved = new Variable("reserved");
+		List<Expression> otherSides = new ArrayList<>();
+		otherSides.add(reserved);
 		Expression thisSide = this;
 		boolean simplifiedStep = false;
 		while (!(thisSide instanceof Variable)) {
@@ -195,40 +201,55 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 				} else {
 					if (!varsOnLeft && !varsOnRight)
 						throw new IllegalStateException("simplification of constants was weak; coder's fault");
-					otherSide = opExp.getOperator().inverse(varsOnLeft ? 0 : 1, otherSide, varsOnLeft ? opExp.getRight() : opExp.getLeft());
+					if (opExp.getOperator() == POW) {
+						final int originalSize = otherSides.size();
+						if (opExp.getRight().equals(Constant.TWO))
+							for (int i = 0; i < originalSize; i++) {
+								otherSides.set(i, otherSides.get(i).sqrt());
+							}
+							for (int i = 0; i < originalSize; i++) {
+								otherSides.add(new OperatorExpression(NEG_ONE, MUL, otherSides.get(i)));
+							}
+					} else
+						map(otherSides, otherSide -> opExp.getOperator().inverse(varsOnLeft ? 0 : 1, otherSide, varsOnLeft ? opExp.getRight() : opExp.getLeft()));
 					thisSide = varsOnLeft ? opExp.getLeft() : opExp.getRight();
 				}
 				simplifiedStep = false;
 			} else if (thisSide instanceof FunctionExpression fExp) {
-				if (fExp.getFunction() instanceof MultiArgFunction fun) {
-					if (fun.getArguments() == 1) {
-						thisSide = fExp.getChildren()[0];
-						otherSide = fun.inverse(0, otherSide);
-					} else if (fun.getArguments() == 2) {
-						boolean varsOnLeft = !fExp.getChildren()[0].getVariables().isEmpty();
-						boolean varsOnRight = !fExp.getChildren()[1].getVariables().isEmpty();
-						if (varsOnLeft && varsOnRight) {
-							if (simplifiedStep)
-								throw new IllegalInverseExpressionException("can't create the inverse of " + fun);
-							thisSide = fExp.simplified();
-							simplifiedStep = true; // can only try to simplify once before it's infinite loop
-							continue;
-						} else if (!varsOnLeft && !varsOnRight) {
-							throw new IllegalStateException("simplification of constants was weak; coder's fault");
-						}
-						thisSide = fExp.getChildren()[0];
-						otherSide = fun.inverse(varsOnLeft ? 0 : 1, otherSide);
+				if (fExp.getFunction().getArgAmount() == 1) {
+					thisSide = fExp.getChildren()[0];
+					map(otherSides, otherSide -> fExp.getFunction().inverse(0, otherSide));
+				} else if (fExp.getFunction().getArgAmount() == 2) {
+					boolean varsOnLeft = !fExp.getChildren()[0].getVariables().isEmpty();
+					boolean varsOnRight = !fExp.getChildren()[1].getVariables().isEmpty();
+					if (varsOnLeft && varsOnRight) {
+						if (simplifiedStep)
+							throw new IllegalInverseExpressionException("can't create the inverse of " + fExp.getFunction());
+						thisSide = fExp.simplified();
+						simplifiedStep = true; // can only try to simplify once before it's infinite loop
+						continue;
+					} else if (!varsOnLeft && !varsOnRight) {
+						throw new IllegalStateException("simplification of constants was weak; coder's fault");
 					}
+					thisSide = fExp.getChildren()[0];
+					map(otherSides, otherSide -> fExp.getFunction().inverse(varsOnLeft ? 0 : 1, otherSide));
 				}
 			} else if (thisSide instanceof Value) {
-				return this.simplified();
+				return List.of(this.simplified());
 			} else {
 				throw new IllegalInverseExpressionException("unimplemented expression type");
 			}
 		}
-		otherSide.domainConditions.replaceAll(reserved, thisSide);
-		otherSide.replaceAll(reserved, thisSide);
-		return otherSide;
+		final Expression finalThisSide = thisSide;
+		otherSides.forEach(otherSide -> otherSide.domainConditions.replaceAll(reserved, finalThisSide));
+		otherSides.forEach(otherSide -> otherSide.replaceAll(reserved, replacement == null ? finalThisSide : replacement));
+		return otherSides;
+	}
+
+	private static void map(List<Expression> list, Function<Expression, Expression> mapper) {
+		for (int i = 0; i < list.size(); i++) {
+			list.set(i, mapper.apply(list.get(i)));
+		}
 	}
 
 	@Override

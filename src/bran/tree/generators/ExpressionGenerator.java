@@ -115,7 +115,7 @@ public class ExpressionGenerator {
 
 		private int appendFunctionExpression() {
 			MultiArgFunction nextFunc = functions[rand.nextInt(functions.length)];
-			int arguments = nextFunc.getArguments();
+			int arguments = nextFunc.getArgAmount();
 			// boolean leftSide = rand.nextDouble() < leftSideProb;
 			if (arguments <= 0)
 				return 0;

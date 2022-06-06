@@ -1,38 +1,44 @@
-package bran.tree.compositions.statements.special.equivalences.inequality;
+package bran.tree.compositions.statements.special.equivalences;
 
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
-import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
 import bran.tree.compositions.sets.SetDisplayStyle;
 import bran.tree.structure.mapper.Mapper;
 
-import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 import static bran.tree.compositions.sets.SetDisplayStyle.setStyle;
+import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
-public enum InequalityType implements EquivalenceType { // TODO Implement order of operations compatibility with other types
+public enum EquivalenceTypeImpl implements EquivalenceType {
+	// TODO Implement order of operations compatibility with other types
 	LESS		 ((l, r) -> l.compareTo(r) <  0, true,  false, "less than", "<", "<", "<", "<", "<"),
 	LESS_EQUAL	 ((l, r) -> l.compareTo(r) <= 0, true,   true, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
 	GREATER		 ((l, r) -> l.compareTo(r) >  0, false, false, "greater than", ">", ">", ">", ">", ">"),
-	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, false,  true, "greater than or equal to", "\u2265", "\u2265", ">=", ">=");
+	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, false,  true, "greater than or equal to", "\u2265", "\u2265", ">=", ">="),
+	EQUAL  		 ((l, r) -> l.compareTo(r) == 0, false,  true, "equals", "=", "=", "==", "==", "=", "="),
+	UNEQUAL		 ((l, r) -> l.compareTo(r) != 0, false, false, "does not equal", "\u2260", "\u2260", "!=", "!=");
 
 	private final Comparison<Comparable, Comparable<Comparable>> comparison;
 	private final boolean lesser;
 	private final boolean equal;
 	private final String[] symbols;
-	private InequalityType opposite;
-	private InequalityType flipped;
+	private EquivalenceTypeImpl opposite;
+	private EquivalenceTypeImpl flipped;
 
 	static {
 		LESS.opposite = GREATER_EQUAL;
-		LESS_EQUAL.opposite = GREATER;
 		GREATER_EQUAL.opposite = LESS;
+		LESS_EQUAL.opposite = GREATER;
 		GREATER.opposite = LESS_EQUAL;
+		EQUAL.opposite = UNEQUAL;
+		UNEQUAL.opposite = EQUAL;
 		LESS.flipped = GREATER;
+		GREATER.flipped = LESS;
 		LESS_EQUAL.flipped = GREATER_EQUAL;
 		GREATER_EQUAL.flipped = LESS_EQUAL;
-		GREATER.flipped = LESS;
+		UNEQUAL.flipped = UNEQUAL;
+		EQUAL.flipped = EQUAL;
 	}
 
-	InequalityType(final Comparison<Comparable, Comparable<Comparable>> comparison, boolean lesser, boolean equal, final String... symbols) {
+	EquivalenceTypeImpl(final Comparison<Comparable, Comparable<Comparable>> comparison, boolean lesser, boolean equal, final String... symbols) {
 		this.comparison = comparison;
 		this.lesser = lesser;
 		this.equal = equal;
@@ -52,7 +58,7 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 		}
 	}
 
-	public InequalityType opposite() {
+	public EquivalenceTypeImpl opposite() {
 		return opposite;
 	}
 

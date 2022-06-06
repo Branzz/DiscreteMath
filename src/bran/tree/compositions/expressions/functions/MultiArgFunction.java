@@ -19,39 +19,39 @@ import static bran.tree.compositions.expressions.functions.appliers.DomainSuppli
 import static java.lang.Math.*;
 
 public enum MultiArgFunction implements ExpFunction {
-	LOG  (2, e -> ((e[0].greater(ZERO).and(e[0].notEquates(ONE))).or(e[0].equates(INFINITY))).and(e[1].greater(ZERO)),
-		  a -> log(a[0]) / log(a[1]), null),
-	LN   (e -> e.greater(ZERO), Math::log, a -> a.derive().div(a)),
-	SIGN (Math::signum, a -> ZERO), // not roots
-	ABS  (Math::abs, a -> SIGN.ofS(a).chain(a)),
-	CEIL (Math::ceil, a -> ZERO),
-	ROUND(a -> (double) Math.round(a), a -> ZERO), // not roots??
-	FLOOR(Math::floor, a -> ZERO),
-	SQRT (e -> e.greaterEqual(ZERO), Math::sqrt, a -> a.derive().div(Constant.TWO.times(a.sqrt()))),
-	 SIN (Math::sin),
-	ASIN (SIN, e -> e.greaterEqual(NEG_ONE).and(e.lessEqual(ONE)), Math::asin, a -> a.derive().div(ONE.minus(a).sqrt())),
-	 SINH(Math::sinh),
-	ASINH(SINH, a -> Math.log(a + Math.sqrt(a * a + 1)), a -> a.derive().div(a.squared().inc().sqrt())),
-	 CSC (e -> SIN.ofS(e).notEquates(ZERO), a -> 1 / sin(a), null),
-	ACSC (CSC, e -> e.lessEqual(NEG_ONE).or(e.greaterEqual(ONE)), a -> Math.asin(1 / a), a -> a.derive().div(ABS.ofS(a).times(ONE.minus(a).sqrt()).negate())),
-	 CSCH(NOT_ZERO, a -> 1 / Math.sinh(a), null),
-	ACSCH(CSCH, NOT_ZERO, a -> Math.log((1 + Math.sqrt(1 + a * a)) / a), a -> a.derive().div(ABS.ofS(a).times(a.squared().inc().sqrt()).negate())),
-	 COS (Math::cos, a -> SIN.ofS(a).negate().chain(a)),
-	ACOS (COS, e -> e.greaterEqual(NEG_ONE).and(e.lessEqual(ONE)), Math::acos, a -> a.derive().div(ONE.minus(a).sqrt().negate())),
-	COSH (Math::cosh, a -> SINH.ofS(a).chain(a)),
-	ACOSH(COSH, e -> e.greaterEqual(ONE), a -> Math.log(a + Math.sqrt(a * a - 1)), a -> a.derive().div(a.squared().dec().sqrt())),
-	 SEC (e -> COS.ofS(e).notEquates(ZERO), a -> 1 / cos(a), null),
-	ASEC (SEC, e -> e.lessEqual(NEG_ONE).or(e.greaterEqual(ONE)), a -> Math.acos(1 / a), a -> a.derive().div(ABS.ofS(a).times(ONE.minus(a).sqrt()))),
-	 SECH(a -> 1 / Math.cosh(a)),
-	ASECH(SECH, e -> e.greater(ZERO).and(e.lessEqual(ONE)), a -> Math.log((1 + Math.sqrt(1 - a * a)) / a), a -> a.derive().div(ABS.ofS(a).times(a.squared().dec().sqrt()).negate())),
-	 TAN (e -> COS.ofS(e).notEquates(ZERO), Math::tan, a -> SEC.ofS(a).squared().chain(a)),
-	ATAN (TAN, Math::atan, a -> a.derive().div(ONE.minus(a))),
-	 TANH(Math::tanh, a -> SECH.ofS(a).squared().chain(a)),
-	ATANH(TANH, e -> e.greater(NEG_ONE).and(e.less(ONE)), a -> .5 * Math.log((1 + a) / (1 - a)), a -> a.derive().div(a.squared().dec())),
-	 COT (e -> SIN.ofS(e).notEquates(ZERO), a -> 1 / tan(a), a -> CSC.ofS(a).negate().squared().chain(a)),
-	ACOT (COT, a -> Math.atan(1 / a), a -> a.derive().div(ONE.minus(a).negate())),
-	 COTH(NOT_ZERO, a -> 1 / Math.tanh(a), a -> CSCH.ofS(a).negate().squared().chain(a)),
-	ACOTH(COTH, e -> e.less(NEG_ONE).or(e.greater(ONE)), a -> .5 * Math.log((1 + a) / (a - 1)), a -> a.derive().div(a.squared().dec())),
+	LOG   (2, e -> ((e[0].greater(ZERO).and(e[0].notEquates(ONE))).or(e[0].equates(INFINITY))).and(e[1].greater(ZERO)),
+		   a -> log(a[0]) / log(a[1]), null),
+	LN    (e -> e.greater(ZERO), Math::log, a -> a.derive().div(a)),
+	SIGN  (Math::signum, a -> ZERO), // not roots
+	ABS   (Math::abs, a -> SIGN.ofS(a).chain(a)),
+	CEIL  (Math::ceil, a -> ZERO),
+	ROUND (a -> (double) Math.round(a), a -> ZERO), // not roots??
+	FLOOR (Math::floor, a -> ZERO),
+	SQRT  (e -> e.greaterEqual(ZERO), Math::sqrt, a -> a.derive().div(Constant.TWO.times(a.sqrt()))),
+	 SIN  (Math::sin),
+	ASIN  (SIN, e -> e.greaterEqual(NEG_ONE).and(e.lessEqual(ONE)), Math::asin, a -> a.derive().div(ONE.minus(a).sqrt())),
+	 SINH (Math::sinh),
+	ASINH (SINH, a -> Math.log(a + Math.sqrt(a * a + 1)), a -> a.derive().div(a.squared().inc().sqrt())),
+	 CSC  (e -> SIN.ofS(e).notEquates(ZERO), a -> 1 / sin(a), null),
+	ACSC  (CSC, e -> e.lessEqual(NEG_ONE).or(e.greaterEqual(ONE)), a -> Math.asin(1 / a), a -> a.derive().div(ABS.ofS(a).times(ONE.minus(a).sqrt()).negate())),
+	 CSCH (NOT_ZERO, a -> 1 / Math.sinh(a), null),
+	ACSCH (CSCH, NOT_ZERO, a -> Math.log((1 + Math.sqrt(1 + a * a)) / a), a -> a.derive().div(ABS.ofS(a).times(a.squared().inc().sqrt()).negate())),
+	 COS  (Math::cos, a -> SIN.ofS(a).negate().chain(a)),
+	ACOS  (COS, e -> e.greaterEqual(NEG_ONE).and(e.lessEqual(ONE)), Math::acos, a -> a.derive().div(ONE.minus(a).sqrt().negate())),
+	COSH  (Math::cosh, a -> SINH.ofS(a).chain(a)),
+	ACOSH (COSH, e -> e.greaterEqual(ONE), a -> Math.log(a + Math.sqrt(a * a - 1)), a -> a.derive().div(a.squared().dec().sqrt())),
+	 SEC  (e -> COS.ofS(e).notEquates(ZERO), a -> 1 / cos(a), null),
+	ASEC  (SEC, e -> e.lessEqual(NEG_ONE).or(e.greaterEqual(ONE)), a -> Math.acos(1 / a), a -> a.derive().div(ABS.ofS(a).times(ONE.minus(a).sqrt()))),
+	 SECH (a -> 1 / Math.cosh(a)),
+	ASECH (SECH, e -> e.greater(ZERO).and(e.lessEqual(ONE)), a -> Math.log((1 + Math.sqrt(1 - a * a)) / a), a -> a.derive().div(ABS.ofS(a).times(a.squared().dec().sqrt()).negate())),
+	 TAN  (e -> COS.ofS(e).notEquates(ZERO), Math::tan, a -> SEC.ofS(a).squared().chain(a)),
+	ATAN  (TAN, Math::atan, a -> a.derive().div(ONE.minus(a))),
+	 TANH (Math::tanh, a -> SECH.ofS(a).squared().chain(a)),
+	ATANH (TANH, e -> e.greater(NEG_ONE).and(e.less(ONE)), a -> .5 * Math.log((1 + a) / (1 - a)), a -> a.derive().div(a.squared().dec())),
+	 COT  (e -> SIN.ofS(e).notEquates(ZERO), a -> 1 / tan(a), a -> CSC.ofS(a).negate().squared().chain(a)),
+	ACOT  (COT, a -> Math.atan(1 / a), a -> a.derive().div(ONE.minus(a).negate())),
+	 COTH (NOT_ZERO, a -> 1 / Math.tanh(a), a -> CSCH.ofS(a).negate().squared().chain(a)),
+	ACOTH (COTH, e -> e.less(NEG_ONE).or(e.greater(ONE)), a -> .5 * Math.log((1 + a) / (a - 1)), a -> a.derive().div(a.squared().dec())),
 
 	// DER(a -> 0, a -> a[0].derive().derive()),
 	// INT()
@@ -132,19 +132,8 @@ public enum MultiArgFunction implements ExpFunction {
 		System.arraycopy(symbols, 0, this.symbols, 2, symbols.length);
 	}
 
-	public int getArguments() {
+	public int getArgAmount() {
 		return arguments;
-	}
-
-	/**
-	 * "of Secure"; TODO for package use only
-	 */
-	public FunctionExpression ofS(Expression... other) {
-		return new FunctionExpression(this, true, other);
-	}
-
-	public FunctionExpression of(Expression... other) throws IllegalArgumentAmountException {
-		return new FunctionExpression(this, other);
 	}
 
 	@Override
@@ -154,7 +143,7 @@ public enum MultiArgFunction implements ExpFunction {
 
 	@Override
 	public void checkArguments(int length) throws IllegalArgumentAmountException {
-		if (length != arguments)
+		if (length != arguments) // only less than?
 			throw new IllegalArgumentAmountException(String.format("wrong number of arguments. given %d but needed %d", length, arguments));
 	}
 
@@ -164,7 +153,8 @@ public enum MultiArgFunction implements ExpFunction {
 	}
 
 	@Override
-	public Statement domain(final Expression... expressions) {
+	public Statement domain(Expression... expressions) throws IllegalArgumentAmountException {
+		checkArguments(expressions.length);
 		return domainSupplier.get(expressions);
 	}
 
@@ -185,6 +175,7 @@ public enum MultiArgFunction implements ExpFunction {
 		return inverse;
 	}
 
+	@Override
 	public Expression inverse(int arg, Expression... expressions) {
 		if (this == LOG) {
 			return arg == 0 ? POW.of(expressions[1], expressions[0].reciprocal())

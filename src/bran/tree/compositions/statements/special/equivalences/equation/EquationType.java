@@ -7,12 +7,14 @@ import bran.tree.structure.mapper.Mapper;
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
 public enum EquationType implements EquivalenceType {
-	EQUAL("EQUALS", "=", "=", "==", "!=", "=", "="),
-	UNEQUAL("DOES NOT EQUAL", "\u2260", "\u2260", "!=", "!=");
+	EQUAL  ((l, r) -> l.compareTo(r) == 0, "EQUALS", "=", "=", "==", "!=", "=", "="),
+	UNEQUAL((l, r) -> l.compareTo(r) != 0, "DOES NOT EQUAL", "\u2260", "\u2260", "!=", "!=");
 
+	private final Comparison<Comparable, Comparable<Comparable>> comparison;
 	private final String[] symbols;
 
-	EquationType(final String... symbols) {
+	EquationType(Comparison<Comparable, Comparable<Comparable>> comparison, final String... symbols) {
+		this.comparison = comparison;
 		this.symbols = symbols;
 	}
 
@@ -44,10 +46,15 @@ public enum EquationType implements EquivalenceType {
 	}
 
 	@Override
-	public <R, L extends Comparable<R>> boolean evaluate(final Comparable<L> left, final Comparable<R> right) {
-		return (this == EQUAL) == left.equals(right);
+	public <R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right) {
+		return comparison.apply(left, right);
 	}
 
+	// @Override
+	// public <R, L extends Comparable<R>> boolean evaluate(final Comparable<L> left, final Comparable<R> right) {
+	// 	return (this == EQUAL) == (right.compareTo(left) == 0);
+	// }
+	//
 	@Override
 	public boolean lesser() {
 		return this == UNEQUAL;

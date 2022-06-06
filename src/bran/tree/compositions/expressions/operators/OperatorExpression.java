@@ -165,15 +165,17 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		}
 		if (right instanceof OperatorExpression rightOperator) {
 			if ((rightOperator.getOperator().getOrder() < operator.getOrder()
-				&& !(rightOperator.hideMultiply()))
+				    && !(rightOperator.hideMultiply()))
 				|| (rightOperator.getOperator().getOrder() == operator.getOrder()
-					&& !rightOperator.getOperator().isCommutative())) {
+					&& !rightOperator.getOperator().isCommutative())
+				|| (operator == SUB)) {
 				rightString = parens(rightString);
 			} else
 				rightGiven = false;
 		}
 		if (leftGiven && rightGiven && operator == MUL
-			&& !(right instanceof Constant rightConstant && (left instanceof FunctionExpression || left instanceof Constant || rightConstant.evaluate() < 0))
+			&& !(right instanceof Constant rightConstant &&
+				   (left instanceof FunctionExpression || left instanceof Variable || left instanceof Constant || rightConstant.evaluate() < 0))
 			&& !(left instanceof Variable && right instanceof Variable))
 			// && !(left instanceof Variable leftVariable && right instanceof Variable rightVariable && leftVariable.equals(rightVariable)))
 			return leftString + rightString;
@@ -217,12 +219,15 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	private Expression nullToNew(Expression simplified, Expression leftSimplified, Expression rightSimplified) {
 		return simplified == null ? new OperatorExpression(leftSimplified, operator, rightSimplified) : simplified;
 	}
+
 	/**
+	 * TODO trig functions
+	 * TODO a searcher agent
 	 * to pass in the parameters manually if they were guaranteed to already have been simplified
 	 */
 	private Expression simplifiedNoDomain(Expression leftSimplified, Operator operator, Expression rightSimplified, boolean commutativeSearch) {
 		if (leftSimplified instanceof Constant && rightSimplified instanceof Constant rightConst
-			&& !((operator == DIV || operator == MUL) && rightConst.equals(Constant.ZERO)))
+			&& !(operator == DIV && rightConst.equals(Constant.ZERO)))
 			return Constant.of(operator.operate(leftSimplified.evaluate(), rightSimplified.evaluate())); // causes negative token to be evaluated as highest precedence
 		switch (operator) {
 			case POW:
@@ -447,8 +452,10 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		if (commutativeSearch) {
 			final boolean commutativeOp = operator.isCommutative();
 			if (commutativeOp || (operator.inverse() != null && operator.inverse().isCommutative())) {
-				final Expression simplified = commutativeCrossSearch(left, right, !commutativeOp,
-												commutativeOp ? operator : (Operator) operator.inverse(), commutativeOp ? (Operator) operator.inverse() : operator);
+				final Expression simplified = commutativeCrossSearch(leftSimplified,
+																	 rightSimplified,
+																	 !commutativeOp,
+																	 commutativeOp ? operator : operator.inverse());
 				if (simplified != null)
 					return simplified;
 			}
@@ -507,25 +514,35 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	// TODO translate into object with inverted version holding
 
-	public static final record Term(Expression expression, boolean inverted) { }
+	public static final record Term(Expression expression, boolean inverted) {
 
-	private Expression commutativeCrossSearch(Expression leftStatement, Expression rightStatement, boolean inverted, final Operator op, final Operator invOp) {
-		List<Term> leftTerms = commutativeSearch(leftStatement, false, op, invOp);
-		List<Term> rightTerms = commutativeSearch(rightStatement, inverted, op, invOp);
+		public Expression expressionInvertCorrected(Operator op) {
+			if (!inverted)
+				return expression;
+			return op.inverse().invertSimplifier(expression);
+		}
+
+	}
+
+	private Expression commutativeCrossSearch(Expression leftStatement, Expression rightStatement, boolean inverted, Operator op) {
+		List<Term> leftTerms = commutativeSearch(leftStatement, false, op);
+		List<Term> rightTerms = commutativeSearch(rightStatement, inverted, op);
 		List<Term> newTerms = new ArrayList<>();
 
 		if (leftTerms.size() + rightTerms.size() < 3)
 			return null;
 		for (int i = 0; i < leftTerms.size(); i++) {
 			for (int j = 0; j < rightTerms.size() && i < leftTerms.size(); j++) {
-				Expression newTerm = simplifiedNoDomain(leftTerms.get(i).expression(), rightTerms.get(j).inverted() ? invOp : op,
-												  rightTerms.get(j).expression(), false);
+				Expression newTerm = simplifiedNoDomain(leftTerms.get(i).expressionInvertCorrected(op),
+														rightTerms.get(j).inverted() ? op.inverse() : op,
+														rightTerms.get(j).expression(),
+														false);
 				if (newTerm != null) { // check to see if any of the current terms can combine and accumulate further:
 					leftTerms.remove(i);
 					rightTerms.remove(j--);
-					newTerm = accumulateTerms(newTerms, newTerm, op, invOp);
-					newTerm = accumulateTerms(leftTerms, newTerm, op, invOp);
-					newTerm = accumulateTerms(rightTerms, newTerm, op, invOp);
+					newTerm = accumulateTerms(newTerms, newTerm, op, false);
+					newTerm = accumulateTerms(leftTerms, newTerm, op, true);
+					newTerm = accumulateTerms(rightTerms, newTerm, op, true);
 					newTerms.add(new Term(newTerm, false));
 				}
 			}
@@ -549,9 +566,12 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return combinedExpressions;
 	}
 
-	private Expression accumulateTerms(final List<Term> terms, Expression newTerm, final Operator op, final Operator invOp) {
+	private Expression accumulateTerms(final List<Term> terms, Expression newTerm, final Operator op, boolean newTermLeftSide) {
 		for (int i = 0; i < terms.size(); i++) {
-			Expression accNewTerm = simplifiedNoDomain(newTerm, terms.get(i).inverted() ? invOp : op, terms.get(i).expression(), false);
+			Expression accNewTerm = simplifiedNoDomain(newTermLeftSide ? newTerm : terms.get(i).expression(),
+													   newTermLeftSide && terms.get(i).inverted() ? op.inverse() : op,
+													   newTermLeftSide ? terms.get(i).expression() : newTerm,
+													   false);
 			if (accNewTerm != null) {
 				terms.remove(i--);
 				newTerm = accNewTerm;
@@ -560,17 +580,17 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return newTerm;
 	}
 
-	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final Operator op, final Operator invOp) {
+	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final Operator op) {
 		List<Term> terms = new ArrayList<>();
-		commutativeSearch(statement, terms, inverted,op, invOp);
+		commutativeSearch(statement, terms, inverted,op);
 		return terms;
 	}
 
-	public static void commutativeSearch(Expression statement, Collection<Term> terms, boolean inverted, final Operator op, final Operator invOp) {
+	public static void commutativeSearch(Expression statement, Collection<Term> terms, boolean inverted, final Operator op) {
 		if (statement instanceof OperatorExpression operatorExpression) {
-			if (operatorExpression.getOperator() == op || operatorExpression.getOperator() == invOp) {
-				commutativeSearch(operatorExpression.getLeft(), terms, inverted, op, invOp);
-				commutativeSearch(operatorExpression.getRight(), terms, (operatorExpression.getOperator() == SUB || operatorExpression.getOperator() == DIV) ^ inverted, op, invOp);
+			if (operatorExpression.getOperator() == op || operatorExpression.getOperator() == op.inverse()) {
+				commutativeSearch(operatorExpression.getLeft(), terms, inverted, op);
+				commutativeSearch(operatorExpression.getRight(), terms, (operatorExpression.getOperator() == SUB || operatorExpression.getOperator() == DIV) ^ inverted, op);
 				return;
 			}
 		}
@@ -763,7 +783,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 			if (exp instanceof OperatorExpression operatorExp && (operatorExp.getOperator() == MUL || operatorExp.getOperator() == DIV)) {
 				seekFactors(operatorExp.getLeft(), inverse, pool);
 				seekFactors(operatorExp.getRight(), inverse ^ (operatorExp.getOperator() == DIV), pool);
-			} else {
+			} else if (!exp.equals(Constant.ZERO)) {
 				pool.add(new Factor(exp, inverse));
 			}
 		}

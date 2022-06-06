@@ -9,16 +9,32 @@ public interface ExpFunction extends Mapper {
 
 	double function(double... a);
 
-	Expression derive(Expression... exp);
+	int getArgAmount();
 
-	Statement domain(Expression... expressions);
+	Expression derive(Expression... exp);
+	Statement domain(Expression... expressions) throws IllegalArgumentAmountException;
+
+	default Statement domainS(Expression... expressions) {
+		try { return domain(expressions); }
+		catch (IllegalArgumentAmountException e) { return null; }
+	}
 
 	void checkArguments(int length) throws IllegalArgumentAmountException;
 
 	ExpFunction inverse();
 
-	// default ExpFunction inverse(int arg) {
-	// 	return inverse();
-	// }
+	Expression inverse(int arg, Expression... expressions);
+
+
+	/**
+	 * "of Secure"; TODO for package use only
+	 */
+	default FunctionExpression ofS(Expression... other) {
+		return new FunctionExpression(this, true, other);
+	}
+
+	default FunctionExpression of(Expression... other) throws IllegalArgumentAmountException {
+		return new FunctionExpression(this, other);
+	}
 
 }

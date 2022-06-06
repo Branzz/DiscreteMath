@@ -1,5 +1,6 @@
 package bran.tree.compositions.expressions.operators;
 
+import bran.tree.compositions.expressions.functions.appliers.FunctionDerivable;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
 import bran.tree.compositions.expressions.Expression;
@@ -8,6 +9,8 @@ import bran.tree.compositions.godel.GodelNumber;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.ForkOperator;
+
+import java.util.function.Function;
 
 import static bran.tree.compositions.expressions.ExpressionDisplayStyle.expressionStyle;
 import static bran.tree.compositions.expressions.values.Constant.*;
@@ -56,6 +59,9 @@ public enum Operator implements ForkOperator {
 	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
 	private Operator inverse;
+	private Function<Expression, Expression> inverter;
+	private Function<Expression, Expression> invertAndSimplifier;
+
 	private final ExpressionOperatorType operatorType;
 	private final Operable operable;
 	private final OperatorDerivable derivable;
@@ -63,6 +69,7 @@ public enum Operator implements ForkOperator {
 	private final String[] symbols;
 	private final boolean commutative;
 	private final GodelNumberSymbols godelNumberSymbols;
+
 
 	Operator(final ExpressionOperatorType operatorType, final Operable operable, final OperatorDerivable derivable,
 			 boolean commutative, final String... symbols) {
@@ -97,6 +104,12 @@ public enum Operator implements ForkOperator {
 		MOD.inverse = MOD;
 		ADD.inverse = SUB; // 0 - x
 		SUB.inverse = ADD; // 0 - x
+
+		SUB.inverter = e -> NEG_ONE.times(e);
+		SUB.invertAndSimplifier = e -> ZERO.minus(e).simplified(ZERO, e);
+		DIV.inverter = e -> ONE.div(e);
+		DIV.invertAndSimplifier = e -> ONE.div(e).simplified(ONE, e);
+
 	}
 
 	@Override
@@ -190,4 +203,11 @@ public enum Operator implements ForkOperator {
 		}
 	}
 
+	public Expression invert(Expression expression) {
+		return inverter == null ? expression : inverter.apply(expression);
+	}
+
+	public Expression invertSimplifier(Expression expression) {
+		return invertAndSimplifier == null ? expression : invertAndSimplifier.apply(expression);
+	}
 }

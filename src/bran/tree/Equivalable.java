@@ -4,5 +4,4 @@ public interface Equivalable<T> {
 
 	boolean equivalentTo(T other);
 
-
 }

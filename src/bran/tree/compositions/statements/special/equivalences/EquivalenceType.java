@@ -1,15 +1,19 @@
 package bran.tree.compositions.statements.special.equivalences;
 
 import bran.tree.structure.Branch;
+import bran.tree.structure.mapper.Associativity;
+import bran.tree.structure.mapper.ForkOperator;
 import bran.tree.structure.mapper.Mapper;
+import bran.tree.structure.mapper.OrderedOperator;
 
 import java.util.function.BiFunction;
 
-public interface EquivalenceType extends Mapper {
+public interface EquivalenceType extends ForkOperator {
 
 	EquivalenceType opposite();
 
-	<R, L extends Comparable<R>> boolean evaluate(final Comparable<L> left, final Comparable<R> right);
+	 // boolean evaluate(final Comparable<T> left, final Comparable<T> right);
+	<R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right);
 
 	boolean lesser();
 
@@ -23,9 +27,29 @@ public interface EquivalenceType extends Mapper {
 	EquivalenceType flipped();
 
 	@FunctionalInterface
-	interface Comparison extends BiFunction<Comparable, Comparable, Boolean> {
+	interface Comparison <R, L extends Comparable<R>> extends BiFunction<Comparable<L>, Comparable<R>, Boolean> {
 		@Override
 		Boolean apply(Comparable left, Comparable right);
+	}
+
+	@Override
+	default int getOrder() {
+		return 0;
+	}
+
+	@Override
+	default int maxOrder() {
+		return 0;
+	}
+
+	@Override
+	default int minOrder() {
+		return 0;
+	}
+
+	@Override
+	default Associativity getDirection() {
+		return Associativity.RIGHT_TO_LEFT;
 	}
 
 }

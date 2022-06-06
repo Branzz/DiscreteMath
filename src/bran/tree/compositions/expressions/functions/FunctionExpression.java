@@ -35,7 +35,7 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 	}
 
 	FunctionExpression(final ExpFunction function, boolean secure, final Expression... expressions) {
-		super(Stream.concat(Stream.of(function.domain(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
+		super(Stream.concat(Stream.of(function.domainS(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		this.function = function;
 		this.expressions = expressions;
 	}
@@ -159,7 +159,8 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 		String argString = Arrays.stream(expressions)
 								 .map(Expression::toString)
 								 .collect(Collectors.joining(", "));
-		return function + (expressions.length == 1 && expressions[0] instanceof Value ? " " + argString : parens(argString));
+		final String args = (expressions.length == 1 && expressions[0] instanceof Value ? "" + argString : parens(argString));
+		return function == MultiArgFunction.ABS ? "|" + args + "|" : function + args;
 	}
 
 }

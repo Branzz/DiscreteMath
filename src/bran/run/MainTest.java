@@ -1,5 +1,9 @@
 package bran.run;
 
+import bran.parser.CompositionParser;
+import bran.parser.ExpressionParser;
+import bran.parser.Parser;
+import bran.parser.StatementParser;
 import bran.tree.compositions.sets.regular.MultiRangedSet;
 import bran.tree.compositions.statements.StatementImpl;
 import bran.tree.compositions.statements.special.VerbalStatement;
@@ -22,7 +26,6 @@ import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.matrices.Matrix;
-import bran.parser.StatementParser;
 import bran.tree.compositions.sets.regular.FiniteSet;
 import bran.tree.compositions.expressions.values.numbers.NumberToText;
 import bran.tree.compositions.sets.regular.SpecialSet;
@@ -52,7 +55,7 @@ public class MainTest {
 		// operationTest();
 		// HamiltonianPathTestingVertices();
 		// hamiltonianPathTestingEdges();
-		// parseTest();
+		parseTest();
 		// statementGeneratorTest();
 		// expressionGeneratorTest();
 		// Stream.of("111", "50").map(Main::solve).forEach(System.out::println);
@@ -66,8 +69,9 @@ public class MainTest {
 		// substituteTest();
 		// equivalenceSimplificationTest();
 		// inverseTest();
-		compareTest();
+		// compareTest();
 
+		// System.out.println(ExpressionParser.parseExpression("1 / SQRT(x ^ 2 + 1)").getDomainConditions().simplified());
 		// Variable a = new Variable("a");
 		// LOG.ofS(a, a.pow(a)).div(a).greater(Constant.NEG_INFINITY).and(LOG.ofS(a, a.pow(a)).div(a).less((Constant.INFINITY)).and(Constant.ONE.greater(Constant.NEG_INFINITY)).and(Constant.ONE.less(Constant.INFINITY))).simplified();
 		// equivalenceSimplificationTest();
@@ -110,11 +114,9 @@ public class MainTest {
 		// 	  .map(t -> OR.of(x.less(Constant.of(2)), Equivalence.of(Constant.ONE, t, x)))
 		// 	  .forEach(s -> System.out.println(s + "\t->\t" + s.simplified()));
 		final Equation eq = x.squared()
-							 .plus(y)
+							 .plus(x)
 							 .minus(Constant.of(20))
-							 .equates(x.cubed()
-							 			.minus(y.times(Constant.of(2)))
-							 			.plus(Constant.of(3)));
+							 .equates(x.plus(Constant.of(3)));
 		System.out.println(eq + "\n" + eq.simplified());
 	}
 
@@ -322,10 +324,37 @@ public class MainTest {
 	}
 
 	static void parseTest() {
-		for (String s : new String[] { "a", "~!!!~not a", "!(a_1 & a_2)", "abc -> b & C | d ^ e", "a & !b", "a ^ (b^C   nand d) | a", "(a == z)", "a & (((b & d)))" })
-			System.out.println(s + " ".repeat(25 - s.length()) + StatementParser.parseStatement(s));
+		// System.out.println(ExpressionParser.parse(" Sin (x * Log(2, 9)) - 6 * 0 + 1 * 8 / 7 - 6")
+		// 								   .simplified());
+		// for (String s : new String[] { "a", "~!!!~not a", "!(a_1 & a_2)", "abc -> b & C | d ^ e", "a & !b", "a ^ (b^C   nand d) | a", "(a == z)", "a & (((b & d)))" })
+		// 	System.out.println(s + " ".repeat(25 - s.length()) + StatementParser.parseStatement(s));
 
 		// System.out.println(Parser.parseStatement("a & (!a & a)"));
+
+		// for (String s : new String[] {
+		// 		"4", "2 * 6", "-7.598/1/8", "(1 + 2) * (4 - 3)", " LOG  (2 ) ", "( 4 ) + (   2* ( 55))",
+		// "sin(3 + asinh(.5)", "2 + (3))", "()", "((", "()", ")", "(", "))", "()()", "2 ** 3", "2 . 5",
+		// 			"Sin(3)", "sin(3)", "SIN(3)", "sIN(3)", "si(3)",
+		// "4 - -3", "SiN()", "cos(sin)", "atan3", ""
+		// })
+		// 	System.out.println(s + "\t" + ExpressionParser.parseAndExcept(s));
+		// for (;;) {
+		// 	String s = ExpressionGenerator.generate(10).toFullString();
+		// 	try { ExpressionParser.parseExpression(s); }
+		// 	catch (Exception e) {
+		// 		System.out.println(s + "\t" + e.getMessage());
+		// 		break;
+		// 	}
+		// }
+
+		for (String s : new String[] {
+			"t^c^   t", "t ^ c", "t ^ (c)", "!t", "!(t)", "(t) ^ (c)",
+				"t ^( c ^ t | ( t ^ c ) ) | t",
+				"(   )", "(  (", "(  )", ")", "( ", " ) )", " ( ) ( )", "",
+			"t OR c AND (5 = 6 ^ 2)"
+		})
+			System.out.println(s + " ".repeat(Math.max(0, 20 - s.length()))
+							   + Parser.parseAndExcept(s, CompositionParser::parse) + "\t\t\t" + Parser.parseAndExcept(s, ExpressionParser::parse));
 	}
 
 	private static void operationTest() {
