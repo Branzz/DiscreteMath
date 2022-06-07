@@ -127,10 +127,10 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		String leftString = left.toString();
 		String rightString = right.toString();
 		if (left instanceof OperationStatement leftOperation
-			&& leftOperation.getOperator().getOrder() > operator.getOrder())
+			&& leftOperation.getOperator().precedence() > operator.precedence())
 			leftString = parens(leftString);
 		if (right instanceof OperationStatement rightOperation
-			&& rightOperation.getOperator().getOrder() > operator.getOrder())
+			&& rightOperation.getOperator().precedence() > operator.precedence())
 			rightString = parens(rightString);
 		return leftString + " " + operator.toString() + " " + rightString;
 	}

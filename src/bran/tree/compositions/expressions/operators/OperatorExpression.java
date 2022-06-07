@@ -151,22 +151,22 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		String rightString = right.toString();
 		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
 			if (right instanceof OperatorExpression
-				&& ExpressionOperatorType.AS.precedence() <= operator.getOrder())
+				&& ExpressionOperatorType.AS.level().precedence() <= operator.precedence())
 				rightString = parens(rightString);
 			return '-' + rightString;
 		}
 		boolean leftGiven = true;
 		boolean rightGiven = true;
 		if (left instanceof OperatorExpression leftOperator) {
-			if (leftOperator.getOperator().getOrder() < operator.getOrder()) {
+			if (leftOperator.getOperator().precedence() < operator.precedence()) {
 					leftString = parens(leftString);
 			} else
 				leftGiven = false;
 		}
 		if (right instanceof OperatorExpression rightOperator) {
-			if ((rightOperator.getOperator().getOrder() < operator.getOrder()
+			if ((rightOperator.getOperator().precedence() < operator.precedence()
 				    && !(rightOperator.hideMultiply()))
-				|| (rightOperator.getOperator().getOrder() == operator.getOrder()
+				|| (rightOperator.getOperator().precedence() == operator.precedence()
 					&& !rightOperator.getOperator().isCommutative())
 				|| (operator == SUB)) {
 				rightString = parens(rightString);
@@ -183,9 +183,9 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	}
 
 	boolean hideMultiply() {
-		return !(left instanceof OperatorExpression leftOperator && (leftOperator.getOperator().getOrder() >= operator.getOrder()))
-		&& !(right instanceof OperatorExpression rightOperator && (rightOperator.getOperator().getOrder() >= operator.getOrder() || !rightOperator.hideMultiply()))
-		&& (operator.getOrder() == MUL.getOrder() && !(right instanceof Constant rightConstant && (left instanceof Constant || rightConstant.evaluate() < 0)));
+		return !(left instanceof OperatorExpression leftOperator && (leftOperator.getOperator().precedence() >= operator.precedence()))
+		&& !(right instanceof OperatorExpression rightOperator && (rightOperator.getOperator().precedence() >= operator.precedence() || !rightOperator.hideMultiply()))
+		&& (operator.precedence() == MUL.precedence() && !(right instanceof Constant rightConstant && (left instanceof Constant || rightConstant.evaluate() < 0)));
 	}
 
 	/*

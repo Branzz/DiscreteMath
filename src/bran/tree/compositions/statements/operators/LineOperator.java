@@ -3,6 +3,7 @@ package bran.tree.compositions.statements.operators;
 import bran.tree.compositions.statements.LineStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.StatementOperatorType;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.BranchOperator;
 import bran.tree.structure.mapper.Associativity;
 
@@ -42,8 +43,8 @@ public enum LineOperator implements BranchOperator {
 	}
 
 	@Override
-	public int getOrder() {
-		return operatorType.precedence();
+	public AssociativityPrecedenceLevel level() {
+		return AssociativityPrecedenceLevel.of(order);
 	}
 
 	@Override
@@ -54,11 +55,6 @@ public enum LineOperator implements BranchOperator {
 	@Override
 	public int minOrder() {
 		return order;
-	}
-
-	@Override
-	public Associativity getDirection() {
-		return operatorType.associativity();
 	}
 
 	public LineStatement of(final Statement statement) {

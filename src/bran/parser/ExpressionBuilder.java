@@ -181,7 +181,7 @@ public class ExpressionBuilder {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) { // x can be the head after the 1st iteration
-						if (x.next instanceof OperatorNode op && op.operator.getOrder() == order) {
+						if (x.next instanceof OperatorNode op && op.operator.precedence() == order) {
 							//	x -> x.next	-> x.next.next -> x.n.n.n
 							//	S -> O	    -> S	-> ?/null
 							Node insert = new ExpressionNode(new OperatorExpression(
@@ -192,7 +192,7 @@ public class ExpressionBuilder {
 						} else
 							x = x.next;
 					}
-					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.getOrder() == order) {
+					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.precedence() == order) {
 						//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
 						//	? -> S		-> O			-> S	-> ?/null
 						Node insert = new ExpressionNode(new OperatorExpression(

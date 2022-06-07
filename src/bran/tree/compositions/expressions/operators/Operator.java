@@ -8,6 +8,7 @@ import bran.tree.compositions.Definition;
 import bran.tree.compositions.godel.GodelNumber;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.structure.mapper.Associativity;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
 import java.util.function.Function;
@@ -113,8 +114,8 @@ public enum Operator implements ForkOperator {
 	}
 
 	@Override
-	public int getOrder() {
-		return operatorType.precedence();
+	public AssociativityPrecedenceLevel level() {
+		return operatorType.level();
 	}
 
 	@Override
@@ -125,11 +126,6 @@ public enum Operator implements ForkOperator {
 	@Override
 	public int minOrder() {
 		return MIN_ORDER;
-	}
-
-	@Override
-	public Associativity getDirection() {
-		return operatorType.associativity();
 	}
 
 	public double operate(double left, double right) {

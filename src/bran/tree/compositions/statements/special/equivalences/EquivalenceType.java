@@ -1,10 +1,8 @@
 package bran.tree.compositions.statements.special.equivalences;
 
-import bran.tree.structure.Branch;
 import bran.tree.structure.mapper.Associativity;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
-import bran.tree.structure.mapper.Mapper;
-import bran.tree.structure.mapper.OrderedOperator;
 
 import java.util.function.BiFunction;
 
@@ -32,24 +30,26 @@ public interface EquivalenceType extends ForkOperator {
 		Boolean apply(Comparable left, Comparable right);
 	}
 
+	int PRECEDENCE = 15;
+
 	@Override
-	default int getOrder() {
-		return 0;
+	default int precedence() {
+		return PRECEDENCE;
 	}
 
 	@Override
 	default int maxOrder() {
-		return 0;
+		return PRECEDENCE;
 	}
 
 	@Override
 	default int minOrder() {
-		return 0;
+		return PRECEDENCE;
 	}
 
 	@Override
-	default Associativity getDirection() {
-		return Associativity.RIGHT_TO_LEFT;
+	default AssociativityPrecedenceLevel level() {
+		return AssociativityPrecedenceLevel.of(PRECEDENCE);
 	}
 
 }

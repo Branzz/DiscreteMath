@@ -1,27 +1,24 @@
 package bran.tree.compositions.expressions.operators;
 
 import bran.tree.structure.mapper.Associativity;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.OperatorType;
 
 import static bran.tree.structure.mapper.Associativity.*;
 
 public enum ExpressionOperatorType implements OperatorType {
-	E(13, RIGHT_TO_LEFT), MD(12, LEFT_TO_RIGHT), AS(11, LEFT_TO_RIGHT);
+	E(13),
+	MD(12),
+	AS(11);
 
-	private final int precedence; // DON'T REPEAT
-	private final Associativity associativity;
+	AssociativityPrecedenceLevel level;
 
-	ExpressionOperatorType(final int precedence, final Associativity associativity) {
-		this.precedence = precedence;
-		this.associativity = associativity;
+	ExpressionOperatorType(int level) {
+		this.level = AssociativityPrecedenceLevel.of(level);
 	}
 
-	public int precedence() {
-		return precedence;
-	}
-
-	public Associativity associativity() {
-		return associativity;
+	public AssociativityPrecedenceLevel level() {
+		return level;
 	}
 
 	public static final int MIN_ORDER = 11;

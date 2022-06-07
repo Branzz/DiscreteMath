@@ -136,7 +136,7 @@ public class StatementBuilder {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) {
-						if (x.next instanceof OperatorNode op && op.operator.getOrder() == order) {
+						if (x.next instanceof OperatorNode op && op.operator.precedence() == order) {
 							//	x -> x.next	-> x.next.next -> x.n.n.n
 							//	S -> O	    -> S	-> ?/null
 							Node insert = new StatementNode(new OperationStatement(
@@ -147,7 +147,7 @@ public class StatementBuilder {
 						} else
 							x = x.next;
 					}
-					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.getOrder() == order) {
+					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.precedence() == order) {
 						//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
 						//	? -> S		-> O			-> S	-> ?/null
 						Node insert = new StatementNode(new OperationStatement(

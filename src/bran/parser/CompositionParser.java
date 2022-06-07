@@ -49,13 +49,13 @@ public class CompositionParser {
 				   LineOperator.class, LINE_OPERATOR,
 				   Operator.class, EXP_OPERATOR,
 				   LogicalOperator.class, SMT_OPERATOR,
-				   EquationType.class, EQUIVALENCE,
-				   InequalityType.class, EQUIVALENCE)
+				   EquivalenceTypeImpl.class, EQUIVALENCE)
 			   .entrySet()
 			   .stream()
 			   .collect(flatMapping(entry -> stream(entry.getKey()
 														 .getEnumConstants())
 													 .flatMap(mapper -> stream(mapper.getSymbols())
+																				.map(String::toLowerCase)
 																				.distinct()
 																				.map(symbol -> new SimpleEntry<>(symbol, (Mapper) mapper)))
 													 .map(symMap -> new SimpleEntry<>(symMap.getKey(), new SimpleEntry<>(symMap.getValue(), entry.getValue()))),
@@ -66,12 +66,12 @@ public class CompositionParser {
 	static final Set<String> rightIdentifiers = Set.of(")", "]", "}");
 
 	enum TokenType {
-		FUNCTION(START, START, EXPRESSION),
-		LINE_OPERATOR(START, START, STATEMENT),
+		FUNCTION(START, START, true, EXPRESSION),
+		LINE_OPERATOR(START, START, true, STATEMENT),
 		COMMA(MIDDLE, START, BOTH),
-		EQUIVALENCE(MIDDLE, MIDDLE, STATEMENT),
-		EXP_OPERATOR(MIDDLE, START, EXPRESSION),
-		SMT_OPERATOR(MIDDLE, START, STATEMENT),
+		EQUIVALENCE(MIDDLE, MIDDLE, true, STATEMENT),
+		EXP_OPERATOR(MIDDLE, START, true, EXPRESSION),
+		SMT_OPERATOR(MIDDLE, START, true, STATEMENT),
 		LEFT_IDENTIFIER(START, START, BOTH), // becomes middle after the (expression) is simplified
 		RIGHT_IDENTIFIER(MIDDLE, MIDDLE, BOTH),
 		VARIABLE(START, MIDDLE, BOTH),
@@ -81,12 +81,22 @@ public class CompositionParser {
 
 		private final OrderZone currentZone;
 		private final OrderZone proceedingZone; // zone after current one
-		private CompositionType compositionType;
+		private final boolean mapperType; // Mapper.java; non-case sensitive
+		private final CompositionType compositionType;
 
 		TokenType(OrderZone currentZone, OrderZone proceedingZone, CompositionType compositionType) {
+			this(currentZone, proceedingZone, false, compositionType);
+		}
+
+		TokenType(OrderZone currentZone, OrderZone proceedingZone, boolean mapperType, CompositionType compositionType) {
 			this.currentZone = currentZone;
 			this.proceedingZone = proceedingZone;
+			this.mapperType = mapperType;
 			this.compositionType = compositionType;
+		}
+
+		public boolean isMapperType() {
+			return mapperType;
 		}
 
 		static TokenType tokenTypeOf(String prefix) {
@@ -148,10 +158,10 @@ public class CompositionParser {
 				throw new ParseException("unexpected token %s at index %d", tokens.get(i).string(), tokens.get(i).from());
 			} else {
 				String tokenString = tokens.get(i).string();
+				if (currentTokenType.isMapperType())
+					compBuilder.add(symbolTokens.get(tokenString).getKey());
+				else
 				switch (currentTokenType) {		// NO FALL THROUGH
-					case EXP_OPERATOR, FUNCTION, LINE_OPERATOR, SMT_OPERATOR, EQUIVALENCE:
-						compBuilder.add(symbolTokens.get(tokenString).getKey());
-						break;
 					case LEFT_IDENTIFIER:
 						CommaSeparatedComposition innerExpressions = CompositionParser.parse(tokens, localVariables, i + 1);
 						compBuilder.add(innerExpressions);
@@ -224,7 +234,7 @@ public class CompositionParser {
 						currentTokenType = TokenType.tokenTypeOf(prefix);
 					if (currentTokenType != TokenType.UNKNOWN) { // valid
 						prefixes.addAll(tokenParts[j].prefixes());
-						prefixes.add(new StringPart(currentTokenType == FUNCTION ? prefix.toLowerCase() : prefix, j, i, currentTokenType));
+						prefixes.add(new StringPart(currentTokenType.isMapperType() ? prefix.toLowerCase() : prefix, j, i, currentTokenType));
 						break;
 					}
 				}

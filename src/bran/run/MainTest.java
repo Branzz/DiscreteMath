@@ -350,10 +350,10 @@ public class MainTest {
 		for (String s : new String[] {
 			"t^c^   t", "t ^ c", "t ^ (c)", "!t", "!(t)", "(t) ^ (c)",
 				"t ^( c ^ t | ( t ^ c ) ) | t",
-				"(   )", "(  (", "(  )", ")", "( ", " ) )", " ( ) ( )", "",
+				"(   )", "(  (", "(  )", ")", "( ", ") )", "( ) ( )", "",
 			"t OR c AND (5 = 6 ^ 2)"
 		})
-			System.out.println(s + " ".repeat(Math.max(0, 20 - s.length()))
+			System.out.println(s + " ".repeat(Math.max(1, 20 - s.length()))
 							   + Parser.parseAndExcept(s, CompositionParser::parse) + "\t\t\t" + Parser.parseAndExcept(s, ExpressionParser::parse));
 	}
 

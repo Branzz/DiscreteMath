@@ -2,6 +2,7 @@ package bran.tree.compositions.statements.operators;
 
 import bran.tree.compositions.statements.*;
 import bran.tree.structure.mapper.Associativity;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
 import java.util.Arrays;
@@ -18,13 +19,13 @@ import static bran.tree.compositions.godel.GodelNumberSymbols.*;
 import static java.util.stream.Collectors.toMap;
 
 public enum LogicalOperator implements ForkOperator {
-	OR		   ((l, r) -> l || r,	 ORS,	  true,  (l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "v", "||", "|", "union", "\u2229", "or"),
+	OR		   ((l, r) -> l || r,	 ORS,	  true,  (l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "or", "||", "|", "union", "\u2229", "or"),
 	NOR 	   ((l, r) -> !(l || r), ORS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT } , "\u22bd", "nor", "nor", "nor"),
 	IMPLIES	   ((l, r) -> !l || r,	 IMPLY,	  false, (l, r) -> new Object[] { l, IF_THEN, r }, "\u21d2", "->", "implies", "implies"),
 	REV_IMPLIES((l, r) -> l || !r, 	 REVERSE, false, (l, r) -> new Object[] { r, IF_THEN, l }, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
 	NAND	   ((l, r) -> !(l && r), ANDS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT}, "\u22bc", "nand", "nand", "nand"),
-	AND		   ((l, r) -> l && r,	 ANDS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "n", "&&", "&", "intersection", "\u222a", "and"),
-	XOR		   ((l, r) -> l ^ r,	 XORS,	  true,  (l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "^", "^", "symmetric difference", "!="),
+	AND		   ((l, r) -> l && r,	 ANDS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "and", "&&", "&", "intersection", "\u222a", "and"),
+	XOR		   ((l, r) -> l ^ r,	 XORS,	  true,  (l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "xor", "xor", "symmetric difference", "!="),
 	XNOR	   ((l, r) -> l == r,	 XORS,	  true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT }, "\u2299", "xnor", "==", "==");
 	// NOT(-1, "\u00ac", "~", "!", "~", "complement", "\\", "not"),
 	// EQUIVALENT(-1, "\u8801", "=", "equivalent to", "equivalent to", "equals"),
@@ -79,8 +80,9 @@ public enum LogicalOperator implements ForkOperator {
 		return symbols;
 	}
 
-	public int getOrder() {
-		return operatorType.precedence();
+	@Override
+	public AssociativityPrecedenceLevel level() {
+		return operatorType.level();
 	}
 
 	@Override
@@ -91,11 +93,6 @@ public enum LogicalOperator implements ForkOperator {
 	@Override
 	public int minOrder() {
 		return MIN_ORDER;
-	}
-
-	@Override
-	public Associativity getDirection() {
-		return operatorType.associativity();
 	}
 
 	public OperationStatement of(final Statement left, final Statement right) {

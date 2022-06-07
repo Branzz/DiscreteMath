@@ -2,11 +2,17 @@ package bran.tree.structure.mapper;
 
 public interface OrderedOperator extends Mapper {
 
-	int getOrder();
+	AssociativityPrecedenceLevel level();
+
+	default int precedence() {
+		return level().precedence();
+	}
+	default Associativity associativity() {
+		return level().associativity();
+	}
 
 	int maxOrder();
-	int minOrder();
 
-	Associativity getDirection();
+	int minOrder();
 
 }
