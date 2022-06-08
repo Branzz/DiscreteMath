@@ -1,13 +1,12 @@
 package bran.parser;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.ParseException;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.expressions.operators.Operator;
 import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.expressions.operators.ExpressionOperatorType;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -177,7 +176,7 @@ public class ExpressionBuilder {
 		}
 
 		void collectOperators() {
-			for (int order = ExpressionOperatorType.MAX_ORDER; size != 1 && order >= ExpressionOperatorType.MIN_ORDER; order--) {
+			for (int order = 10; size != 1 && order >= 1; order--) {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) { // x can be the head after the 1st iteration

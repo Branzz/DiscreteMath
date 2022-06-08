@@ -1,8 +1,10 @@
 package bran.parser;
 
 import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.godel.GodelBuilder;
+import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 
 class LazyTypeVariable extends Composition {
@@ -35,6 +37,18 @@ class LazyTypeVariable extends Composition {
 			return asVariableStatement = new VariableStatement(name);
 	}
 
+	public Statement foundAsStatement() {
+		if (foundType)
+			return asVariableStatement;
+		return (Statement) found(false);
+	}
+
+	public Expression foundAsExpression() {
+		if (foundType)
+			return asVariable;
+		return (Expression) found(true);
+	}
+
 	public boolean foundType() {
 		return foundType;
 	}
@@ -57,9 +71,13 @@ class LazyTypeVariable extends Composition {
 			return asVariableStatement;
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
+
 	//TODO unimplement
 	@Override public String toFullString() { return getAsComposition().toFullString(); }
-	@Override public String toString() { return name; }
 	@Override public boolean equals(final Object s) { return getAsComposition().equals(s); }
 	@Override public Composition simplified() { return getAsComposition().simplified(); }
 	@Override public void replaceAll(final Composition original, final Composition replacement) { getAsComposition().replaceAll(original, replacement); }

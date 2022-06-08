@@ -1,15 +1,18 @@
 package bran.run;
 
+import bran.exceptions.ParseException;
 import bran.parser.CompositionParser;
 import bran.parser.ExpressionParser;
 import bran.parser.Parser;
 import bran.parser.StatementParser;
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.sets.regular.MultiRangedSet;
 import bran.tree.compositions.statements.StatementImpl;
 import bran.tree.compositions.statements.special.VerbalStatement;
 import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
 import bran.application.draw.StartViewer;
 import bran.application.draw.exprs.StartExpressionViewer;
+import bran.tree.generators.CompositionGenerator;
 import bran.tree.generators.ExpressionGenerator;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
@@ -48,6 +51,7 @@ import static bran.tree.compositions.expressions.operators.Operator.MUL;
 public class MainTest {
 
 	public static void main(String[] args) {
+		// System.out.println(CompositionParser.parse("rng()"));
 		// numberToStringTest();
 		// SetsTest();
 		// logicTest();
@@ -347,14 +351,24 @@ public class MainTest {
 		// 	}
 		// }
 
-		for (String s : new String[] {
-			"t^c^   t", "t ^ c", "t ^ (c)", "!t", "!(t)", "(t) ^ (c)",
-				"t ^( c ^ t | ( t ^ c ) ) | t",
-				"(   )", "(  (", "(  )", ")", "( ", ") )", "( ) ( )", "",
-			"t OR c AND (5 = 6 ^ 2)"
-		})
-			System.out.println(s + " ".repeat(Math.max(1, 20 - s.length()))
-							   + Parser.parseAndExcept(s, CompositionParser::parse) + "\t\t\t" + Parser.parseAndExcept(s, ExpressionParser::parse));
+		// for (String s : new String[] {
+		// 	"!t", "t&c&   t", "t & c", "t & (c)", "!t", "!(t)", "(t) & (c)",
+		// 		"t &( c & t | ( t & c ) ) | t",
+		// 		"(   )", "(  (", "(  )", ")", "( ", ") )", "( ) ( )", "",
+		// 	"t OR c AND ((5 = 6) | (2 = 2))"
+		// })
+		int runningStrMax = 0;
+		for (int i = 0; i < 10; i++) {
+			String s = CompositionParser.generate(5);
+			if (s.length() > runningStrMax - 2)
+				runningStrMax = s.length() + 4;
+			try {
+				final Composition parse = CompositionParser.parse(s);
+				System.out.println(s +  " ".repeat(runningStrMax - s.length()) + parse);
+			} catch (ParseException e) {
+				i--;
+			}
+		}
 	}
 
 	private static void operationTest() {

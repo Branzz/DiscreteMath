@@ -1,24 +1,21 @@
 package bran.tree.compositions.expressions.operators;
 
-import bran.tree.compositions.expressions.functions.appliers.FunctionDerivable;
-import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.expressions.ExpressionDisplayStyle;
-import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.Definition;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.ExpressionDisplayStyle;
 import bran.tree.compositions.godel.GodelNumber;
 import bran.tree.compositions.godel.GodelNumberSymbols;
-import bran.tree.structure.mapper.Associativity;
+import bran.tree.compositions.statements.Statement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
 import java.util.function.Function;
 
 import static bran.tree.compositions.expressions.ExpressionDisplayStyle.expressionStyle;
-import static bran.tree.compositions.expressions.values.Constant.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LN;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 import static bran.tree.compositions.expressions.operators.DomainSupplier.DENOM_NOT_ZERO;
-import static bran.tree.compositions.expressions.operators.ExpressionOperatorType.*;
+import static bran.tree.compositions.expressions.values.Constant.*;
 
 /**
  * reasoning for the power's domain
@@ -43,7 +40,7 @@ import static bran.tree.compositions.expressions.operators.ExpressionOperatorTyp
  * 	 19. (-anything except 0 and inf) ** (non-integer) is NAN	| NOT (x < 0 && p not int)))
  */
 public enum Operator implements ForkOperator {
-	POW(ExpressionOperatorType.E, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))),
+	POW(2, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))),
 		(x, p) -> p.equates(ZERO)
 				.or(((x.getDomainConditions()
 						.and(((x.equates(ZERO).or(x.equates(NEG_ZERO)).and(p.less(NEG_ZERO))).not())))
@@ -53,17 +50,17 @@ public enum Operator implements ForkOperator {
 						.or(p.equates(INFINITY).and(x.greater(NEG_ONE).and(x.less(ONE)))))
 					.and((x.less(NEG_ZERO).and(Definition.INTEGER.of(p).not())).not())) // only in double's version of pow
 		, false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db)
-	MUL(MD, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, GodelNumberSymbols.TIMES, "*", "times"),
-	DIV(MD, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
-	MOD(MD, (a, b) -> a % b, (a, b) -> a.derive().limitDomain(a.mod(b).notEquates(ZERO)) /*jump not diff.*/, DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
-	ADD(AS, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
-	SUB(AS, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
+	MUL(3, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, GodelNumberSymbols.TIMES, "*", "times"),
+	DIV(3, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
+	MOD(3, (a, b) -> a % b, (a, b) -> a.derive().limitDomain(a.mod(b).notEquates(ZERO)) /*jump not diff.*/, DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
+	ADD(4, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
+	SUB(4, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
 	private Operator inverse;
 	private Function<Expression, Expression> inverter;
 	private Function<Expression, Expression> invertAndSimplifier;
 
-	private final ExpressionOperatorType operatorType;
+	private final AssociativityPrecedenceLevel level;
 	private final Operable operable;
 	private final OperatorDerivable derivable;
 	private final DomainSupplier domainSupplier;
@@ -71,25 +68,24 @@ public enum Operator implements ForkOperator {
 	private final boolean commutative;
 	private final GodelNumberSymbols godelNumberSymbols;
 
-
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final OperatorDerivable derivable,
+	Operator(int level, final Operable operable, final OperatorDerivable derivable,
 			 boolean commutative, final String... symbols) {
-		this(operatorType, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
+		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
 	}
 
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+	Operator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
 			 boolean commutative, final String... symbols) {
-		this(operatorType, operable, derivable, domainSupplier, commutative, GodelNumberSymbols.SYNTAX_ERROR, symbols);
+		this(level, operable, derivable, domainSupplier, commutative, GodelNumberSymbols.SYNTAX_ERROR, symbols);
 	}
 
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final OperatorDerivable derivable,
+	Operator(int level, final Operable operable, final OperatorDerivable derivable,
 			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
-		this(operatorType, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, godelNumberSymbols, symbols);
+		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, godelNumberSymbols, symbols);
 	}
 
-	Operator(final ExpressionOperatorType operatorType, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+	Operator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
 			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
-		this.operatorType = operatorType;
+		this.level = AssociativityPrecedenceLevel.of(level);
 		this.operable = operable;
 		this.derivable = derivable;
 		this.domainSupplier = domainSupplier;
@@ -115,17 +111,7 @@ public enum Operator implements ForkOperator {
 
 	@Override
 	public AssociativityPrecedenceLevel level() {
-		return operatorType.level();
-	}
-
-	@Override
-	public int maxOrder() {
-		return MAX_ORDER;
-	}
-
-	@Override
-	public int minOrder() {
-		return MIN_ORDER;
+		return level;
 	}
 
 	public double operate(double left, double right) {

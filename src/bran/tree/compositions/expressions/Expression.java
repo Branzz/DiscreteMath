@@ -252,6 +252,16 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 		}
 	}
 
+	// public Expression findARoot() {
+	// 	final Statement simplified = derive().equates(ZERO)
+	// 										 .simplified();
+	// 	if (simplified instanceof OperationStatement o)
+	// 		if (o.getLeft() instanceof VariableStatement)
+	// 			return o.getRight();
+	// 		else
+	// 			return o.getLeft();
+	// }
+
 	@Override
 	public abstract boolean equals(Object other);
 

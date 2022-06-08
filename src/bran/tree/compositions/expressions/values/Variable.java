@@ -78,7 +78,12 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 
 	@Override
 	public boolean equals(final Object o) {
-		return this == o;
+		return this == o || (o instanceof Variable v && this.name.equals(v.name));
+	}
+
+	@Override
+	public int hashCode() {
+		return name != null ? name.hashCode() : 0;
 	}
 
 	@Override

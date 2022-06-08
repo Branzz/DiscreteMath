@@ -1,7 +1,9 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
+import bran.parser.CompositionParser.StringPart;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
+import bran.tree.compositions.expressions.functions.MultiArgFunction;
 import bran.tree.compositions.statements.LineStatement;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
@@ -15,12 +17,9 @@ import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.expressions.operators.Operator;
 import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.tree.compositions.Composition;
-import bran.tree.structure.mapper.Associativity;
-import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
-import bran.tree.structure.mapper.ForkOperator;
-import bran.tree.structure.mapper.OrderedOperator;
+import bran.tree.structure.mapper.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CompositionBuilder {
@@ -35,60 +34,60 @@ public class CompositionBuilder {
 
 	public Composition build() throws IllegalArgumentAmountException {
 		if (compositionChain.isEmpty())
-			throw new ParseException("can't be empty");
+			return Composition.empty();
 		compositionChain.collect();
 		// assert(compositionChain.size() == 1);
 		if (compositionChain.size() != 1)
-			throw new ParseException("unfinished composition");
+			throw new ParseException("unfinished composition %s", CompositionChain.OpCollector.combine(compositionChain.head, compositionChain.tail));
 		return compositionChain.peek();
 	}
 
-	public void add(Object obj) {
+	public void add(Object obj, StringPart sP) {
 		if (obj instanceof LazyTypeVariable lazyTypeVariable)
-			add(lazyTypeVariable);
+			add(lazyTypeVariable, sP);
 		else if (obj instanceof Composition statement)
-			add(statement);
+			add(statement, sP);
 		else if (obj instanceof ExpFunction expFunction)
-			add(expFunction);
+			add(expFunction, sP);
 		else if (obj instanceof LineOperator lineOperator)
-			add(lineOperator);
+			add(lineOperator, sP);
 		else if (obj instanceof ForkOperator forkOperator)
-			add(forkOperator); //
+			add(forkOperator, sP); //
 		else if (obj instanceof CommaSeparatedComposition compositions)
-			add(compositions);
+			add(compositions, sP);
 		else
 			throw new ParseException("unknown token (builder)");
 	}
 
-	public void add(LazyTypeVariable lazyTypeVariable) {
-		compositionChain.addNode(new CompositionChain.VariableNode(lazyTypeVariable));
+	public void add(LazyTypeVariable lazyTypeVariable, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.VariableNode(lazyTypeVariable, sP));
 	}
 
-	public void add(Composition composition) {
-		compositionChain.addNode(new CompositionChain.CompositionNode(composition));
+	public void add(Composition composition, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.CompositionNode(composition, sP));
 	}
 
-	public void add(ExpFunction expFunction) {
-		compositionChain.addNode(new CompositionChain.FunctionNode(expFunction));
+	public void add(ExpFunction expFunction, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.FunctionNode(expFunction, sP));
 	}
 
-	public void add(LineOperator lineOperator) {
-		compositionChain.addNode(new CompositionChain.LineOperatorNode(lineOperator));
+	public void add(LineOperator lineOperator, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.LineOperatorNode(lineOperator, sP));
 	}
 
-	public void add(ForkOperator forkOperator) {
-		compositionChain.addNode(new CompositionChain.OperatorNode(forkOperator));
+	public void add(ForkOperator forkOperator, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.OperatorNode(forkOperator, sP));
 	}
 	// public void add(List<Composition> compositions) {
 	// 	compositionChain.addNode(new CompositionChain.MultiCompositionNode(compositions));
 
 	// }
 
-	public void add(CommaSeparatedComposition expressions) {
+	public void add(CommaSeparatedComposition expressions, StringPart sP) {
 		if (expressions.isSingleton())
-			add(expressions.getAsSingleton());
+			add(expressions.getAsSingleton(), sP);
 		else
-			add(expressions.getFull());
+			add(expressions.getFull(), sP);
 	}
 
 	private static class CompositionChain {
@@ -103,7 +102,7 @@ public class CompositionBuilder {
 			// LinkedList<Object> x;
 			// x.iterator();
 			// x.get(0)
-			head =  tail = null;
+			head = tail = null;
 			size = 0;
 		}
 
@@ -133,14 +132,14 @@ public class CompositionBuilder {
 		public void collect() throws IllegalArgumentAmountException {
 			if (size <= 1)
 				return; // this leaves the only variable here as un found
-			inferVariableTypes();
+			// inferVariableTypes();
 			// collectEquivalences();
-			collectLineOperators();
-			collectForkOperators();
+			// collectLineOperators();
+			collectOrderedOperators();
 			// collectLogicalOperators();
 		}
 
-		private void inferVariableTypes() {
+		private void inferVariableTypes() { // TODO MERGE WITH collect Ordered OPs
 			// for (Node z = head; z.next != null; z = z.next) {
 			// 	if (z instanceof )
 			// }
@@ -149,7 +148,7 @@ public class CompositionBuilder {
 				x = x.next;
 			}
 			if (x == null)
-				throw new ParseException("unexpected repeating variables");
+				throw new ParseException("unexpected repeating variable");
 			Node y = head;
 			for (; y != x; y = y.next)
 				((VariableNode) y).found(x.isExpression());
@@ -181,321 +180,250 @@ public class CompositionBuilder {
 			}
 		}
 
-		void collectEquivalences() { // could combine with collectOperators
-			Node x = head;
-			while (x.next != null && x.next.next != null && x.next.next.next != null) {
-				// x -> x.next -> x.next.next -> x.next.next.next
-				// ? -> l      -> equiv type  -> r
-				if (x == head) {
-					if (x.next instanceof EquivalenceTypeNode eN) {
-						if (x.isExpression() && x.next.next.isExpression()) {
-							if (x.value() instanceof Expression left
-								&& x.next.next.value() instanceof Expression right) {
-								final EquivalenceNode insert = new EquivalenceNode(Equivalence.of(left, eN.equivalenceType, right));
-								insert.next = x.next.next.next;
-								x = head = insert;
-								size -= 2;
-							} else throw new ParseException("type mismatch");
-						} else
-							throw new ParseException("type error1");
-					} else
-						x = x.next;
-				} else if (x.next.next instanceof EquivalenceTypeNode eN) {
-					if (x.next.isExpression() && x.next.next.next.isExpression()) {
-						if (x.next.value() instanceof Expression left
-						 && x.next.next.next.value() instanceof Expression right) {
-							final EquivalenceNode insert = new EquivalenceNode(Equivalence.of(left, eN.equivalenceType, right));
-							insert.next = x.next.next.next.next;
-							x.next = insert;
-							size -= 2;
-						} else throw new ParseException("type mismatch");
-					} else
-						throw new ParseException("type error2");
-				} else
-					x = x.next;
-			}
-		}
-
-		void collectLineOperators() throws IllegalArgumentAmountException {
-			Node x = head;
-			while (x.next != null) {
-				if (x == head) {
-					//	x  -> x.next 	-> x.next.next	-> x.next.next.next
-					//	LO -> Statement	-> ?/null
-					if (x instanceof LineOperatorNode loN) {
-						Node insert = new CompositionNode(lineStream(loN, x));
-						insert.next = x.next;
-						x = head = insert;
-					} else
-						x = x.next;
-				} else {
-					if (x.next instanceof LineOperatorNode loN) {
-						//	x -> x.next -> x.next.next	-> x.next.next.next
-						//	? -> LO		-> Statement	-> ?/null
-						Node insert = new CompositionNode(lineStream(loN, x.next));
-						insert.next = x.next.next;
-						x.next = insert;
-					} else
-						x = x.next;
-				}
-			}
-		}
-
-		// void collectLogicalOperators() {
-		// 	for (int order = LogicalOperator.MAX_ORDER; size != 1 && order >= LogicalOperator.MIN_ORDER; order--) {
-		// 		Node x = head;
-		// 		while (x.next != null && x.next.next != null) {
-		// 			if (x == head) {
-		// 				if (!x.next.isExpression() && x.next instanceof OperatorNode op && op.operator.getOrder() == order) {
-		// 					//	x -> x.next	-> x.next.next -> x.n.n.n
-		// 					//	S -> O	    -> S	-> ?/null
-		// 				if (x.value() instanceof Statement left
-		// 				 && x.next.value() instanceof LogicalOperator operator
-		// 				 && x.next.next.value() instanceof Statement right) {
-		// 					Node insert = new CompositionNode(new OperationStatement(left, operator, right));
-		// 					insert.next = x.next.next.next;
-		// 					x = head = insert;
-		// 					size -= 2;
-		// 					} else
-		// 						throw new ParseException("type mismatch");
-		// 				} else
-		// 					x = x.next;
-		// 			}
-		// 			else if (!x.next.isExpression() && x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.getOrder() == order) {
-		// 				//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
-		// 				//	? -> S		-> O			-> S	-> ?/null
-		// 				if (x.next.value() instanceof Statement left
-		// 				 && x.next.next.value() instanceof LogicalOperator operator
-		// 				 && x.next.next.next.value() instanceof Statement right) {
-		// 					Node insert = new CompositionNode(new OperationStatement(left, operator, right));
-		// 					insert.next = x.next.next.next.next;
-		// 					x.next = insert;
-		// 					size -= 2;
-		// 				} else throw new ParseException("type mismatch");
+		// void collectLineOperators() throws IllegalArgumentAmountException {
+		// 	Node x = head;
+		// 	while (x.next != null) {
+		// 		if (x == head) {
+		// 			//	x  -> x.next 	-> x.next.next	-> x.next.next.next
+		// 			//	LO -> Statement	-> ?/null
+		// 			if (x instanceof LineOperatorNode || x instanceof FunctionNode) {
+		// 				Node insert = new CompositionNode(lineStream(x));
+		// 				insert.append(x.next);
+		// 				x = head = insert;
+		// 			} else
+		// 				x = x.next;
+		// 		} else {
+		// 			if (x.next instanceof LineOperatorNode || x.next instanceof FunctionNode) {
+		// 				//	x -> x.next -> x.next.next	-> x.next.next.next
+		// 				//	? -> LO		-> Statement	-> ?/null
+		// 				Node insert = new CompositionNode(lineStream(x.next));
+		// 				insert.append(x.next.next);
+		// 				x.append(insert);
 		// 			} else
 		// 				x = x.next;
 		// 		}
 		// 	}
 		// }
+		// void collectLineOperators() throws IllegalArgumentAmountException {
+		// 	Node x = tail;
+		// 	while (x.prev != null) {
+		// 		if (x == tail) {
+		// 			//	x  -> x.next 	-> x.next.next	-> x.next.next.next
+		// 			//	LO -> Statement	-> ?/null
+		// 			if (x.prev instanceof LineOperatorNode || x.prev instanceof FunctionNode) {
+		// 				// Node insert = new CompositionNode(new LineStatement(x, x.prev), new FunctionExpression(x.prev, x));
+		// 				insert.append(x.prev);
+		// 				x = tail = insert;
+		// 			} else
+		// 				x = x.prev;
+		// 		} else {
+		// 			if (x.prev instanceof LineOperatorNode || x.prev instanceof FunctionNode) {
+		// 				//	x -> x.next -> x.next.next	-> x.next.next.next
+		// 				//	? -> LO		-> Statement	-> ?/null
+		// 				Node insert = new CompositionNode(lineStream(x.prev));
+		// 				insert.append(x.prev.prev);
+		// 				x.append(insert);
+		// 			} else
+		// 				x = x.prev;
+		// 		}
+		// 	}
+		// }
 
-		Composition lineStream(Node x, Node start) throws IllegalArgumentAmountException {
-			// return x.isExpression() ? new FunctionExpression(x.operator, lineStream0(x.next, start))
-			// 			   :
-			if (x instanceof LineOperatorNode lONode) {
-				Composition compStreamed = lineStream(x.next, start);
-				if (compStreamed instanceof LazyTypeVariable lazyVar)
-					compStreamed = lazyVar.found(false);
-				if (compStreamed instanceof Statement smtStreamed)
-					return new LineStatement(smtStreamed, lONode.operator);
-				else
-					throw new ParseException("wrong type of argument for3");
-			} else if (x instanceof FunctionNode fNode) {
-				final Composition[] compositions = lineStreamArray(x.next, start);
-				final Expression[] expressions = new Expression[compositions.length];
-				for (int i = 0; i < compositions.length; i++) {
-					if (compositions[i] instanceof Expression exp)
-						expressions[i] = exp;
-					else
-						throw new ParseException("wrong type4");
-				}
-				return new FunctionExpression(fNode.function, expressions);
-			} else if (x.value() instanceof Composition comp) { // base case
-				// start.append(x.next);
-				if (comp instanceof LazyTypeVariable v)
-					return v;
-				else
-					return (Composition) x.value();
-			}
-			throw new ParseException(unknownExcMessage);
-		}
+		// Composition lineStream(Node x) throws IllegalArgumentAmountException {
+		// 	return lineStream(x, x);
+		// }
 
-		Composition[] lineStreamArray(Node x, Node start) throws IllegalArgumentAmountException {
-			if (x instanceof LineOperatorNode lONode) {
-				return new Composition[] { lineStream(lONode, start) };
-			} else if (x instanceof CompositionNode cNode) { // base case
-				// start.append(x.next);
-				return new Composition[] { cNode.composition } ;
-			} else if (x instanceof MultiCompositionNode nextStatement) {
-				// start.append(x.next);
-				return nextStatement.compositions.compositions().toArray(Composition[]::new);
-			}
-			throw new ParseException(unknownExcMessage);
-		}
+		// Composition lineStream(Node x, Node start) throws IllegalArgumentAmountException {
+		// 	// return x.isExpression() ? new FunctionExpression(x.operator, lineStream0(x.next, start))
+		// 	// 			   :
+		// 	if (x instanceof LineOperatorNode lONode) {
+		// 		Composition compStreamed = lineStream(x.next, start);
+		// 		if (compStreamed instanceof LazyTypeVariable lazyVar)
+		// 			compStreamed = lazyVar.found(false);
+		// 		if (compStreamed instanceof Statement smtStreamed)
+		// 			return new LineStatement(lONode.operator, smtStreamed);
+		// 		else
+		// 			throw new ParseException("wrong type of argument for3");
+		// 	} else if (x instanceof FunctionNode fNode) {
+		// 		final Composition[] compositions = lineStreamArray(x.next, start);
+		// 		final Expression[] expressions = new Expression[compositions.length];
+		// 		for (int i = 0; i < compositions.length; i++) {
+		// 			if (compositions[i] instanceof Expression exp)
+		// 				expressions[i] = exp;
+		// 			else
+		// 				throw new ParseException("wrong type4");
+		// 		}
+		// 		return new FunctionExpression(fNode.function, expressions);
+		// 	} else if (x.value() instanceof Composition comp) { // base case
+		// 		// start.append(x.next);
+		// 		if (comp instanceof LazyTypeVariable v)
+		// 			return v;
+		// 		else
+		// 			return (Composition) x.value();
+		// 	}
+		// 	throw new ParseException(unknownExcMessage);
+		// }
+
+		// Composition[] lineStreamArray(Node x, Node start) throws IllegalArgumentAmountException {
+		// 	if (x instanceof LineOperatorNode lONode) {
+		// 		return new Composition[] { lineStream(lONode, start) };
+		// 	} else if (x instanceof CompositionNode cNode) { // base case
+		// 		start.append(x.next);
+		// 		return new Composition[] { cNode.composition } ;
+		// 	} else if (x instanceof MultiCompositionNode nextStatement) {
+		// 		start.append(x.next);
+		// 		return nextStatement.compositions.compositions().toArray(Composition[]::new);
+		// 	}
+		// 	throw new ParseException(unknownExcMessage);
+		// }
 
 		@Override
 		public String toString() {
 			StringBuilder sB = new StringBuilder();
 			Node x = head;
 			while (x != null) {
-				sB.append(x.value());
+				sB.append(x.value()).append(' ');
 				x = x.next;
 			}
 			return sB.toString();
 		}
 
-
-		// @FunctionalInterface interface Iter { Node iter(Node n); }
-		// @FunctionalInterface interface Setr { Node set(Node n, Node to); }
-		// @FunctionalInterface interface SetEnd { Node set(Node to); }
-
-		void collectForkOperators() {
-			for (int order = AssociativityPrecedenceLevel.MAX; size != 1 && order >= AssociativityPrecedenceLevel.MIN; order--) {
-				new ForkOpCollector(AssociativityPrecedenceLevel.of(order).associativity() == Associativity.LEFT_TO_RIGHT, order)
+		void collectOrderedOperators() {
+			for (int order = AssociativityPrecedenceLevel.MIN; size != 1 && order <= AssociativityPrecedenceLevel.MAX; order++) {
+				new OpCollector(AssociativityPrecedenceLevel.of(order).associativity() == Associativity.LEFT_TO_RIGHT, order)
 						.iterateAlong();
-				// Node x = (LTR ? head : tail);
-				// Iter i = LTR ? (n -> n.next) : (n -> n.prev);
-				// Setr s = LTR ? ((n, to) -> n.next = to) : ((n, to) -> n.prev = to);
-				// SetEnd end = LTR ? (to -> head = to) : (to -> tail = to);
-				// while (i.iter(x) != null && i.iter(i.iter(x)) != null) {
-				// 	if (x == (LTR ? head : tail)) {
-				// 		if (i.iter(x).value() instanceof ForkOperator op && op.precedence() == order) {
-				// 			Node insert = new CompositionNode(getComposition(x, op, i.iter(i.iter(x))));
-				// 			s.set(insert, i.iter(i.iter(i.iter(x))));
-				// 			x = end.set(insert);
-				// 			size -= 2;
-				// 		}
-				// 		else {
-				// 			x = i.iter(x);
-				// 		}
-				// 	}
-				// 	else if (i.iter(i.iter(x)).value() instanceof ForkOperator op && op.precedence() == order) {
-				// 		if (i.iter(i.iter(i.iter(x))) == null)
-				// 			throw new ParseException("missing right side of exp");
-				// 		Node insert = new CompositionNode(getComposition(i.iter(x), op, i.iter(i.iter(i.iter(x)))));
-				// 		s.set(insert, i.iter(i.iter(i.iter(i.iter(x)))));
-				// 		s.set(x, insert);
-				// 		size -= 2;
-				// 	} else
-				// 		x = i.iter(x);
-				// }
-
-				// if (LTR)
-				// while (x.next != null && x.next.next != null) {
-				// 	if (x == head) {
-				// 		if (x.next.value() instanceof ForkOperator op && op.precedence() == order) {
-				// 			Node insert = new CompositionNode(getComposition(x, op, x.next.next));
-				// 			insert.next = x.next.next.next;
-				// 			x = head = insert;
-				// 			size -= 2;
-				// 		}
-				// 		else {
-				// 			x = x.next;
-				// 		}
-				// 	}
-				// 	else if (x.next.next.value() instanceof ForkOperator op && op.precedence() == order) {
-				// 		if (x.next.next.next == null)
-				// 			throw new ParseException("missing right side of exp");
-				// 		Node insert = new CompositionNode(getComposition(x.next, op, x.next.next.next));
-				// 		insert.next = x.next.next.next.next;
-				// 		x.next = insert;
-				// 		size -= 2;
-				// 	} else
-				// 		x = x.next;
-				// }
-				// else
-				// while (x.prev != null && x.prev.prev != null) {
-				// 	if (x == tail) {
-				// 		if (x.prev.value() instanceof ForkOperator op && op.precedence() == order) {
-				// 			Node insert = new CompositionNode(getComposition(x.prev.prev, op, x));
-				// 			insert.prev = x.prev.prev.prev;
-				// 			x = tail = insert;
-				// 			size -= 2;
-				// 		}
-				// 		else {
-				// 			x = x.prev;
-				// 		}
-				// 	}
-				// 	else if (x.prev.prev.value() instanceof ForkOperator op && op.precedence() == order) {
-				// 		if (x.prev.prev.prev == null)
-				// 			throw new ParseException("missing left side of exp");
-				// 		Node insert = new CompositionNode(getComposition(x.prev.prev.prev, op, x.prev));
-				// 		insert.prev = x.prev.prev.prev.prev;
-				// 		x.prev = insert;
-				// 		size -= 2;
-				// 	} else
-				// 		x = x.prev;
-				// }
 			}
 		}
 
-		private class ForkOpCollector {
+		private class OpCollector {
 			private Node x;
 			private final boolean LTR;
 			private final int order;
 
-			public ForkOpCollector(boolean LTR, int order) {
+			public OpCollector(boolean LTR, int order) {
 				this.LTR = LTR;
 				this.order = order;
-				x = end();
 			}
 
 			void ltr(Supplier<Node> leftRun, Supplier<Node> rightRun) { if (LTR) rightRun.get(); else leftRun.get(); }
 			Node ltr(Node leftNode, Node rightNode) { return LTR ? leftNode : rightNode; }
-			Node iter(Node node) { return LTR ? node.next : node.prev; }
+			Node iter(Node node) { return node == null ? null : (LTR ? node.next : node.prev); }
+			Node revIter(Node node) { return node == null ? null : (LTR ? node.prev : node.next); }
 			Node iter() { return iter(x); }
 			Node iter(int n, Node y) { return n == 1 ? y : iter(n - 1, iter(y)); }
 			Node iter(int n) { return iter(n, x); }
-			Node setIter(Node n, Node to) { return LTR ? (n.append(to)) : (n.prepend(to)); }
-			// Node setIter(Node n, Node to) { return ltr(()-> n.next = to, () -> n.prev = to); }
+			Node setIter(Node n, Node to) { return LTR ? n.append(to) : n.prepend(to); }
 			Node setIter(Node to) { return setIter(x, to); }
-			Node setEnd(Node to) { if (LTR) return head = to; else return tail = to; }
-			// Node setEnd(Node to) { return ltr(() -> head = to, () -> tail = to); }
-			Node end() { return LTR ? head : tail; }
+			Node start() { return LTR ? head : tail; }
+			boolean isStart() { return x == start(); }
+			Node setStart(Node to) { if (LTR) return head = to; else return tail = to; }
+			Node end() { return LTR ? tail : head; }
 			boolean isEnd() { return x == end(); }
+			Node setEnd(Node to) { if (LTR) return tail = to; else return head = to; }
 
-			void iterateAlong() {
-				while (iter() != null && iter(iter()) != null) {
-					Node y = isEnd() ? x : iter();
-					if (iter(y).value() instanceof ForkOperator op && op.precedence() == order) {
-						// final Node otherSide = iter(iter(y));
-						Node insert = new CompositionNode(getComposition(y, op, iter(iter(y))));
-						setIter(insert, iter(iter(iter(y))));
-						if (isEnd())
-							x = setEnd(insert);
-						else
-							setIter(insert);
-						size -= 2;
-					} else
-						x = iter(y);
+			void set(Node node, Node replace) {
+				if (node == head) {
+					node.next.prev = replace;
+					replace.next = node.next;
+					head = replace;
+				} else if (node == tail) {
+					node.prev.next = replace;
+					replace.prev = node.prev;
+					tail = replace;
+				} else {
+					replace.prev = node.prev;
+					replace.next = node.next;
+					node.prev.next = replace;
+					node.next.prev = replace;
 				}
 			}
 
-			private Composition getComposition(Node left, OrderedOperator op, Node right) {
-				if (op instanceof Operator operator) {
-					return new OperatorExpression(getAsExpression(left), operator, getAsExpression(right));
-				} else if (op instanceof LogicalOperator logOp) {
-					return new OperationStatement(getAsStatement(left), logOp, getAsStatement(right));
-				} else if (op instanceof EquivalenceType eN) {
-					return Equivalence.of(getAsExpression(left), eN, getAsExpression(right));
-				} else throw new ParseException("weird type");
+			// result: from -> node -> to
+			void insert(Node prev, @NotNull Node node, Node next) {
+				if (prev == null)
+					head = node;
+				if (next == null)
+					tail = node;
+				node.prepend(prev);
+				node.append(next);
 			}
 
-			private Expression getAsExpression(Node node) {
+			static StringPart combine(Node from, Node to) {
+				StringBuilder combinedStr = new StringBuilder();
+				for (Node n = from; n != to; n = n.next)
+					combinedStr.append(n.stringPart.string()).append(' ');
+				combinedStr.append(to.stringPart.string());
+				return new StringPart(combinedStr.toString(), from.stringPart.from(), to.stringPart.to(), CompositionParser.TokenType.UNKNOWN);
+			}
+
+			// a -> x.prev -> op -> x.next -> b ===> a -> new -> b
+			void iterateAlong() {
+				for (x = start(); x != null; x = iter(x)) {
+					if (x.value() instanceof OrderedOperator op
+						&& op.precedence() == order) {
+						if (x.next != null && op instanceof BranchOperator bOp) {
+							insert(x.prev, new CompositionNode(getBranchComposition(bOp, x.next), combine(x, x.next)), x.next.next);
+							size -= 1;
+						} else if (x.prev != null && x.next != null && op instanceof ForkOperator fOp) {
+							insert(x.prev.prev, new CompositionNode(getComposition(x.prev, fOp, x.next), combine(x.prev, x.next)), x.next.next);
+							size -= 2;
+						} else throw new ParseException("misplaced function/operation \"%s\" at index %d", op, x.stringPart.from());
+					}
+				}
+			}
+
+			private Composition getBranchComposition(BranchOperator op, Node child) {
+				if (op instanceof LineOperator lOp) {
+					return new LineStatement(lOp, getAsStatement(child));
+				} else if (op instanceof MultiArgFunction mAF) {
+					try {
+						return new FunctionExpression(mAF, getAsExpression(child));
+					} catch (IllegalArgumentAmountException e) {
+						throw new ParseException(e.getMessage()); // + " for " + op
+					}
+				}
+				else throw new ParseException("unknown/unimplemented branch operator");
+			}
+
+			private Composition getComposition(Node left, ForkOperator op, Node right) {
+				if (op instanceof Operator operator)
+					return new OperatorExpression(getAsExpression(left), operator, getAsExpression(right));
+				else if (op instanceof LogicalOperator logOp)
+					return new OperationStatement(getAsStatement(left), logOp, getAsStatement(right));
+				else if (op instanceof EquivalenceType eN)
+					return Equivalence.of(getAsExpression(left), eN, getAsExpression(right));
+				else
+					throw new ParseException("unknown/unimplemented fork operator");
+			}
+
+			private Expression getAsExpression(Node node) { // *MUTABLE*
 				Expression exp;
 				if (node.value() instanceof LazyTypeVariable lazyVar) {
-					if (lazyVar.isExpression())
-						exp = lazyVar.getAsVariable();
-					else throw new ParseException("x");
+					if (lazyVar.isStatement())
+						throw new ParseException("found statement variable \"%s\" at index %d, expected expression", lazyVar.toString(), node.stringPart.from());
+					else
+						exp = lazyVar.foundAsExpression();
 				} else {
 					if (node.value() instanceof Expression nodeExp)
 						exp = nodeExp;
-					else throw new ParseException("y");
+					else
+						throw new ParseException("found statement \"%s\" at index %d, expected expression", node.toString(), node.stringPart.from());
 				}
 				return exp;
 			}
 
-			private Statement getAsStatement(Node node) {
+			private Statement getAsStatement(Node node) { // *MUTABLE*
 				Statement smt;
 				if (node.value() instanceof LazyTypeVariable lazyVar) {
-					if (lazyVar.isStatement())
-						smt = lazyVar.getAsVariableStatement();
+					if (lazyVar.isExpression())
+						throw new ParseException("found expression variable \"%s\" at index %d, expected statement", lazyVar.toString(), node.stringPart.from());
 					else
-						throw new ParseException("used expression variable for a statement");
+						smt = lazyVar.foundAsStatement();
 				} else {
 					if (node.value() instanceof Statement nodeExp)
 						smt = nodeExp;
 					else
-						throw new ParseException("used statement variable for a expression");
+						throw new ParseException("found expression \"%s\" at index %d, expected statement", node.toString(), node.stringPart.from());
 				}
 				return smt;
 			}
@@ -515,6 +443,13 @@ public class CompositionBuilder {
 		private static abstract class Node {
 			protected Node prev = null;
 			protected Node next = null;
+			private final StringPart stringPart;
+			// public Node() {
+			// 	stringPart = null;
+			// }
+			public Node(StringPart stringPart) {
+				this.stringPart = stringPart;
+			}
 			abstract Object value();
 			Node append(Node next) throws ParseException {
 				if (next != null)
@@ -526,37 +461,46 @@ public class CompositionBuilder {
 					prev.next = this;
 				return this.prev = prev;
 			}
-			static Node of(Object o) {
-				if (o instanceof Composition c)
-					return new CompositionNode(c);
-				else if (o instanceof Operator op)
-					return new OperatorNode(op);
-				else if (o instanceof LineOperator lO)
-					return new LineOperatorNode(lO);
-				else if (o instanceof ExpFunction f)
-					return new FunctionNode(f);
-				else if (o instanceof CommaSeparatedComposition cE)
-					return new MultiCompositionNode(cE);
-				throw new ParseException(unknownExcMessage);
-			}
+			// static Node of(Object o) {
+			// 	if (o instanceof Composition c)
+			// 		return new CompositionNode(c);
+			// 	else if (o instanceof Operator op)
+			// 		return new OperatorNode(op);
+			// 	else if (o instanceof LineOperator lO)
+			// 		return new LineOperatorNode(lO);
+			// 	else if (o instanceof ExpFunction f)
+			// 		return new FunctionNode(f);
+			// 	else if (o instanceof CommaSeparatedComposition cE)
+			// 		return new MultiCompositionNode(cE);
+			// 	throw new ParseException(unknownExcMessage);
+			// }
 			public abstract boolean isExpression();
+
+			// @Override
+			// public String toString() {
+			// 	StringBuilder sB = new StringBuilder();
+			// 	Node x = this;
+			// 	while (x != null) {
+			// 		sB.append(x.value()).append(' ');
+			// 		x = x.next;
+			// 	}
+			// 	return sB.toString();
+			// }
+
+			@Override
+			public String toString() {
+				return value().toString();
+			}
+
 		}
 
 		private static class EquivalenceTypeNode extends Node {
 			final EquivalenceType equivalenceType;
-			public EquivalenceTypeNode(EquivalenceType equivalenceType) {
+			public EquivalenceTypeNode(EquivalenceType equivalenceType, StringPart stringPart) {
+				super(stringPart);
 				this.equivalenceType = equivalenceType;
 			}
 			@Override EquivalenceType value() { return equivalenceType; }
-			@Override public boolean isExpression() { return false; }
-		}
-
-		private static class EquivalenceNode extends Node {
-			final Equivalence equivalence;
-			public EquivalenceNode(Equivalence equivalence) {
-				this.equivalence = equivalence;
-			}
-			@Override Equivalence value() { return equivalence; }
 			@Override public boolean isExpression() { return false; }
 		}
 
@@ -564,41 +508,22 @@ public class CompositionBuilder {
 			final Composition composition;
 			final boolean isExpression;
 			@Override Composition value() { return composition; }
-			public CompositionNode(Composition composition) {
+			public CompositionNode(Composition composition, StringPart stringPart) {
+				super(stringPart);
 				this.composition = composition;
 				this.isExpression = composition instanceof Expression;
 			}
-			// @Override Node append(Node next) {
-			// 	super.append(next);
-			// 	if (next instanceof OperatorNode lO)
-			// 		return this.next = lO;
-			// 	else if (next instanceof EquivalenceTypeNode eTN)
-			// 		return this.next = eTN;
-			// 	// else if (next instanceof FunctionNode fN) {
-			// 	// 	// implicit multiplication
-			// 	// }
-			// 	throw new ParseException(unknownExcMessage);
-			// }
 			@Override public boolean isExpression() { return isExpression; }
 		}
 
 		private static class VariableNode extends Node {
-			/* NOT final */
-			LazyTypeVariable variable;
-			boolean isExpression;
+			final LazyTypeVariable variable;
+			/* NON final */ boolean isExpression;
 			@Override LazyTypeVariable value() { return variable; }
-			public VariableNode(LazyTypeVariable variable) {
+			public VariableNode(LazyTypeVariable variable, StringPart stringPart) {
+				super(stringPart);
 				this.variable = variable;
 			}
-			// @Override Node append(Node next) {
-			// 	super.append(next);
-			// 	if (!variable.foundType()) // when variable is first; ex. "a +", "x*(y&"
-			// 		variable.found(next.isExpression());
-			// 	// if (next instanceof FunctionNode fN) {
-			// 	// 	// implicit multiplication
-			// 	// }
-			// 	throw new ParseException(unknownExcMessage);
-			// }
 			@Override public boolean isExpression() { return isExpression; }
 			void found(boolean isExpression) {
 				this.isExpression = isExpression;
@@ -610,9 +535,10 @@ public class CompositionBuilder {
 			final ForkOperator operator;
 			final boolean isExpression;
 			@Override ForkOperator value() { return operator; }
-			public OperatorNode(ForkOperator operator) {
+			public OperatorNode(ForkOperator operator, StringPart stringPart) {
+				super(stringPart);
 				this.operator = operator;
-				this.isExpression = operator instanceof Operator; // !ForkOperator
+				this.isExpression = operator instanceof Operator;
 			}
 			@Override public boolean isExpression() { return isExpression; }
 		}
@@ -620,7 +546,8 @@ public class CompositionBuilder {
 		private static class LineOperatorNode extends Node {
 			final LineOperator operator;
 			@Override LineOperator value() { return operator; }
-			public LineOperatorNode(LineOperator operator) {
+			public LineOperatorNode(LineOperator operator, StringPart stringPart) {
+				super(stringPart);
 				this.operator = operator;
 			}
 			@Override public boolean isExpression() { return false; }
@@ -629,21 +556,17 @@ public class CompositionBuilder {
 		private static class FunctionNode extends Node {
 			final ExpFunction function;
 			@Override ExpFunction value() { return function; }
-			public FunctionNode(ExpFunction function) {
+			public FunctionNode(ExpFunction function, StringPart stringPart) {
+				super(stringPart);
 				this.function = function;
 			}
 			@Override public boolean isExpression() { return true; }
 		}
 
 		private static class MultiCompositionNode extends Node {
-			// List<Composition> expressions;
-			// public MultiCompositionNode(List<Composition> compositions) {
-			// 	this.expressions = compositions;
-			// }
-			// @Override List<Composition> value() { return expressions; }
-			// @Override public boolean isExpression() { return true; }
 			CommaSeparatedComposition compositions;
-			public MultiCompositionNode(CommaSeparatedComposition compositions) {
+			public MultiCompositionNode(CommaSeparatedComposition compositions, StringPart stringPart) {
+				super(stringPart);
 				this.compositions = compositions;
 			}
 			@Override CommaSeparatedComposition value() { return compositions; }

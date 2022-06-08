@@ -11,8 +11,8 @@ public interface OrderedOperator extends Mapper {
 		return level().associativity();
 	}
 
-	int maxOrder();
+	// int maxOrder();
 
-	int minOrder();
+	// int minOrder();
 
 }

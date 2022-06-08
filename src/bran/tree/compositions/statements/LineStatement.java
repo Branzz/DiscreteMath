@@ -34,7 +34,7 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 	// 	lineOperator = value ? CONSTANT : NOT;
 	// }
 
-	public LineStatement(Statement child, LineOperator lineOperator) {
+	public LineStatement(LineOperator lineOperator, Statement child) {
 		this.child = child;
 		this.lineOperator = lineOperator;
 	}

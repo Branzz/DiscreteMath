@@ -151,7 +151,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		String rightString = right.toString();
 		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
 			if (right instanceof OperatorExpression
-				&& ExpressionOperatorType.AS.level().precedence() <= operator.precedence())
+				&& ADD.level().precedence() <= operator.precedence())
 				rightString = parens(rightString);
 			return '-' + rightString;
 		}

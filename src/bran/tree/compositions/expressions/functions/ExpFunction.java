@@ -1,11 +1,12 @@
 package bran.tree.compositions.expressions.functions;
 
-import bran.tree.compositions.statements.Statement;
 import bran.exceptions.IllegalArgumentAmountException;
-import bran.tree.structure.mapper.Mapper;
 import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.statements.Statement;
+import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
+import bran.tree.structure.mapper.BranchOperator;
 
-public interface ExpFunction extends Mapper {
+public interface ExpFunction extends BranchOperator {
 
 	double function(double... a);
 
@@ -35,6 +36,11 @@ public interface ExpFunction extends Mapper {
 
 	default FunctionExpression of(Expression... other) throws IllegalArgumentAmountException {
 		return new FunctionExpression(this, other);
+	}
+
+	@Override
+	default AssociativityPrecedenceLevel level() {
+		return AssociativityPrecedenceLevel.of(1);
 	}
 
 }

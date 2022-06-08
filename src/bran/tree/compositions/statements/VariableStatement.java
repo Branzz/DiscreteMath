@@ -60,8 +60,14 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		return constant;
 	}
 
+	@Override
 	public boolean equals(Object s) {
-		return this == s || (s instanceof VariableStatement && ((VariableStatement) s).name.equals(name));
+		return this == s || (s instanceof VariableStatement v && name.equals(v.name));
+	}
+
+	@Override
+	public int hashCode() {
+		return name != null ? name.hashCode() : 0;
 	}
 
 	@Override

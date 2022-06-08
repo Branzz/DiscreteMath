@@ -123,7 +123,7 @@ public class StatementBuilder {
 
 		Statement lineStream(Node x, Node start) {
 			if (x instanceof LineOperatorNode lONnext){
-				return new LineStatement(lineStream(x.next, start), lONnext.operator);
+				return new LineStatement(lONnext.operator, lineStream(x.next, start));
 			} else if (x instanceof StatementNode nextStatement) { // base case
 				start.next = x.next;
 				return nextStatement.statement;

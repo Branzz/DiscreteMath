@@ -2,27 +2,23 @@ package bran.tree.compositions.statements.operators;
 
 import bran.tree.compositions.statements.LineStatement;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.StatementOperatorType;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.BranchOperator;
-import bran.tree.structure.mapper.Associativity;
 
-import static bran.tree.compositions.statements.StatementOperatorType.REVERSE;
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
 public enum LineOperator implements BranchOperator {
-	CONSTANT(b -> b,	REVERSE, "self", "self", "self", "self", "self", "self"),
-	NOT(b -> !b,		REVERSE, "\u00ac", "~", "!", "~", "complement", "\\", "not");
+	CONSTANT(b -> b,  1, "self", "self", "self", "self", "self", "self"),
+	NOT     (b -> !b, 1, "\u00ac", "~", "!", "~", "complement", "\\", "not");
 	/* All true, all false */
-	public static final int order = 1;
 
 	private final String[] symbols;
-	private final StatementOperatorType operatorType;
+	private final AssociativityPrecedenceLevel level;
 	private final LineOperable lineOperable;
 
-	LineOperator(final LineOperable lineOperable, final StatementOperatorType operatorType, final String... symbols) {
+	LineOperator(final LineOperable lineOperable, int level, final String... symbols) {
 		this.lineOperable = lineOperable;
-		this.operatorType = operatorType;
+		this.level = AssociativityPrecedenceLevel.of(level);
 		this.symbols = symbols;
 	}
 
@@ -44,21 +40,11 @@ public enum LineOperator implements BranchOperator {
 
 	@Override
 	public AssociativityPrecedenceLevel level() {
-		return AssociativityPrecedenceLevel.of(order);
-	}
-
-	@Override
-	public int maxOrder() {
-		return order;
-	}
-
-	@Override
-	public int minOrder() {
-		return order;
+		return level;
 	}
 
 	public LineStatement of(final Statement statement) {
-		return new LineStatement(statement, this);
+		return new LineStatement(this, statement);
 	}
 
 	@FunctionalInterface

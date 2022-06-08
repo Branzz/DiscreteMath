@@ -1,6 +1,5 @@
 package bran.tree.compositions.statements.special.equivalences;
 
-import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
@@ -30,26 +29,9 @@ public interface EquivalenceType extends ForkOperator {
 		Boolean apply(Comparable left, Comparable right);
 	}
 
-	int PRECEDENCE = 15;
-
-	@Override
-	default int precedence() {
-		return PRECEDENCE;
-	}
-
-	@Override
-	default int maxOrder() {
-		return PRECEDENCE;
-	}
-
-	@Override
-	default int minOrder() {
-		return PRECEDENCE;
-	}
-
 	@Override
 	default AssociativityPrecedenceLevel level() {
-		return AssociativityPrecedenceLevel.of(PRECEDENCE);
+		return AssociativityPrecedenceLevel.of(10);
 	}
 
 }

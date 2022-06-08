@@ -27,14 +27,15 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 	final ExpFunction function;
 	final Expression[] expressions;
 
-	public FunctionExpression(final ExpFunction function, final Expression... expressions) throws IllegalArgumentAmountException {
+	public FunctionExpression(final ExpFunction function, Expression... expressions) throws IllegalArgumentAmountException {
 		super(Stream.concat(Stream.of(function.domain(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
+		expressions = Arrays.stream(expressions).filter(e -> !e.equals(Composition.empty())).toArray(Expression[]::new);
 		function.checkArguments(expressions.length);
 		this.function = function;
 		this.expressions = expressions;
 	}
 
-	FunctionExpression(final ExpFunction function, boolean secure, final Expression... expressions) {
+	FunctionExpression(final ExpFunction function, boolean secure, Expression... expressions) {
 		super(Stream.concat(Stream.of(function.domainS(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		this.function = function;
 		this.expressions = expressions;
@@ -159,7 +160,7 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 		String argString = Arrays.stream(expressions)
 								 .map(Expression::toString)
 								 .collect(Collectors.joining(", "));
-		final String args = (expressions.length == 1 && expressions[0] instanceof Value ? "" + argString : parens(argString));
+		final String args = (expressions.length == 1 && expressions[0] instanceof Value ? " " + argString : parens(argString));
 		return function == MultiArgFunction.ABS ? "|" + args + "|" : function + args;
 	}
 

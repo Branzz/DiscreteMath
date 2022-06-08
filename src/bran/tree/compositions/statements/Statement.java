@@ -123,11 +123,11 @@ public abstract class Statement extends Composition implements Equivalable<State
 	}
 
 	public static LineStatement notOf(Statement s) {
-		return new LineStatement(s, LineOperator.NOT);
+		return new LineStatement(LineOperator.NOT, s);
 	}
 
 	public static LineStatement selfOf(Statement s) {
-		return new LineStatement(s, LineOperator.CONSTANT);
+		return new LineStatement(LineOperator.CONSTANT, s);
 	}
 	
 	public static Statement andOf(Statement... s) {
@@ -159,11 +159,11 @@ public abstract class Statement extends Composition implements Equivalable<State
 	}
 
 	public Statement not() {
-		return new LineStatement(this, LineOperator.NOT);
+		return new LineStatement(LineOperator.NOT, this);
 	}
 
 	public LineStatement self() {
-		return new LineStatement(this, LineOperator.CONSTANT);
+		return new LineStatement(LineOperator.CONSTANT, this);
 	}
 	
 	public OperationStatement and(Statement... s) {

@@ -159,8 +159,7 @@ public class ExpressionParser {
 							tokens.subList(start, i + 1).clear();
 						}
 						try {
-							return new CommaSeparatedExpression(expBuilder.build(),
-																parse(tokens, localVariables, start));
+							return new CommaSeparatedExpression(expBuilder.build(), parse(tokens, localVariables, start));
 						} catch (IllegalArgumentAmountException e) {
 							throw new ParseException("illegal amount of arguments near %s near index %d: %s",
 													 tokens.get(i).string(), tokens.get(i).from(), e.getMessage());

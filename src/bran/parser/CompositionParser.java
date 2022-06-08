@@ -14,9 +14,12 @@ import bran.tree.compositions.expressions.functions.MultiArgFunction;
 import bran.tree.compositions.expressions.operators.Operator;
 import bran.tree.compositions.Composition;
 import bran.tree.structure.mapper.Mapper;
+import bran.tree.structure.mapper.OrderedOperator;
 
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static bran.parser.CompositionParser.TokenType.CompositionType.*;
 import static bran.parser.CompositionParser.TokenType.*;
@@ -26,12 +29,10 @@ import static bran.parser.ExpressionParser.expressionOperators;
 import static bran.parser.StatementParser.statementLineOperators;
 import static bran.parser.StatementParser.statementOperators;
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.flatMapping;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 public class CompositionParser {
 
-	final record StringPart(String string, int from, int to, TokenType tokenType) { }
 	final record TokenPart(boolean splittable, List<StringPart> prefixes) {
 
 		public StringPart lastPrefix() {
@@ -45,11 +46,14 @@ public class CompositionParser {
 	static final Map<String, EquivalenceTypeImpl> equivalenceOperators = Parser.getSymbolMapping(EquivalenceTypeImpl.values());
 
 	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = //expected zone param
-			Map.of(MultiArgFunction.class, FUNCTION,
-				   LineOperator.class, LINE_OPERATOR,
-				   Operator.class, EXP_OPERATOR,
-				   LogicalOperator.class, SMT_OPERATOR,
-				   EquivalenceTypeImpl.class, EQUIVALENCE)
+			// Map.of(MultiArgFunction.class, FUNCTION,
+			// 	   LineOperator.class, LINE_OPERATOR,
+			// 	   Operator.class, EXP_OPERATOR,
+			// 	   LogicalOperator.class, SMT_OPERATOR,
+			// 	   EquivalenceTypeImpl.class, EQUIVALENCE)
+			stream(TokenType.values())
+					.filter(t -> t.associatedClass != null)
+					.collect(toMap(t -> t.associatedClass, t -> t))
 			   .entrySet()
 			   .stream()
 			   .collect(flatMapping(entry -> stream(entry.getKey()
@@ -61,42 +65,79 @@ public class CompositionParser {
 													 .map(symMap -> new SimpleEntry<>(symMap.getKey(), new SimpleEntry<>(symMap.getValue(), entry.getValue()))),
 									toMap(SimpleEntry::getKey, SimpleEntry::getValue, (v1, v2) -> v1)));
 
+	private static <E> E randElement(double random, E[] es) {
+		return es[(int) (random * es.length)];
+	}
+
+	private static String generate(double random, Class<? extends OrderedOperator> tokenClass) {
+		final String[] symbols = randElement(random, tokenClass.getEnumConstants()).getSymbols();
+		return symbols[(int) ((random * 100) % symbols.length)];
+	}
+
 	// static final Map<String, EquationType> equivalences = Parser.getSymbolMapping()
 	static final Set<String> leftIdentifiers = Set.of("(", "[", "{");
 	static final Set<String> rightIdentifiers = Set.of(")", "]", "}");
 
 	enum TokenType {
-		FUNCTION(START, START, true, EXPRESSION),
-		LINE_OPERATOR(START, START, true, STATEMENT),
-		COMMA(MIDDLE, START, BOTH),
-		EQUIVALENCE(MIDDLE, MIDDLE, true, STATEMENT),
-		EXP_OPERATOR(MIDDLE, START, true, EXPRESSION),
-		SMT_OPERATOR(MIDDLE, START, true, STATEMENT),
-		LEFT_IDENTIFIER(START, START, BOTH), // becomes middle after the (expression) is simplified
-		RIGHT_IDENTIFIER(MIDDLE, MIDDLE, BOTH),
-		VARIABLE(START, MIDDLE, BOTH),
-		CONSTANT(START, MIDDLE, EXPRESSION),
-		WHITESPACE(ANY, NOWHERE, BOTH), // the previous type
-		UNKNOWN(NOWHERE, NOWHERE, NEITHER);
+		LEFT_IDENTIFIER(START, START, BOTH, r -> "("), // becomes middle after the (expression) is simplified
+		FUNCTION(START, START, true, EXPRESSION, MultiArgFunction.class),
+		LINE_OPERATOR(START, START, true, STATEMENT, LineOperator.class),
+		VARIABLE(START, MIDDLE, BOTH, r -> String.valueOf((char) ('a' + (int) (r * 3)))),
+		CONSTANT(START, MIDDLE, EXPRESSION, r -> r > .2 ? String.valueOf((int) ((r - .8) * 50 - 5)) : String.valueOf(r * 12.5 - 5).substring(0, 5)),
+		COMMA(MIDDLE, START, BOTH, r -> ","),
+		EQUIVALENCE(MIDDLE, START, true, STATEMENT, EquivalenceTypeImpl.class),
+		EXP_OPERATOR(MIDDLE, START, true, EXPRESSION, Operator.class),
+		SMT_OPERATOR(MIDDLE, START, true, STATEMENT, LogicalOperator.class),
+		RIGHT_IDENTIFIER(MIDDLE, MIDDLE, BOTH, r -> ")"),
+		WHITESPACE(ANY, NOWHERE, BOTH, r -> " "), // the previous type
+		UNKNOWN(NOWHERE, NOWHERE, NEITHER, r -> "UNKNOWN");
 
 		private final OrderZone currentZone;
 		private final OrderZone proceedingZone; // zone after current one
 		private final boolean mapperType; // Mapper.java; non-case sensitive
 		private final CompositionType compositionType;
+		private final Function<Double, String> generator;
+		private final Class<? extends OrderedOperator> associatedClass;
+		private final Map<String, Mapper> tokenMap;
 
-		TokenType(OrderZone currentZone, OrderZone proceedingZone, CompositionType compositionType) {
-			this(currentZone, proceedingZone, false, compositionType);
+			TokenType(OrderZone currentZone, OrderZone proceedingZone, CompositionType compositionType, Function<Double, String> generator) {
+			this(currentZone, proceedingZone, false, compositionType, generator);
 		}
 
-		TokenType(OrderZone currentZone, OrderZone proceedingZone, boolean mapperType, CompositionType compositionType) {
+		TokenType(OrderZone currentZone, OrderZone proceedingZone, boolean mapperType, CompositionType compositionType, Function<Double, String> generator) {
 			this.currentZone = currentZone;
 			this.proceedingZone = proceedingZone;
 			this.mapperType = mapperType;
 			this.compositionType = compositionType;
+			this.generator = generator;
+			this.associatedClass = null;
+			this.tokenMap = null;
+		}
+
+		TokenType(OrderZone currentZone, OrderZone proceedingZone, CompositionType compositionType, Class<? extends OrderedOperator> associatedClass) {
+			this(currentZone, proceedingZone, false, compositionType, associatedClass);
+		}
+
+		TokenType(OrderZone currentZone, OrderZone proceedingZone, boolean mapperType, CompositionType compositionType, Class<? extends OrderedOperator> associatedClass) {
+			this.currentZone = currentZone;
+			this.proceedingZone = proceedingZone;
+			this.mapperType = mapperType;
+			this.compositionType = compositionType;
+			this.tokenMap = Parser.getSymbolMapping(associatedClass.getEnumConstants());
+			this.generator = r -> String.valueOf(randElement(r, tokenMap.keySet().toArray()));
+			this.associatedClass = associatedClass;
 		}
 
 		public boolean isMapperType() {
 			return mapperType;
+		}
+
+		static TokenType getPrefixFromMap(String prefix) {
+			for (TokenType tokenType : values()) {
+				if (tokenType.tokenMap != null && tokenType.tokenMap.containsKey(prefix))
+					return tokenType;
+			}
+			return UNKNOWN;
 		}
 
 		static TokenType tokenTypeOf(String prefix) {
@@ -107,14 +148,14 @@ public class CompositionParser {
 				 : prefix.isBlank() ? WHITESPACE
 				 : leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
 				 : rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
-				 : expressionOperators.containsKey(prefix) ? EXP_OPERATOR
-				 : statementOperators.containsKey(prefix) ? SMT_OPERATOR
-				 : expressionLineOperators.containsKey(prefix) ? FUNCTION
-				 : statementLineOperators.containsKey(prefix) ? LINE_OPERATOR
-				 : equivalenceOperators.containsKey(prefix) ? EQUIVALENCE
+				 // : expressionOperators.containsKey(prefix) ? EXP_OPERATOR
+				 // : statementOperators.containsKey(prefix) ? SMT_OPERATOR
+				 // : expressionLineOperators.containsKey(prefix) ? FUNCTION
+				 // : statementLineOperators.containsKey(prefix) ? LINE_OPERATOR
+				 // : equivalenceOperators.containsKey(prefix) ? EQUIVALENCE
 				 : Constant.validName(prefix) ? CONSTANT
 				 : Variable.validName(prefix) ? VARIABLE
-				 : UNKNOWN;
+				 : getPrefixFromMap(prefix);
 		}
 
 		enum OrderZone {
@@ -138,8 +179,11 @@ public class CompositionParser {
 		if (str.length() == 0)
 			return Composition.empty();
 
-		final CommaSeparatedComposition comp = parse(tokenize(str), new HashMap<>(),0);
+		return parse(tokenize(str));
+	}
 
+	private static Composition parse(List<StringPart> tokens) {
+		final CommaSeparatedComposition comp = parse(tokens, new HashMap<>(), 0);
 		if (!comp.isSingleton())
 			throw new ParseException("misplaced comma or function call");
 		return comp.getAsSingleton();
@@ -152,19 +196,21 @@ public class CompositionParser {
 		OrderZone expectingZone = START;
 		CompositionBuilder compBuilder = new CompositionBuilder();
 		for (int i = start; i < tokens.size(); i++) {
-			TokenType currentTokenType = tokens.get(i).tokenType();
+			final StringPart stringPart = tokens.get(i);
+			TokenType currentTokenType = stringPart.tokenType();
 			OrderZone nextProceedingZone = currentTokenType.proceedingZone;
-			if (!currentTokenType.currentZone.inZoneOf(expectingZone)) {
-				throw new ParseException("unexpected token %s at index %d", tokens.get(i).string(), tokens.get(i).from());
+			if (!currentTokenType.currentZone.inZoneOf(expectingZone)
+				&& !(i == start && currentTokenType == RIGHT_IDENTIFIER)) {
+				throw new ParseException("unexpected token %s at index %d", stringPart.string(), stringPart.from());
 			} else {
-				String tokenString = tokens.get(i).string();
+				String tokenString = stringPart.string();
 				if (currentTokenType.isMapperType())
-					compBuilder.add(symbolTokens.get(tokenString).getKey());
+					compBuilder.add(symbolTokens.get(tokenString).getKey(), stringPart);
 				else
 				switch (currentTokenType) {		// NO FALL THROUGH
 					case LEFT_IDENTIFIER:
 						CommaSeparatedComposition innerExpressions = CompositionParser.parse(tokens, localVariables, i + 1);
-						compBuilder.add(innerExpressions);
+						compBuilder.add(innerExpressions, stringPart);
 						if (tokens.get(i + 1).tokenType == RIGHT_IDENTIFIER) {
 							nextProceedingZone = MIDDLE;
 							i++; // last token was )
@@ -177,14 +223,15 @@ public class CompositionParser {
 								return new CommaSeparatedComposition(compBuilder.build());
 							} catch (IllegalArgumentAmountException e) {
 								throw new ParseException("illegal amount of arguments near %s near index %d: %s",
-														 tokens.get(i).string(), tokens.get(i).from(), e.getMessage());
+														 stringPart.string(), stringPart.from(), e.getMessage());
 							}
 						} else
-							throw new ParseException("unbalanced right bracket \"%s\" at index %d", tokens.get(i).string(), tokens.get(i).from());
+							throw new ParseException("unbalanced right bracket \"%s\" at index %d", stringPart.string(), stringPart.from());
 					case COMMA:
 						if (inner) {
 							tokens.subList(start, i + 1).clear();
-						}
+						} else
+							throw new ParseException("comma not within function call at index %d", stringPart.from());
 						// if (!expectingZone.inZoneOf(MIDDLE))
 						// 	throw new ParseException("unfinished expression at index %d", tokens.get(tokens.size() - 1).from());
 						try {
@@ -192,13 +239,13 @@ public class CompositionParser {
 																parse(tokens, localVariables, start));
 						} catch (IllegalArgumentAmountException e) {
 							throw new ParseException("illegal amount of arguments near %s near index %d: %s",
-													 tokens.get(i).string(), tokens.get(i).from(), e.getMessage());
+													 stringPart.string(), stringPart.from(), e.getMessage());
 						}
 					case VARIABLE:
-						compBuilder.add(localVariables.computeIfAbsent(tokenString, LazyTypeVariable::new));
+						compBuilder.add(localVariables.computeIfAbsent(tokenString, LazyTypeVariable::new), stringPart);
 						break;
 					case CONSTANT:
-						compBuilder.add(Constant.of(tokenString));
+						compBuilder.add(Constant.of(tokenString), stringPart);
 						break;
 					case UNKNOWN:
 						throw new ParseException("unknown token \"%s\" at index %d", tokenString, tokens.get(tokens.size() - 1).from());
@@ -234,7 +281,7 @@ public class CompositionParser {
 						currentTokenType = TokenType.tokenTypeOf(prefix);
 					if (currentTokenType != TokenType.UNKNOWN) { // valid
 						prefixes.addAll(tokenParts[j].prefixes());
-						prefixes.add(new StringPart(currentTokenType.isMapperType() ? prefix.toLowerCase() : prefix, j, i, currentTokenType));
+						prefixes.add(new StringPart(currentTokenType.isMapperType() ? prefix.toLowerCase() : prefix, j, i, currentTokenType, prefix));
 						break;
 					}
 				}
@@ -257,6 +304,7 @@ public class CompositionParser {
 				throw new ParseException("unknown token %s at index %d",
 										 lastPartLastPrefix.string(), lastPartLastPrefix.from());
 		}
+		lastParts.removeIf(s -> s.tokenType == WHITESPACE);
 		return lastParts;
 	}
 
@@ -266,9 +314,116 @@ public class CompositionParser {
 												 .toList();
 		StringBuilder sB = new StringBuilder();
 		for (int i = 0; i < size; i++)
-			sB.append(symbols.get(((int) (Math.random() * symbols.size()))))
+			sB.append(i % 2 == 0 ? "a" : symbols.get(((int) (Math.random() * symbols.size()))))
 			  .append(' ');
 		return sB.toString();
+	}
+
+	public static String generate(int size) {
+		return generate(size, System.currentTimeMillis());
+	}
+
+	public static String generate(int size, long seed) {
+		Random random = new Random(seed);
+		final Map<OrderZone, List<TokenType>> currentZones =
+				stream(TokenType.values()).collect(groupingBy(t -> t.currentZone, Collectors.toList()));
+		// final Map<OrderZone, List<TokenType>> proceedingZones =
+		// 		stream(TokenType.values()).collect(groupingBy(t -> t.proceedingZone, Collectors.toList()));
+		List<TokenType> tokens = new ArrayList<>();
+		OrderZone current = START;
+		int parenDepth = 0;
+		for (int i = 0; i < size; i++) {
+			TokenType nextToken;
+			do {
+				nextToken = getRand(TokenType.values());
+			} while (nextToken.currentZone != current || (parenDepth == 0 && nextToken == RIGHT_IDENTIFIER));
+			tokens.add(nextToken);
+			current = nextToken.proceedingZone;
+			if (nextToken == LEFT_IDENTIFIER)
+				parenDepth++;
+			else if (nextToken == RIGHT_IDENTIFIER)
+				parenDepth--;
+		}
+
+		while (current == START || parenDepth > 0) {
+			TokenType nextToken;
+			if (current == START) {
+				if (parenDepth > 0 && Math.random() < .5) {
+					nextToken = RIGHT_IDENTIFIER;
+					parenDepth--;
+				} else
+					do nextToken = getRand(TokenType.values());
+					while (nextToken.currentZone != current || (nextToken == LEFT_IDENTIFIER || nextToken == RIGHT_IDENTIFIER));
+			} else {
+				nextToken = RIGHT_IDENTIFIER;
+				parenDepth--;
+			}
+			tokens.add(nextToken);
+			current = nextToken.proceedingZone;
+		}
+		// StringPart[] stringParts = new StringPart[tokens.size()];
+		// int strLen = 0;
+		// for (int i = 0; i < tokens.size(); i++) {
+		// 	TokenType token = tokens.get(i);
+		// 	String str = token.generator.apply(random.nextDouble());
+		// 	stringParts[i] = new StringPart(str, strLen, strLen += str.length() + 1, token);
+		// }
+		return tokens.stream().map(t -> t.generator.apply(random.nextDouble())).collect(joining(" "));
+	}
+
+	private static <T> T getRand(List<T> ts) {
+		return ts.get((int) (Math.random() * ts.size()));
+	}
+
+	private static <T> T getRand(T[] ts) {
+		return ts[((int) (Math.random() * ts.length))];
+	}
+
+	final static class StringPart {
+
+		private final String string;
+		private final int from;
+		private final int to;
+		private final TokenType tokenType;
+		private final String visualString;
+
+		StringPart(String string, int from, int to, TokenType tokenType) {
+			this.string = string;
+			this.from = from;
+			this.to = to;
+			this.tokenType = tokenType;
+			visualString = string;
+		}
+
+		StringPart(String string, int from, int to, TokenType tokenType, String visualString) {
+			this.string = string;
+			this.from = from;
+			this.to = to;
+			this.tokenType = tokenType;
+			this.visualString = visualString;
+		}
+
+		public String string() {
+			return string;
+		}
+
+		public int from() {
+			return from;
+		}
+
+		public int to() {
+			return to;
+		}
+
+		public TokenType tokenType() {
+			return tokenType;
+		}
+
+		@Override
+		public String toString() {
+			return visualString;
+		}
+
 	}
 
 }
