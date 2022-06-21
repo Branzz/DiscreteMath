@@ -5,7 +5,6 @@ import bran.tree.compositions.expressions.functions.MultiArgFunction;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
-import bran.tree.compositions.sets.regular.RangedSet;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -22,6 +21,7 @@ import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.Composition;
 import bran.tree.Equivalable;
+//import java.lang.Record;
 
 import java.util.*;
 import java.util.function.Function;

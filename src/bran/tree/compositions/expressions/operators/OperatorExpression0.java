@@ -15,7 +15,7 @@ import java.util.function.Function;
 import static bran.tree.compositions.expressions.operators.Operator.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 
-public class OperatorExpression extends Expression implements Fork<Expression, Operator, Expression> {
+public class OperatorExpression0 extends Expression implements Fork<Expression, Operator, Expression> {
 
 	private Expression left;
 	private final Operator operator;
@@ -310,7 +310,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 					return rightSimplified.times(leftSimplified);
 				break;
 			case DIV:
-				FactorParts divFactorParts = factor(leftSimplified, rightSimplified);
+				FactorParts0 divFactorParts = factor(leftSimplified, rightSimplified);
 				if (divFactorParts != null)
 					return divFactorParts.leftPart.div(divFactorParts.rightPart).simplified();
 				else if (leftSimplified.equals(rightSimplified))
@@ -383,7 +383,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 				break;
 			case ADD: // (a +- b) +- a | a +- (a +- b)
 				// if left operator + - (right anything?) or if right operator + -
-				FactorParts addFactorParts = factor(leftSimplified, rightSimplified);
+				FactorParts0 addFactorParts = factor(leftSimplified, rightSimplified);
 				if (addFactorParts != null)
 					return addFactorParts.factor.times(addFactorParts.leftPart.plus(addFactorParts.rightPart)).simplified();
 				if (leftSimplified instanceof FunctionExpression leftFunction && rightSimplified instanceof FunctionExpression rightFunction) {
@@ -428,7 +428,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 					if (leftConstant.equals(Constant.ZERO))
 						return new OperatorExpression(Constant.NEG_ONE, MUL, rightSimplified);
 				}
-				FactorParts subFactorParts = factor(leftSimplified, rightSimplified);
+				FactorParts0 subFactorParts = factor(leftSimplified, rightSimplified);
 				if (subFactorParts != null) {
 					return subFactorParts.factor.times(subFactorParts.leftPart.minus(subFactorParts.rightPart)).simplified();
 				}
@@ -456,32 +456,32 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return null;
 	}
 
-	public static record FactorParts(Expression factor, Expression leftPart, Expression rightPart) { }
+	public static record FactorParts0(Expression factor, Expression leftPart, Expression rightPart) { }
 
-	private FactorParts factor0(Expression leftSimplified, Expression rightSimplified) {
+	private FactorParts0 factor0(Expression leftSimplified, Expression rightSimplified) {
 		if (leftSimplified instanceof OperatorExpression leftOperator) { // tree search for all mults
 			if (leftOperator.getOperator() == MUL) {
 				if (rightSimplified instanceof OperatorExpression rightOperator && rightOperator.getOperator() == MUL) {
 					if (leftOperator.getLeft().equals(rightOperator.getLeft()))
-						return new FactorParts(leftOperator.getLeft(), leftOperator.getRight(), rightOperator.getRight());
+						return new FactorParts0(leftOperator.getLeft(), leftOperator.getRight(), rightOperator.getRight());
 					else if (leftOperator.getLeft().equals(rightOperator.getRight()))
-						return new FactorParts(leftOperator.getLeft(), leftOperator.getRight(), rightOperator.getLeft());
+						return new FactorParts0(leftOperator.getLeft(), leftOperator.getRight(), rightOperator.getLeft());
 					else if (leftOperator.getRight().equals(rightOperator.getLeft()))
-						return new FactorParts(leftOperator.getRight(), leftOperator.getLeft(), rightOperator.getRight());
+						return new FactorParts0(leftOperator.getRight(), leftOperator.getLeft(), rightOperator.getRight());
 					else if (leftOperator.getRight().equals(rightOperator.getRight()))
-						return new FactorParts(leftOperator.getRight(), leftOperator.getLeft(), rightOperator.getLeft());
+						return new FactorParts0(leftOperator.getRight(), leftOperator.getLeft(), rightOperator.getLeft());
 				} else {
 					if (leftOperator.getLeft().equals(rightSimplified))
-						return new FactorParts(leftOperator.getLeft(), leftOperator.getRight(), Constant.ONE);
+						return new FactorParts0(leftOperator.getLeft(), leftOperator.getRight(), Constant.ONE);
 					else if (leftOperator.getRight().equals(rightSimplified))
-						return new FactorParts(leftOperator.getRight(), Constant.ONE, leftOperator.getLeft());
+						return new FactorParts0(leftOperator.getRight(), Constant.ONE, leftOperator.getLeft());
 				}
 			}
 		} else if (rightSimplified instanceof OperatorExpression rightOperator && rightOperator.getOperator() == MUL) {
 			if (rightOperator.getLeft().equals(leftSimplified))
-				return new FactorParts(rightOperator.getLeft(), rightOperator.getRight(), Constant.ONE);
+				return new FactorParts0(rightOperator.getLeft(), rightOperator.getRight(), Constant.ONE);
 			else if (rightOperator.getRight().equals(leftSimplified))
-				return new FactorParts(rightOperator.getRight(), Constant.ONE, rightOperator.getLeft());
+				return new FactorParts0(rightOperator.getRight(), Constant.ONE, rightOperator.getLeft());
 		}
 		return null;
 	}
@@ -507,12 +507,12 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	// TODO translate into object with inverted version holding
 
-	public static final record Term(Expression expression, boolean inverted) { }
+	public static final record Term0(Expression expression, boolean inverted) { }
 
 	private Expression commutativeCrossSearch(Expression leftStatement, Expression rightStatement, boolean inverted, final Operator op, final Operator invOp) {
-		List<Term> leftTerms = commutativeSearch(leftStatement, false, op, invOp);
-		List<Term> rightTerms = commutativeSearch(rightStatement, inverted, op, invOp);
-		List<Term> newTerms = new ArrayList<>();
+		List<Term0> leftTerms = commutativeSearch(leftStatement, false, op, invOp);
+		List<Term0> rightTerms = commutativeSearch(rightStatement, inverted, op, invOp);
+		List<Term0> newTerms = new ArrayList<>();
 
 		if (leftTerms.size() + rightTerms.size() < 3)
 			return null;
@@ -526,7 +526,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 					newTerm = accumulateTerms(newTerms, newTerm, op, invOp);
 					newTerm = accumulateTerms(leftTerms, newTerm, op, invOp);
 					newTerm = accumulateTerms(rightTerms, newTerm, op, invOp);
-					newTerms.add(new Term(newTerm, false));
+					newTerms.add(new Term0(newTerm, false));
 				}
 			}
 		}
@@ -540,7 +540,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	}
 
 	public static Expression combine(Collection<OperatorExpression.Term> terms, Operator operator) {
-		final Iterator<Term> iterator = terms.iterator();
+		final Iterator<Term0> iterator = terms.iterator();
 		if (terms.size() == 1)
 			return iterator.next().expression();
 		OperatorExpression combinedExpressions = new OperatorExpression(iterator.next().expression(), operator, iterator.next().expression());
@@ -549,7 +549,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return combinedExpressions;
 	}
 
-	private Expression accumulateTerms(final List<Term> terms, Expression newTerm, final Operator op, final Operator invOp) {
+	private Expression accumulateTerms(final List<Term0> terms, Expression newTerm, final Operator op, final Operator invOp) {
 		for (int i = 0; i < terms.size(); i++) {
 			Expression accNewTerm = simplifiedNoDomain(newTerm, terms.get(i).inverted() ? invOp : op, terms.get(i).expression(), false);
 			if (accNewTerm != null) {
@@ -560,13 +560,13 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		return newTerm;
 	}
 
-	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final Operator op, final Operator invOp) {
-		List<Term> terms = new ArrayList<>();
+	private List<Term0> commutativeSearch(final Expression statement, final boolean inverted, final Operator op, final Operator invOp) {
+		List<Term0> terms = new ArrayList<>();
 		commutativeSearch(statement, terms, inverted,op, invOp);
 		return terms;
 	}
 
-	public static void commutativeSearch(Expression statement, Collection<Term> terms, boolean inverted, final Operator op, final Operator invOp) {
+	public static void commutativeSearch(Expression statement, Collection<Term0> terms, boolean inverted, final Operator op, final Operator invOp) {
 		if (statement instanceof OperatorExpression operatorExpression) {
 			if (operatorExpression.getOperator() == op || operatorExpression.getOperator() == invOp) {
 				commutativeSearch(operatorExpression.getLeft(), terms, inverted, op, invOp);
@@ -586,10 +586,10 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		// 	} // else ???
 		// }
 		// terms.add(statement);
-		terms.add(new Term(statement , inverted));
+		terms.add(new Term0(statement , inverted));
 	}
 
-	public static FactorParts factor(Expression leftExp, Expression rightExp) {
+	public static FactorParts0 factor(Expression leftExp, Expression rightExp) {
 		return new FactorSystem(leftExp, rightExp).factor();
 	}
 
@@ -612,7 +612,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		private Iterator<Factor> leftIter;
 		private Iterator<Factor> rightIter;
 
-		public FactorParts factor() {
+		public FactorParts0 factor() {
 			boolean factorable = false;
 			if (leftFactors.size() + rightFactors.size() < 2)
 				return null;
@@ -717,7 +717,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 					}
 				}
 			}
-			return factorable ? new FactorParts(combineInvertibleFactors(factors), combineInvertibleFactors(leftFactors), combineInvertibleFactors(rightFactors)) : null;
+			return factorable ? new FactorParts0(combineInvertibleFactors(factors), combineInvertibleFactors(leftFactors), combineInvertibleFactors(rightFactors)) : null;
 		}
 
 		/**
