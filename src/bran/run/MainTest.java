@@ -1,5 +1,15 @@
 package bran.run;
 
+import bran.exceptions.ParseException;
+import bran.parser.CompositionParser;
+import bran.parser.ExpressionParser;
+import bran.parser.Parser;
+import bran.parser.StatementParser;
+import bran.tree.compositions.Composition;
+import bran.tree.compositions.sets.regular.MultiRangedSet;
+import bran.tree.compositions.statements.StatementImpl;
+import bran.tree.compositions.statements.special.VerbalStatement;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
 import bran.application.draw.StartViewer;
 import bran.application.draw.exprs.StartExpressionViewer;
 import bran.exceptions.ParseException;
@@ -11,7 +21,28 @@ import bran.parser.CompositionParser;
 import bran.tree.Holder;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
+import bran.tree.compositions.expressions.values.numbers.NumberToText;
+import bran.tree.compositions.godel.GodelNumberFactors;
+import bran.tree.compositions.sets.regular.FiniteSet;
+import bran.tree.compositions.sets.regular.MultiRangedSet;
+import bran.tree.compositions.sets.regular.SpecialSet;
+import bran.tree.compositions.sets.regular.SpecialSetType;
+import bran.tree.compositions.statements.Statement;
+import bran.tree.compositions.statements.StatementImpl;
+import bran.tree.compositions.statements.TruthTable;
+import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.compositions.statements.special.VerbalStatement;
+import bran.tree.compositions.statements.special.equivalences.equation.Equation;
+import bran.tree.compositions.statements.special.proofs.Argument;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
+import bran.tree.generators.ExpressionGenerator;
+import bran.tree.generators.StatementGenerator;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
@@ -40,7 +71,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.SIN;
 import static bran.tree.compositions.expressions.operators.Operator.DIV;
 import static bran.tree.compositions.expressions.operators.Operator.MUL;
 import static bran.tree.compositions.expressions.values.Constant.ZERO;
@@ -49,7 +81,10 @@ import static bran.tree.compositions.statements.Statement.thereExists;
 
 public class MainTest {
 
+	// TODO add delimit statements in parser like new line semicolon or auto ?? then switch to the desmos equation analyzer for declarations etc
+	// TODO implement functions: evaluate (e->e), simplify(c->c), derive(e->e), range(e->b), domain(e->b), truth(t->t), inverse(e->e), etc
 	public static void main(String[] args) {
+		System.out.println(CompositionParser.parseExpression("(x^5 * y^3) / (x^2 * y)").simplified());
 		// System.out.println(CompositionParser.parse("rng()"));
 		// numberToStringTest();
 		// SetsTest();
@@ -73,6 +108,7 @@ public class MainTest {
 		// equivalenceSimplificationTest();
 		// inverseTest();
 		// compareTest();
+//		tetrationTest();
 		setOperationsTest();
 
 		// System.out.println(ExpressionParser.parseExpression("1 / SQRT(x ^ 2 + 1)").getDomainConditions().simplified());
@@ -146,6 +182,17 @@ public class MainTest {
 		// System.out.println(
 		// 		forAll(Var.of("person")).in()
 		// );
+	}
+
+	private static void tetrationTest() {
+//		Variable x = new Variable("x");
+//		x.set(new NumberLiteral(2));
+//		for (int i = 0; i < 100; i++) {
+//			FunctionExpression f = TETRA.ofS(Constant.of(i), Constant.of(1.46));
+//			System.out.println(i + ": " + f.evaluate());
+//		}
+//		System.out.println(TETRA.ofS(Constant.of(100), Constant.of(2)).evaluate());
+		System.out.println(((Expression) CompositionParser.parse("tetra(2, ln(x))")).derive().simplified());
 	}
 
 	private static void compareTest() {
@@ -363,20 +410,20 @@ public class MainTest {
 
 	private static void expressionGeneratorTest() {
 		int seedOffset = 0;
-		final int sampleSize = 30;
-		for (double i = 0.0; i < 1.01; i += 0.05) {
-			ExpressionGenerator.DEEP_CHANCE = i;
-			double avg = 0;
-			for (long seed = 0; seed < sampleSize; seed++) {
-				final Expression generation = ExpressionGenerator.generate(seed, 20, 1, 0.5, 0.5, 0.5);
-				avg += generation.depthProb();
-			}
-			System.out.println(i + " : " + avg / sampleSize);
-		}
-		ExpressionGenerator.DEEP_CHANCE = .35;
+//		final int sampleSize = 30;
+//		for (double i = 0.0; i < 1.01; i += 0.05) {
+//			ExpressionGenerator.DEEP_CHANCE = i;
+//			double avg = 0;
+//			for (long seed = 0; seed < sampleSize; seed++) {
+//				final Expression generation = ExpressionGenerator.generate(seed, 20, 1, 0.5, 0.5, 0.5);
+//				avg += generation.depthProb();
+//			}
+//			System.out.println(i + " : " + avg / sampleSize);
+//		}
+//		ExpressionGenerator.DEEP_CHANCE = .35;
 		for (long seed = 0; seed < 5; seed++) {
 			final Expression generation = ExpressionGenerator.generate(seed + seedOffset++, 20, 1, 0.5, 0.5, 0.5);
-			System.out.printf("%s %f\n", generation.toFullString(), generation.depthProb());
+			System.out.printf("%s" + " ".repeat(Math.max(1, 15)) + "%s\n", generation.toFullString(), generation.simplified());
 		}
 		// System.out.println((((PI.times(PI)).times(PI.times(PI))).times(((PI.times(PI)).times(PI.times(PI)))))
 		// 				.times((((PI.times(PI)).times(PI.times(PI))).times(((PI.times(PI)).times(PI.times(PI)))))).depthProb());
@@ -425,7 +472,17 @@ public class MainTest {
 				runningStrMax = s.length() + 4;
 			try {
 				final Composition parse = CompositionParser.parse(s);
-				System.out.println(s +  " ".repeat(runningStrMax - s.length()) + parse);
+				String spaces = " ".repeat(10);
+				try {
+
+					String ext = parse instanceof Expression exp
+										 ? exp.getDomainConditions().toString() + spaces + exp.getDomainConditions().simplified().toString()
+										 : "";
+
+					System.out.println(s + spaces + parse + spaces + ext);
+				} catch (Exception e) {
+
+				}
 			} catch (ParseException e) {
 				i--;
 			}

@@ -1,37 +1,36 @@
 package bran.tree.compositions.expressions;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.IllegalInverseExpressionException;
-import bran.tree.compositions.expressions.functions.ExpFunction;
+import bran.tree.Equivalable;
+import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.functions.FunctionExpression;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.godel.GodelBuilder;
+import bran.tree.compositions.godel.GodelNumberSymbols;
+import bran.tree.compositions.sets.regular.SpecialSet;
+import bran.tree.compositions.sets.regular.SpecialSetType;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
-import bran.tree.compositions.statements.special.quantifier.UniversalNumbersStatement;
 import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
 import bran.tree.compositions.statements.special.equivalences.inequality.Inequality;
-import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.exceptions.IllegalArgumentAmountException;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.sets.regular.SpecialSet;
-import bran.tree.compositions.sets.regular.SpecialSetType;
-import bran.tree.compositions.godel.GodelNumberSymbols;
-import bran.tree.compositions.godel.GodelBuilder;
-import bran.tree.compositions.Composition;
-import bran.tree.Equivalable;
+import bran.tree.compositions.statements.special.quantifier.UniversalNumbersStatement;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static bran.tree.compositions.statements.operators.LogicalOperator.AND;
-import static bran.tree.compositions.statements.special.equivalences.inequality.InequalityType.*;
-import static bran.tree.compositions.expressions.values.Constant.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.SQRT;
 import static bran.tree.compositions.expressions.operators.Operator.*;
+import static bran.tree.compositions.expressions.values.Constant.*;
+import static bran.tree.compositions.statements.operators.LogicalOperator.AND;
+import static bran.tree.compositions.statements.special.equivalences.inequality.InequalityType.*;
 
 public abstract class Expression implements Composition, Equivalable<Expression>, Comparable<Expression> {
 
@@ -170,6 +169,11 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		// the range of f(x) is the domain of f'(x)
 		// TODO; simplify first? you can prove if a function is less somehow; you can with given variables for sure
 		// return Double.compare(evaluate(), expression.evaluate());
+		try {
+
+		} catch (IllegalInverseExpressionException e) {
+
+		}
 		final Expression inverse = subtraction.inverse().iterator().next();
 		final Set<Variable> variables = subtraction.getVariables();
 		// if (variables.size() != 1)

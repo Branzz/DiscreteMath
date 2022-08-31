@@ -1,9 +1,15 @@
 package bran.parser;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.ParseException;
 import bran.parser.CompositionParser.StringPart;
+import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
 import bran.tree.compositions.expressions.functions.MultiArgFunction;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.tree.compositions.statements.LineStatement;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
@@ -11,14 +17,7 @@ import bran.tree.compositions.statements.operators.LineOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.equivalences.Equivalence;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
-import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.functions.ExpFunction;
-import bran.exceptions.IllegalArgumentAmountException;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.Composition;
 import bran.tree.structure.mapper.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -79,16 +78,16 @@ public class CompositionBuilder {
 	public void add(ForkOperator forkOperator, StringPart sP) {
 		compositionChain.addNode(new CompositionChain.OperatorNode(forkOperator, sP));
 	}
-	// public void add(List<Composition> compositions) {
-	// 	compositionChain.addNode(new CompositionChain.MultiCompositionNode(compositions));
 
-	// }
+	 public void add(List<Composition> compositions, StringPart sP) {
+	 	compositionChain.addNode(new CompositionChain.MultiCompositionNode(new CommaSeparatedComposition(compositions), sP));
+	 }
 
-	public void add(CommaSeparatedComposition compositions, StringPart sP) {
-		if (compositions.isSingleton())
-			add(compositions.getAsSingleton(), sP);
+	public void add(CommaSeparatedComposition expressions, StringPart sP) {
+		if (expressions.isSingleton())
+			add(expressions.getAsSingleton(), sP);
 		else
-			compositionChain.addNode(new CompositionChain.MultiCompositionNode(compositions, sP));
+			add(expressions.getFull(), sP);
 	}
 
 	private static class CompositionChain {
@@ -340,7 +339,7 @@ public class CompositionBuilder {
 			}
 
 			// result: from -> node -> to
-			void insert(Node prev, @NotNull Node node, Node next) {
+			void insert(Node prev, Node node, Node next) {
 				if (prev == null)
 					head = node;
 				if (next == null)
@@ -378,7 +377,7 @@ public class CompositionBuilder {
 					return new LineStatement(lOp, getAsStatement(child));
 				} else if (op instanceof MultiArgFunction mAF) {
 					try {
-						return new FunctionExpression(mAF, getAsExpressions(child).toArray(Expression[]::new));
+						return new FunctionExpression(mAF, getAsExpression(child));
 					} catch (IllegalArgumentAmountException e) {
 						throw new ParseException(String.format("%s for %s", e.getMessage(), op));
 					}

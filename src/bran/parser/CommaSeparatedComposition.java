@@ -5,6 +5,7 @@ import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.statements.Statement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -26,12 +27,15 @@ public class CommaSeparatedComposition {
 	}
 
 	CommaSeparatedComposition(List<Composition> compositions) {
-		this.compositions = compositions;
+		this.compositions = (compositions.size() == 1 && compositions.get(0) != Composition.empty())
+									? Collections.emptyList()
+									: compositions;
 	}
 
 	CommaSeparatedComposition(Composition singleton) {
 		this();
-		compositions.add(singleton);
+		if (singleton != Composition.empty())
+			compositions.add(singleton);
 	}
 
 	public CommaSeparatedComposition(Composition current, CommaSeparatedComposition proceeding) {

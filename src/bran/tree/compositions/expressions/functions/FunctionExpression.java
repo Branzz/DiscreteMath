@@ -18,8 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static bran.tree.compositions.expressions.functions.MultiArgFunction.LN;
-import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 import static bran.tree.compositions.expressions.operators.Operator.POW;
 
 public class FunctionExpression extends AbstractFunctionExpression<Expression, ExpFunction> {
@@ -70,12 +69,21 @@ public class FunctionExpression extends AbstractFunctionExpression<Expression, E
 				constants[i] = ((Constant) simplifiedExpressions[i]).evaluate();
 			return Constant.of(function.function(constants));
 		}
-		if (function instanceof MultiArgFunction mF && mF == LOG) {
-			if (simplifiedExpressions[0].equals(Constant.E))
-				return new FunctionExpression(LN, true, simplifiedExpressions[1]);
-			if (simplifiedExpressions[1] instanceof OperatorExpression rightOp && rightOp.getOperator() == POW
-				&& simplifiedExpressions[0].equals(rightOp.getLeft()))
-				return rightOp.getRight();
+		if (function instanceof MultiArgFunction mF) {
+			if (mF == LOG) {
+				if (simplifiedExpressions[0].equals(Constant.E))
+					return new FunctionExpression(LN, true, simplifiedExpressions[1]);
+				if (simplifiedExpressions[1] instanceof OperatorExpression rightOp && rightOp.getOperator() == POW
+							&& simplifiedExpressions[0].equals(rightOp.getLeft()))
+					return rightOp.getRight();
+			} else if (mF == TETRA) {
+				Expression tower = tower(simplifiedExpressions[0], simplifiedExpressions[1]);
+				if (tower != null) {
+					Expression towerSimplified = tower.simplified();
+					if (!tower.equals(towerSimplified))
+						return towerSimplified;
+				}
+			}
 		}
 		return new FunctionExpression(function, true, simplifiedExpressions);
 	}

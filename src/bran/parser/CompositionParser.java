@@ -1,33 +1,28 @@
 package bran.parser;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.ParseException;
-import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.functions.MultiArgFunction;
+import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.operators.LineOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceTypeImpl;
-import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
-import bran.tree.compositions.statements.special.equivalences.inequality.InequalityType;
-import bran.tree.compositions.expressions.values.Constant;
-import bran.tree.compositions.expressions.values.Variable;
-import bran.exceptions.IllegalArgumentAmountException;
-import bran.tree.compositions.expressions.functions.MultiArgFunction;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.Composition;
 import bran.tree.structure.mapper.Mapper;
 import bran.tree.structure.mapper.OrderedOperator;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static bran.parser.CompositionParser.TokenType.CompositionType.*;
 import static bran.parser.CompositionParser.TokenType.*;
 import static bran.parser.CompositionParser.TokenType.OrderZone.*;
-import static bran.parser.ExpressionParser.expressionLineOperators;
-import static bran.parser.ExpressionParser.expressionOperators;
-import static bran.parser.StatementParser.statementLineOperators;
-import static bran.parser.StatementParser.statementOperators;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.*;
 
@@ -45,6 +40,32 @@ public class CompositionParser {
 
 	static final Map<String, EquivalenceTypeImpl> equivalenceOperators = Parser.getSymbolMapping(EquivalenceTypeImpl.values());
 
+	private enum NumberSuperScript implements Mapper {
+		S0(0, "\u2070"),
+		S1(1, "\u00B9"),
+		S2(2, "\u00B2"),
+		S3(3, "\u00B3"),
+		S4(4, "\u2074"),
+		S5(5, "\u2075"),
+		S6(6, "\u2076"),
+		S7(7, "\u2077"),
+		S8(8, "\u2078"),
+		S9(9, "\u2079");
+
+		private final int value;
+		private final String[] symbols;
+
+		NumberSuperScript(int value, String... symbols) {
+			this.value = value;
+			this.symbols = symbols;
+		}
+
+		@Override
+		public String[] getSymbols() {
+			return symbols;
+		}
+	}
+
 	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = //expected zone param
 			// Map.of(MultiArgFunction.class, FUNCTION,
 			// 	   LineOperator.class, LINE_OPERATOR,
@@ -56,8 +77,7 @@ public class CompositionParser {
 					.collect(toMap(t -> t.associatedClass, t -> t))
 			   .entrySet()
 			   .stream()
-			   .collect(flatMapping(entry -> stream(entry.getKey()
-														 .getEnumConstants())
+			   .collect(flatMapping(entry -> stream(entry.getKey().getEnumConstants())
 													 .flatMap(mapper -> stream(mapper.getSymbols())
 																				.map(String::toLowerCase)
 																				.distinct()
@@ -172,6 +192,24 @@ public class CompositionParser {
 			STATEMENT, EXPRESSION, BOTH, NEITHER
 		}
 
+	}
+
+	public static Expression parseExpression(String str) {
+		Composition composition = parse(str);
+		if (composition instanceof Expression expression) {
+			return expression;
+		} else {
+			throw new ParseException("not an expression");
+		}
+	}
+
+	public static Statement parseStatement(String str) {
+		Composition composition = parse(str);
+		if (composition instanceof Statement statement) {
+			return statement;
+		} else {
+			throw new ParseException("not an statement");
+		}
 	}
 
 	public static Composition parse(String str) {

@@ -59,7 +59,7 @@ public class Constant extends Value {
 			switch (valueChars[0]){
 				case '-':
 					negative = true;
-					//FALLTHROUGH
+					// FALLTHROUGH
 				case '+':
 					firstInd++;
 			}

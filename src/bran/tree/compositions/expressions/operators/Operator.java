@@ -50,8 +50,8 @@ public enum Operator implements ForkOperator<Double, Expression, Expression> {
 						.or(p.equates(INFINITY).and(x.greater(NEG_ONE).and(x.less(ONE)))))
 					.and((x.less(NEG_ZERO).and(Definition.INTEGER.of(p).not())).not())) // only in double's version of pow
 		, false, "^", "power"), // a^b * ((b/a) * da + ln(a) * db)
-	MUL(3, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, GodelNumberSymbols.TIMES, "*", "times"),
-	DIV(3, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over"),
+	MUL(3, (a, b) -> a * b, (a, b) -> a.times(b.derive()).plus(a.derive().times(b)), true, GodelNumberSymbols.TIMES, "*", "times", "\u00D7", "\u22C5"),
+	DIV(3, (a, b) -> a / b, (a, b) -> ((b.times(a.derive())).minus(a.times(b.derive()))).div(b.squared()), DENOM_NOT_ZERO, false, "/", "over", "\u00F7"),
 	MOD(3, (a, b) -> a % b, (a, b) -> a.derive().limitDomain(a.mod(b).notEquates(ZERO)) /*jump not diff.*/, DENOM_NOT_ZERO, false, "%", "mod"), // TODO derivative
 	ADD(4, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
 	SUB(4, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");

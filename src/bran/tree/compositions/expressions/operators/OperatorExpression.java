@@ -161,7 +161,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 				leftGiven = false;
 		}
 		if (right instanceof OperatorExpression rightOperator) {
-			if ((rightOperator.getOperator().precedence() < operator.precedence()
+			if ((rightOperator.getOperator().precedence() > operator.precedence()
 				    && !(rightOperator.hideMultiply()))
 				|| (rightOperator.getOperator().precedence() == operator.precedence()
 					&& !rightOperator.getOperator().isCommutative())

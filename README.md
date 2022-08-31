@@ -33,7 +33,6 @@ The entire class of discrete math I took as a library (and some more)
     * +, -, ×, ÷ matrices
 * Parser (String input) ⭐
   * Read statements and expressions
-  * Apply to any tree structure *(unfinished)*
   * Syntax error catching
 * Proofs
   * Exhaustive (uses combinatorics)

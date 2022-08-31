@@ -1,8 +1,5 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <AndroidXmlCodeStyleSettings>
-      <option name="USE_CUSTOM_SETTINGS" value="true" />
-    </AndroidXmlCodeStyleSettings>
     <DBN-PSQL>
       <case-options enabled="true">
         <option name="KEYWORD_CASE" value="lower" />
@@ -28,38 +25,16 @@
       </formatting-settings>
     </DBN-SQL>
     <JavaCodeStyleSettings>
-      <option name="GENERATE_FINAL_LOCALS" value="true" />
-      <option name="GENERATE_FINAL_PARAMETERS" value="true" />
-      <option name="REPEAT_SYNCHRONIZED" value="false" />
-      <option name="SPACE_BEFORE_COLON_IN_FOREACH" value="false" />
-      <option name="SPACE_INSIDE_ONE_LINE_ENUM_BRACES" value="true" />
+      <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
     </JavaCodeStyleSettings>
     <ScalaCodeStyleSettings>
       <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
     </ScalaCodeStyleSettings>
-    <codeStyleSettings language="HTML">
-      <indentOptions>
-        <option name="USE_TAB_CHARACTER" value="true" />
-      </indentOptions>
-    </codeStyleSettings>
     <codeStyleSettings language="JAVA">
-      <option name="LINE_COMMENT_AT_FIRST_COLUMN" value="false" />
-      <option name="BLOCK_COMMENT_AT_FIRST_COLUMN" value="false" />
-      <option name="LINE_COMMENT_ADD_SPACE" value="true" />
-      <option name="KEEP_LINE_BREAKS" value="false" />
-      <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
-      <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
-      <option name="BLANK_LINES_AFTER_IMPORTS" value="0" />
-      <option name="BLANK_LINES_AFTER_CLASS_HEADER" value="1" />
       <option name="BLANK_LINES_BEFORE_CLASS_END" value="1" />
-      <option name="ALIGN_MULTILINE_CHAINED_METHODS" value="true" />
-      <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
-      <option name="ALIGN_MULTILINE_BINARY_OPERATION" value="true" />
       <option name="SPACE_WITHIN_ARRAY_INITIALIZER_BRACES" value="true" />
       <option name="SPACE_WITHIN_EMPTY_ARRAY_INITIALIZER_BRACES" value="true" />
       <option name="SPACE_BEFORE_ARRAY_INITIALIZER_LBRACE" value="true" />
-      <option name="METHOD_CALL_CHAIN_WRAP" value="2" />
-      <option name="BINARY_OPERATION_SIGN_ON_NEXT_LINE" value="true" />
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />
         <option name="USE_RELATIVE_INDENTS" value="true" />
@@ -80,11 +55,6 @@
           </group>
         </groups>
       </arrangement>
-    </codeStyleSettings>
-    <codeStyleSettings language="XML">
-      <indentOptions>
-        <option name="USE_TAB_CHARACTER" value="true" />
-      </indentOptions>
     </codeStyleSettings>
   </code_scheme>
 </component>
