@@ -38,6 +38,10 @@ public class Variable extends Value implements Holder<NumberLiteral> {
 		return variableMatcher.reset(prefix).matches();
 	}
 
+	public static Variable of(final String name) {
+		return new Variable(name);
+	}
+
 	public String getName() {
 		return name;
 	}

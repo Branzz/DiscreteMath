@@ -17,7 +17,7 @@ import bran.tree.structure.Fork;
 import static bran.tree.compositions.statements.VariableStatement.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.*;
 
-public class OperationStatement extends Statement implements Fork<Statement, LogicalOperator, Statement> { // Two Child
+public class OperationStatement extends Statement implements Fork<Boolean, Statement, LogicalOperator, Statement> {
 
 	private Statement left;
 	private LogicalOperator operator;
@@ -128,10 +128,10 @@ public class OperationStatement extends Statement implements Fork<Statement, Log
 		String rightString = right.toString();
 		if (left instanceof OperationStatement leftOperation
 			&& leftOperation.getOperator().precedence() > operator.precedence())
-			leftString = parens(leftString);
+			leftString = Composition.parens(leftString);
 		if (right instanceof OperationStatement rightOperation
 			&& rightOperation.getOperator().precedence() > operator.precedence())
-			rightString = parens(rightString);
+			rightString = Composition.parens(rightString);
 		return leftString + " " + operator.toString() + " " + rightString;
 	}
 

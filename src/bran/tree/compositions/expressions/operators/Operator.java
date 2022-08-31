@@ -39,7 +39,7 @@ import static bran.tree.compositions.expressions.values.Constant.*;
  *   15. +INF ** (+anything except 0,NAN) is +INF				|
  * 	 19. (-anything except 0 and inf) ** (non-integer) is NAN	| NOT (x < 0 && p not int)))
  */
-public enum Operator implements ForkOperator {
+public enum Operator implements ForkOperator<Double, Expression, Expression> {
 	POW(2, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))),
 		(x, p) -> p.equates(ZERO)
 				.or(((x.getDomainConditions()
@@ -114,8 +114,8 @@ public enum Operator implements ForkOperator {
 		return level;
 	}
 
-	public double operate(double left, double right) {
-		return operable.operate(left, right);
+	public Double operate(Expression left, Expression right) {
+		return operable.operate(left.evaluate(), right.evaluate());
 	}
 
 	public Expression derive(final Expression left, final Expression right) {

@@ -20,6 +20,7 @@ import bran.tree.compositions.Composition;
 import bran.tree.structure.mapper.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class CompositionBuilder {
@@ -83,11 +84,11 @@ public class CompositionBuilder {
 
 	// }
 
-	public void add(CommaSeparatedComposition expressions, StringPart sP) {
-		if (expressions.isSingleton())
-			add(expressions.getAsSingleton(), sP);
+	public void add(CommaSeparatedComposition compositions, StringPart sP) {
+		if (compositions.isSingleton())
+			add(compositions.getAsSingleton(), sP);
 		else
-			add(expressions.getFull(), sP);
+			compositionChain.addNode(new CompositionChain.MultiCompositionNode(compositions, sP));
 	}
 
 	private static class CompositionChain {
@@ -377,9 +378,9 @@ public class CompositionBuilder {
 					return new LineStatement(lOp, getAsStatement(child));
 				} else if (op instanceof MultiArgFunction mAF) {
 					try {
-						return new FunctionExpression(mAF, getAsExpression(child));
+						return new FunctionExpression(mAF, getAsExpressions(child).toArray(Expression[]::new));
 					} catch (IllegalArgumentAmountException e) {
-						throw new ParseException(e.getMessage()); // + " for " + op
+						throw new ParseException(String.format("%s for %s", e.getMessage(), op));
 					}
 				}
 				else throw new ParseException("unknown/unimplemented branch operator");
@@ -396,36 +397,59 @@ public class CompositionBuilder {
 					throw new ParseException("unknown/unimplemented fork operator");
 			}
 
+			private List<Expression> getAsExpressions(Node node) { // *MUTABLE*
+				if (node instanceof MultiCompositionNode multiComp) {
+					if (multiComp.compositions.isExpressions())
+						return multiComp.compositions.asExpressions();
+					else if (multiComp.compositions.isStatements())
+						throw new ParseException("found statements \"%s\" at index %d, expected expressions", node.toString(), node.stringPart.from());
+					else
+						throw new ParseException("found mixed types \"%s\" at index %d, expected expressions", node.toString(), node.stringPart.from());
+				} else {
+					return List.of(getAsExpression(node));
+				}
+			}
+
 			private Expression getAsExpression(Node node) { // *MUTABLE*
-				Expression exp;
 				if (node.value() instanceof LazyTypeVariable lazyVar) {
 					if (lazyVar.isStatement())
 						throw new ParseException("found statement variable \"%s\" at index %d, expected expression", lazyVar.toString(), node.stringPart.from());
 					else
-						exp = lazyVar.foundAsExpression();
+						return lazyVar.foundAsExpression();
 				} else {
 					if (node.value() instanceof Expression nodeExp)
-						exp = nodeExp;
+						return nodeExp;
 					else
 						throw new ParseException("found statement \"%s\" at index %d, expected expression", node.toString(), node.stringPart.from());
 				}
-				return exp;
 			}
 
+			// private Expression getAsExpression(Composition composition) { // *MUTABLE*
+			// 	if (composition instanceof LazyTypeVariable lazyVar) {
+			// 		if (lazyVar.isStatement())
+			// 			throw new ParseException("found statement variable \"%s\" at index %d, expected expression", lazyVar.toString(), node.stringPart.from());
+			// 		else
+			// 			return lazyVar.foundAsExpression();
+			// 	} else {
+			// 		if (composition instanceof Expression nodeExp)
+			// 			return nodeExp;
+			// 		else
+			// 			throw new ParseException("found statement \"%s\" at index %d, expected expression", node.toString(), node.stringPart.from());
+			// 	}
+			// }
+
 			private Statement getAsStatement(Node node) { // *MUTABLE*
-				Statement smt;
 				if (node.value() instanceof LazyTypeVariable lazyVar) {
 					if (lazyVar.isExpression())
 						throw new ParseException("found expression variable \"%s\" at index %d, expected statement", lazyVar.toString(), node.stringPart.from());
 					else
-						smt = lazyVar.foundAsStatement();
+						return lazyVar.foundAsStatement();
 				} else {
 					if (node.value() instanceof Statement nodeExp)
-						smt = nodeExp;
+						return nodeExp;
 					else
 						throw new ParseException("found expression \"%s\" at index %d, expected statement", node.toString(), node.stringPart.from());
 				}
-				return smt;
 			}
 
 		}
@@ -440,7 +464,7 @@ public class CompositionBuilder {
 			return size == 0;
 		}
 
-		private static abstract class Node {
+		private static abstract class Node { // TODO Comma Separated Node?
 			protected Node prev = null;
 			protected Node next = null;
 			private final StringPart stringPart;

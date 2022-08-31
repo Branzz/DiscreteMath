@@ -5,7 +5,7 @@ package bran.tree;
  * a variable isn't necessarily a number, but can be thought of a hypothetical one.
  * @param <E>
  */
-public interface Holder<E> {
+public interface Holder<E> { // TODO extends HolderFinal
 
 	E get();
 

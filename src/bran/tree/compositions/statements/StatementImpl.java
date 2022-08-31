@@ -5,7 +5,7 @@ import bran.tree.compositions.godel.GodelBuilder;
 import java.util.List;
 
 public class StatementImpl extends Statement {
-	@Override protected boolean isConstant() { throw new UnsupportedOperationException(); }
+	@Override public boolean isConstant() { throw new UnsupportedOperationException(); }
 	@Override protected boolean getTruth() { throw new UnsupportedOperationException(); }
 	@Override public String toFullString() { throw new UnsupportedOperationException(); }
 	@Override public boolean equals(final Object s) { throw new UnsupportedOperationException(); }

@@ -1,16 +1,17 @@
 package bran.tree.compositions.statements.special.equivalences;
 
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
 import java.util.function.BiFunction;
 
-public interface EquivalenceType extends ForkOperator {
+public interface EquivalenceType extends ForkOperator<Boolean, Expression, Expression> {
 
 	EquivalenceType opposite();
 
 	 // boolean evaluate(final Comparable<T> left, final Comparable<T> right);
-	<R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right);
+	boolean evaluate(Expression left, Expression right);
 
 	boolean lesser();
 
@@ -24,7 +25,7 @@ public interface EquivalenceType extends ForkOperator {
 	EquivalenceType flipped();
 
 	@FunctionalInterface
-	interface Comparison <R, L extends Comparable<R>> extends BiFunction<Comparable<L>, Comparable<R>, Boolean> {
+	interface Comparison<R, L extends Comparable<R>> extends BiFunction<Comparable<L>, Comparable<R>, Boolean> {
 		@Override
 		Boolean apply(Comparable left, Comparable right);
 	}

@@ -49,7 +49,7 @@ public class Constant extends Value {
 	/**
 	 * returns +-infinity if value exceeds range
 	 */
-	public static Constant of(final String value) {
+	public static Constant of(final String value) { // TODO could use MatchResult
 		try {
 			return new Constant(Double.parseDouble(value));
 		} catch (NumberFormatException e) {

@@ -1,6 +1,7 @@
 package bran.tree.compositions.expressions.values.numbers;
 
 import java.io.Serial;
+import java.util.Arrays;
 
 public class NumberLiteral extends java.lang.Number implements Comparable<NumberLiteral> {
 
@@ -19,14 +20,28 @@ public class NumberLiteral extends java.lang.Number implements Comparable<Number
 //		literals = new ArrayList<Number>();
 //	}
 
-	public NumberLiteral(double value) {
-		this.value = value;
+// 	public NumberLiteral(double value) {
+// 		this.value = value;
+// //		for (Number n : literals)
+// //			if (n.equals(this)) {
+// //				n = this;
+// //				return;
+// //			}
+// //		literals.add(this);
+// 	}
+
+	public NumberLiteral(Number value) {
+		this.value = value.doubleValue();
 //		for (Number n : literals)
 //			if (n.equals(this)) {
 //				n = this;
 //				return;
 //			}
 //		literals.add(this);
+	}
+
+	public static NumberLiteral[] of(Double... ds) {
+		return Arrays.stream(ds).map(NumberLiteral::new).toArray(NumberLiteral[]::new);
 	}
 
 	public boolean equals(Object other) {
@@ -81,13 +96,23 @@ public class NumberLiteral extends java.lang.Number implements Comparable<Number
 	// 	return new NumberLiteral(value);
 	// }
 
-	@Override
-	public String toString() {
-		return String.valueOf(value);
+	public boolean isInt() {
+		return value % 1 == 0;
 	}
 
 	public int compareTo(final NumberLiteral numberLiteral) {
 		return Double.compare(value, numberLiteral.value);
+	}
+
+	@Override
+	public int hashCode() {
+		long longBits = Double.doubleToLongBits(value);
+		return (int) (longBits ^ (longBits >>> 32));
+	}
+
+	@Override
+	public String toString() {
+		return isInt() ? String.valueOf(intValue()) : String.valueOf(value);
 	}
 
 }

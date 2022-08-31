@@ -2,6 +2,7 @@ package bran.tree.compositions.sets.regular;
 
 import bran.exceptions.SetException;
 import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.statements.special.equivalences.Equivalence;
 
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class MultiRangedSet extends Set {
+public class MultiRangedSet implements Set<NumberLiteral> {
 
 	// private final SpecialSet baseDomain;
 	private final List<RangedSet> ranges;
@@ -33,7 +34,7 @@ public class MultiRangedSet extends Set {
 		// this.baseDomain = baseDomain;
 		List<RangedSet> ranges = new ArrayList<>();
 		for (Equivalence equivalence : equivalences) {
-			Set toSet = equivalence.toSet();
+			Set<NumberLiteral> toSet = equivalence.toSet();
 			if (toSet instanceof RangedSet rangedSet) {
 				if (!rangedSet.baseDomain().getType().equals(SpecialSetType.R))
 					throw new SetException("multi ranged set is only base real numbers");
@@ -72,22 +73,47 @@ public class MultiRangedSet extends Set {
 
 	@Override
 	public Composition simplified() {
-		return super.simplified();
+		return Set.super.simplified();
 	}
 
 	@Override
-	public boolean isSubsetOf(final Set s) {
+	public boolean subsetImpl(final Set<NumberLiteral> s) {
 		return false;
 	}
 
 	@Override
-	public boolean isProperSubsetOf(final Set s) {
+	public boolean properSubsetImpl(final Set<NumberLiteral> s) {
 		return false;
 	}
 
 	@Override
-	public boolean contains(final Object o) {
+	public boolean equivalentImpl(Set<NumberLiteral> other) {
 		return false;
+	}
+
+	@Override
+	public boolean containsImpl(final NumberLiteral e) {
+		return false;
+	}
+
+	@Override
+	public Set<NumberLiteral> complementImpl() {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> intersectionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> unionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> symmetricDifferenceImpl(Set<NumberLiteral> s) {
+		return null;
 	}
 
 }

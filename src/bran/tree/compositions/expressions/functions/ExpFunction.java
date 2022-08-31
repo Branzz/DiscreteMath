@@ -4,28 +4,30 @@ import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
-import bran.tree.structure.mapper.BranchOperator;
 
-public interface ExpFunction extends BranchOperator {
+import java.util.Arrays;
 
-	double function(double... a);
-
-	int getArgAmount();
+public interface ExpFunction extends AbstractFunction<Double> {
 
 	Expression derive(Expression... exp);
 	Statement domain(Expression... expressions) throws IllegalArgumentAmountException;
+
+	double function(double... a);
+
+	@Override
+	default Double function(Double... a) {
+		AbstractFunction.super.function(a);
+		return function(Arrays.stream(a).mapToDouble(Double::valueOf).toArray());
+	}
 
 	default Statement domainS(Expression... expressions) {
 		try { return domain(expressions); }
 		catch (IllegalArgumentAmountException e) { return null; }
 	}
 
-	void checkArguments(int length) throws IllegalArgumentAmountException;
-
 	ExpFunction inverse();
 
 	Expression inverse(int arg, Expression... expressions);
-
 
 	/**
 	 * "of Secure"; TODO for package use only

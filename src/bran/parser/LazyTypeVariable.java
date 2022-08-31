@@ -7,7 +7,7 @@ import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 
-class LazyTypeVariable extends Composition {
+class LazyTypeVariable implements Composition {
 
 	private final String name;
 	private boolean foundType;
@@ -25,7 +25,11 @@ class LazyTypeVariable extends Composition {
 	}
 
 	public boolean isStatement() {
-		return foundType && isExpression;
+		return foundType && !isExpression;
+	}
+
+	public boolean isFound() {
+		return foundType;
 	}
 
 	public Composition found(boolean isExpression) {

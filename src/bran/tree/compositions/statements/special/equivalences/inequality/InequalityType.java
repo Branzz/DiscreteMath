@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special.equivalences.inequality;
 
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
 import bran.tree.compositions.sets.SetDisplayStyle;
@@ -14,7 +15,7 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 	GREATER		 ((l, r) -> l.compareTo(r) >  0, false, false, "greater than", ">", ">", ">", ">", ">"),
 	GREATER_EQUAL((l, r) -> l.compareTo(r) >= 0, false,  true, "greater than or equal to", "\u2265", "\u2265", ">=", ">=");
 
-	private final Comparison<Comparable, Comparable<Comparable>> comparison;
+	private final Comparison<Expression, Expression> comparison;
 	private final boolean lesser;
 	private final boolean equal;
 	private final String[] symbols;
@@ -32,7 +33,7 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 		GREATER.flipped = LESS;
 	}
 
-	InequalityType(final Comparison<Comparable, Comparable<Comparable>> comparison, boolean lesser, boolean equal, final String... symbols) {
+	InequalityType(final Comparison<Expression, Expression> comparison, boolean lesser, boolean equal, final String... symbols) {
 		this.comparison = comparison;
 		this.lesser = lesser;
 		this.equal = equal;
@@ -40,7 +41,7 @@ public enum InequalityType implements EquivalenceType { // TODO Implement order 
 	}
 
 	@Override
-	public <R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right) {
+	public boolean evaluate(Expression left, Expression right) {
 		return comparison.apply(left, right);
 	}
 

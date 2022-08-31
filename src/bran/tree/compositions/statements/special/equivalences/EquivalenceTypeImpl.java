@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special.equivalences;
 
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
 import bran.tree.compositions.sets.SetDisplayStyle;
 import bran.tree.structure.mapper.Mapper;
@@ -8,6 +9,7 @@ import static bran.tree.compositions.sets.SetDisplayStyle.setStyle;
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
 public enum EquivalenceTypeImpl implements EquivalenceType {
+
 	// TODO Implement order of operations compatibility with other types
 	LESS		 ((l, r) -> l.compareTo(r) <  0, true,  false, "less than", "<", "<", "<", "<", "<"),
 	LESS_EQUAL	 ((l, r) -> l.compareTo(r) <= 0, true,   true, "less than or equal to", "\u2264", "\u2264", "<=", "<="),
@@ -16,7 +18,7 @@ public enum EquivalenceTypeImpl implements EquivalenceType {
 	EQUAL  		 ((l, r) -> l.compareTo(r) == 0, false,  true, "equals", "=", "=", "==", "==", "=", "="),
 	UNEQUAL		 ((l, r) -> l.compareTo(r) != 0, false, false, "does not equal", "\u2260", "\u2260", "!=", "!=");
 
-	private final Comparison<Comparable, Comparable<Comparable>> comparison;
+	private final Comparison<Expression, Expression> comparison;
 	private final boolean lesser;
 	private final boolean equal;
 	private final String[] symbols;
@@ -38,7 +40,7 @@ public enum EquivalenceTypeImpl implements EquivalenceType {
 		EQUAL.flipped = EQUAL;
 	}
 
-	EquivalenceTypeImpl(final Comparison<Comparable, Comparable<Comparable>> comparison, boolean lesser, boolean equal, final String... symbols) {
+	EquivalenceTypeImpl(Comparison<Expression, Expression> comparison, boolean lesser, boolean equal, final String... symbols) {
 		this.comparison = comparison;
 		this.lesser = lesser;
 		this.equal = equal;
@@ -46,7 +48,7 @@ public enum EquivalenceTypeImpl implements EquivalenceType {
 	}
 
 	@Override
-	public <R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right) {
+	public  boolean evaluate(Expression left, Expression right) {
 		return comparison.apply(left, right);
 	}
 

@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public abstract class Value extends Expression implements Leaf {
 
-	protected NumberLiteral number; // non-final; it can/will change in hypothetical - FOR VARIABLES
+	protected NumberLiteral number; // non-final; it can/will change in hypothetical (FOR VARIABLES)
 
 	public Value() {
 		this(0.0);

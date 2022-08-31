@@ -15,7 +15,7 @@ import java.util.function.Function;
 import static bran.tree.compositions.expressions.operators.Operator.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 
-public class OperatorExpression extends Expression implements Fork<Expression, Operator, Expression> {
+public class OperatorExpression extends Expression implements Fork<Double, Expression, Operator, Expression> {
 
 	private Expression left;
 	private final Operator operator;
@@ -45,7 +45,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	@Override
 	public double evaluate() {
-		return operator.operate(left.evaluate(), right.evaluate());
+		return operator.operate(left, right);
 	}
 
 	@Override
@@ -98,10 +98,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 
 	@Override
 	public Set<Variable> getVariables() {
-		Set<Variable> variables = new HashSet<>();
-		variables.addAll(left.getVariables());
-		variables.addAll(right.getVariables());
-		return variables;
+		return Expression.combineVariableSets(left, right);
 	}
 
 	// @Override
@@ -152,14 +149,14 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
 			if (right instanceof OperatorExpression
 				&& ADD.level().precedence() <= operator.precedence())
-				rightString = parens(rightString);
+				rightString = Composition.parens(rightString);
 			return '-' + rightString;
 		}
 		boolean leftGiven = true;
 		boolean rightGiven = true;
 		if (left instanceof OperatorExpression leftOperator) {
 			if (leftOperator.getOperator().precedence() < operator.precedence()) {
-					leftString = parens(leftString);
+					leftString = Composition.parens(leftString);
 			} else
 				leftGiven = false;
 		}
@@ -169,7 +166,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 				|| (rightOperator.getOperator().precedence() == operator.precedence()
 					&& !rightOperator.getOperator().isCommutative())
 				|| (operator == SUB)) {
-				rightString = parens(rightString);
+				rightString = Composition.parens(rightString);
 			} else
 				rightGiven = false;
 		}
@@ -228,7 +225,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 	private Expression simplifiedNoDomain(Expression leftSimplified, Operator operator, Expression rightSimplified, boolean commutativeSearch) {
 		if (leftSimplified instanceof Constant && rightSimplified instanceof Constant rightConst
 			&& !(operator == DIV && rightConst.equals(Constant.ZERO)))
-			return Constant.of(operator.operate(leftSimplified.evaluate(), rightSimplified.evaluate())); // causes negative token to be evaluated as highest precedence
+			return Constant.of(operator.operate(leftSimplified, rightSimplified)); // causes negative token to be evaluated as highest precedence
 		switch (operator) {
 			case POW:
 				if (rightSimplified instanceof Constant rightConstant) {
@@ -311,7 +308,7 @@ public class OperatorExpression extends Expression implements Fork<Expression, O
 				}
 				if (leftSimplified.equals(rightSimplified))
 					return leftSimplified.squared();
-				if (rightSimplified instanceof Constant && !(leftSimplified instanceof Constant))
+				if (rightSimplified instanceof Constant && !(leftSimplified instanceof Constant)) // TODO
 					return rightSimplified.times(leftSimplified);
 				break;
 			case DIV:

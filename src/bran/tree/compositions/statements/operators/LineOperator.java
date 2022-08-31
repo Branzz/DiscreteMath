@@ -34,7 +34,7 @@ public enum LineOperator implements BranchOperator {
 		};
 	}
 
-	public boolean operate(boolean value) {
+	public boolean operate(boolean value) { // TODO abstract
 		return lineOperable.operate(value);
 	}
 

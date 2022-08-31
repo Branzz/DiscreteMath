@@ -4,7 +4,7 @@ import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.sets.Set;
 import bran.tree.structure.Leaf;
 
-public class RangedSet extends Set implements Leaf {
+public class RangedSet implements Set<NumberLiteral>, Leaf {
 
 	// if it exists, it exists along this domain
 	private final SpecialSet baseDomain;
@@ -42,11 +42,11 @@ public class RangedSet extends Set implements Leaf {
 	}
 
 	@Override
-	public boolean isSubsetOf(final Set other) {
+	public boolean subsetImpl(final Set<NumberLiteral> other) {
 		if (other instanceof RangedSet oRanged) {
 			return from.doubleValue() >= oRanged.from.doubleValue()
 					&& to.doubleValue() <= oRanged.from.doubleValue()
-					&& baseDomain.isSubsetOf(oRanged.baseDomain);
+					&& baseDomain.subsetImpl(oRanged.baseDomain);
 		} else if (other instanceof SpecialSet oSpec) {
 
 		}
@@ -54,13 +54,38 @@ public class RangedSet extends Set implements Leaf {
 	}
 
 	@Override
-	public boolean isProperSubsetOf(final Set s) {
+	public boolean properSubsetImpl(Set<NumberLiteral> s) {
 		return false;
 	}
 
 	@Override
-	public boolean contains(final Object o) {
+	public boolean equivalentImpl(Set<NumberLiteral> other) {
 		return false;
+	}
+
+	@Override
+	public boolean containsImpl(NumberLiteral e) {
+		return false;
+	}
+
+	@Override
+	public Set<NumberLiteral> complementImpl() {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> intersectionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> unionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> symmetricDifferenceImpl(Set<NumberLiteral> s) {
+		return null;
 	}
 
 	@Override

@@ -8,29 +8,42 @@ import java.util.Collection;
 
 public class LimitExpression extends Expression {
 
-	Expression approaches; // lim a ->
-	Expression approached; // x
-	Expression function;   // f(x)
+	// lim approaching -> approached of function
+	Expression approaching;
+	Expression approached;
+	Expression function;
 
-	public LimitExpression(final Expression approaches, final Expression approached, final Expression function) {
-		this.approaches = approaches;
+	public LimitExpression(final Expression approaching, final Expression approached, final Expression function) {
+		this.approaching = approaching;
 		this.approached = approached;
 		this.function = function;
 	}
 
+	public Expression approaching() {
+		return approaching;
+	}
+
+	public Expression approached() {
+		return approached;
+	}
+
+	public Expression function() {
+		return function;
+	}
+
 	@Override
 	public java.util.Set<Variable> getVariables() {
-		return null;
+		return Expression.combineVariableSets(approaching, approached, function);
 	}
 
 	@Override
 	public Expression simplified() {
-		return new LimitExpression(approaches.simplified(), approached.simplified(), function.simplified());
+		return new LimitExpression(approaching.simplified(), approached.simplified(), function.simplified());
 	}
 
 	@Override
 	public double evaluate() {
-		replaceAll(approaches, approached);
+		replaceAll(approaching, approached);
 		return function.evaluate();
 	}
 
@@ -64,12 +77,12 @@ public class LimitExpression extends Expression {
 
 	@Override
 	public boolean equals(final Object other) {
-		return false;
+		return this == other;
 	}
 
 	@Override
 	public String toFullString() {
-		return "Lim " + approaches + " -> " + approached + " of " + function;
+		return "lim " + approaching + " -> " + approached + " of " + function;
 	}
 
 }

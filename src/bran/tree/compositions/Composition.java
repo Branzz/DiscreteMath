@@ -9,35 +9,35 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 
-public abstract class Composition implements TreePart {
+public interface Composition extends TreePart { // TODO group (theory)
 
-	public abstract String toFullString();
+	String toFullString();
 
 	@Override
-	public abstract String toString();
+	String toString();
 
-	public static String parens(String string) {
+	static String parens(String string) {
 		return '(' + string + ')';
 	}
 
-	@Override
-	public abstract boolean equals(Object s);
+	// @Override
+	// public abstract boolean equals(Object s);
 
-	public abstract Composition simplified();
+	Composition simplified();
 
-	public abstract void replaceAll(final Composition original, final Composition replacement);
+	void replaceAll(final Composition original, final Composition replacement);
 
 	// public abstract <T> Collection<T> getAll(Function<T, Boolean> matcher);
 
-	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
+	void appendGodelNumbers(final GodelBuilder godelBuilder);
 
-	public GodelNumberFactors godelNumber() {
+	default GodelNumberFactors godelNumber() {
 		final GodelBuilder godelBuilder = new GodelBuilder();
 		appendGodelNumbers(godelBuilder);
 		return new GodelNumberFactors(godelBuilder.getNumbers().toArray(GodelNumber[]::new));
 	}
 
-	private static final Composition emptyComposition = new Composition() {
+	Composition emptyComposition = new Composition() {
 		@Override public String toFullString() { return "()"; }
 		@Override public String toString() { return "()"; }
 		@Override public boolean equals(Object c) { return this == c; }
@@ -47,7 +47,7 @@ public abstract class Composition implements TreePart {
 		@Override public void appendGodelNumbers(GodelBuilder godelBuilder) { }
 	};
 
-	public static Composition empty() {
+	static Composition empty() {
 		return emptyComposition;
 	}
 

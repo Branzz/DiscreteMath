@@ -1,14 +1,12 @@
 package bran.tree.compositions.statements.special.quantifier;
 
 import bran.combinatorics.Counter;
+import bran.tree.compositions.sets.regular.var.WithVariableSet;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.godel.GodelBuilder;
-import bran.tree.compositions.Composition;
-import bran.tree.Equivalable;
 import bran.tree.compositions.sets.regular.FiniteSet;
 import bran.tree.Holder;
 
@@ -19,29 +17,17 @@ import java.util.stream.Collectors;
 
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
-public class ExistentialStatement <I, E extends Composition & Holder<I> & Equivalable<? super E>> extends QuantifiedStatement {
+public class ExistentialStatement<I, E extends Holder<I>> extends QuantifiedStatement<I, E> {
 
-	private final int argumentSize;
-	private final QuantifiedStatementArguments<E> universalStatement;
-	private final E[] variables;
-	private final Set domain;
-	private boolean proven;
-
-	public static final String[] forAllSymbols = { "\u2203", "\u2203", "\u2203", "\u2203" };
+	public static final String[] thereExistsSymbols = { "\u2203", "\u2203", "\u2203", "\u2203" };
 	public static final String[] inSetSymbols  = { "\u2208", "\u2208", "\u2208", "\u2208" };
 
-	public ExistentialStatement(final QuantifiedStatementArguments<E> universalStatement, final Set domain, final boolean proven, final E... variables) {
-		this.argumentSize = variables.length;
-		this.universalStatement = universalStatement;
-		this.variables = variables;
-		this.domain = domain;
-		this.proven = proven;
+	public ExistentialStatement(QuantifiedStatementArguments<E> universalStatement, Set<I> domain, boolean proven, E... variables) {
+		super(universalStatement, domain, proven, variables);
 	}
 
-	@Override
-	protected boolean getTruth() {
-		// return proven;
-		return exhaustiveProof();
+	public ExistentialStatement(QuantifiedStatementArguments<E> universalStatement, WithVariableSet<I, E> domain, boolean proven, E... variables) {
+		super(universalStatement, (Set<I>) domain, proven, variables);
 	}
 
 	public boolean exhaustiveProof() {
@@ -51,8 +37,8 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 			while (counter.hasNext()) {
 				int[] count = counter.next();
 				for (int i = 0; i < argumentSize; i++)
-					variables[i].set(choices.get(count[i]));
-				if (universalStatement.state(variables).truth())
+					statementParameters[i].set(choices.get(count[i]));
+				if (statement.truth())
 					return true;
 			}
 			return false;
@@ -69,11 +55,10 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 			while (counter.hasNext()) {
 				int[] count = counter.next();
 				for (int i = 0; i < argumentSize; i++)
-					variables[i].set(choices.get(count[i]));
-				sb.append(Arrays.stream(variables)
-											   .map(v -> v.toFullString() + " = " + v.get())
+					statementParameters[i].set(choices.get(count[i]));
+				sb.append(Arrays.stream(statementParameters)
+											   .map(v -> v.toString() + " = " + v.get())
 											   .collect(Collectors.joining(", ", "for ", ", ")));
-				Statement statement = universalStatement.state(variables);
 				if (statement instanceof QuantifiedStatement quantifiedStatement)
 					sb.append("\u21b4\n\t").append(quantifiedStatement.exhaustiveProofString().replaceAll("\n", "\n\t"));
 				else
@@ -115,23 +100,23 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 		return switch (statementStyle) {
 			case NAME -> "There exists ";
 			case LOWERCASE_NAME -> "there exists ";
-			default -> forAllSymbols[statementStyle.index()];
-		} + Arrays.stream(variables)
+			default -> thereExistsSymbols[statementStyle.index()];
+		} + Arrays.stream(statementParameters)
 				  .map(stringMapper)
 				  .collect(Collectors.joining(",")) + switch (statementStyle) {
 			case NAME, LOWERCASE_NAME -> " in the set of ";
 			default -> inSetSymbols[statementStyle.index()];
-		} + domain + "|" + universalStatement.state(variables);
+		} + domain + "|" + statement;
 	}
 
 	@Override
-	public String toFullString() {
-		return toString(Composition::toFullString);
+	public String toFullString() { // TODO, check if it's a Composition
+		return toString(Object::toString);
 	}
 
 	@Override
 	public String toString() {
-		return toString(Composition::toString);
+		return toString(Object::toString);
 	}
 
 	@Override
@@ -146,31 +131,21 @@ public class ExistentialStatement <I, E extends Composition & Holder<I> & Equiva
 
 	@Override
 	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
-		for (final E variable : variables) {
+		for (final E variable : statementParameters) {
 			godelBuilder.push(GodelNumberSymbols.LEFT);
 			godelBuilder.push(GodelNumberSymbols.EACH);
 			godelBuilder.push(godelBuilder.getVar(variable));
 			godelBuilder.push(GodelNumberSymbols.RIGHT);
 			godelBuilder.push(GodelNumberSymbols.LEFT);
 		}
-		universalStatement.state(variables).appendGodelNumbers(godelBuilder);
-		for (int i = 0; i < variables.length; i++)
+		statement.appendGodelNumbers(godelBuilder);
+		for (int i = 0; i < statementParameters.length; i++)
 			godelBuilder.push(GodelNumberSymbols.RIGHT);
 	}
 
 	@Override
-	public List<Statement> getChildren() {
-		return null;
-	}
-
-	@Override
-	public List<VariableStatement> getVariables() {
-		return null;
-	}
-
-	@Override
 	public Statement negation() {
-		return new UniversalStatement<>(e -> universalStatement.state(e).not(), domain, proven, variables);
+		return new UniversalStatement<>(e -> statement.not(), domain, proven, statementParameters);
 	}
 
 }

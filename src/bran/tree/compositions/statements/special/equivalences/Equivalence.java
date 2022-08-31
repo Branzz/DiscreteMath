@@ -1,10 +1,8 @@
 package bran.tree.compositions.statements.special.equivalences;
 
 import bran.exceptions.IllegalInverseExpressionException;
-import bran.exceptions.VariableExpressionException;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.sets.regular.RangedSet;
 import bran.tree.compositions.statements.OperationStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -18,12 +16,12 @@ import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
 import bran.tree.compositions.statements.special.equivalences.inequality.Inequality;
 import bran.tree.compositions.statements.special.equivalences.inequality.InequalityType;
+import bran.tree.structure.Fork;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class Equivalence extends SpecialStatement {
+public abstract class Equivalence extends SpecialStatement implements Fork<Boolean, Expression, EquivalenceType, Expression> {
 
 	protected Expression left;
 	protected Expression right;
@@ -48,13 +46,20 @@ public abstract class Equivalence extends SpecialStatement {
 		return left;
 	}
 
+	@Override
+	public EquivalenceType getOperator() {
+		return getEquivalenceType();
+	}
+
 	public abstract EquivalenceType getEquivalenceType();
 
 	public Expression getRight() {
 		return right;
 	}
 
-	public abstract Set toSet();
+	public Set toSet() {
+		return Set.emptySet();
+	}
 
 	@Override
 	protected boolean getTruth() { // TODO Equation: if the simplify is the same expression
@@ -112,7 +117,11 @@ public abstract class Equivalence extends SpecialStatement {
 		 */
 
 		final OperatorExpression oneSide = new OperatorExpression(leftSimplified, Operator.SUB, rightSimplified);
-		final Expression oneSideSimplified = oneSide.simplified(leftSimplified, rightSimplified);
+		Expression oneSideSimplified;
+		if (leftSimplified.equals(Constant.ZERO) || rightSimplified.equals(Constant.ZERO))
+			oneSideSimplified = oneSide;
+		else
+			oneSideSimplified = oneSide.simplified(leftSimplified, rightSimplified);
 		// final java.util.Set<Variable> oneSideVariables = oneSideSimplified.getVariables();
 		// if (oneSideVariables.size() == 0)
 		// 	return VariableStatement.of(getEquivalenceType().evaluate(oneSideSimplified, Constant.ZERO));

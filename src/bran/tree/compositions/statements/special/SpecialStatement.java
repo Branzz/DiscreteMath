@@ -8,11 +8,6 @@ import java.util.List;
 public abstract class SpecialStatement extends Statement {
 
 	@Override
-	protected boolean isConstant() {
-		return false;
-	}
-
-	@Override
 	public abstract List<Statement> getChildren();
 
 	@Override

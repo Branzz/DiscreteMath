@@ -33,8 +33,8 @@ public class Inequality extends Equivalence {
 		return inequalityType;
 	}
 
-	@Override
-	public Set toSet() {
+	// @Override
+	public Set<NumberLiteral> toSet() {
 		boolean leftIsVar = left instanceof Variable;
 		boolean rightIsVar = right instanceof Variable;
 		boolean leftIsConst = left instanceof Constant;

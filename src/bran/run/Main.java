@@ -7,8 +7,12 @@ import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.tree.compositions.sets.LineSet;
 import bran.tree.compositions.sets.OperationSet;
 import bran.tree.compositions.sets.Set;
+import bran.tree.compositions.sets.operators.LineSetOperator;
+import bran.tree.compositions.sets.operators.SetOperator;
+import bran.tree.compositions.sets.regular.FiniteNumberSet;
 import bran.tree.compositions.statements.operators.LineOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
+import bran.tree.compositions.statements.special.BooleanSet;
 import bran.tree.generators.StatementGenerator;
 import bran.tree.compositions.statements.*;
 import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
@@ -20,8 +24,6 @@ import bran.exceptions.IllegalArgumentAmountException;
 import bran.parser.StatementParser;
 import bran.tree.compositions.Definition;
 import bran.tree.compositions.sets.regular.FiniteSet;
-import bran.tree.compositions.sets.regular.SpecialSet;
-import bran.tree.compositions.sets.regular.SpecialSetType;
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.godel.GodelNumberFactors;
 import bran.tree.structure.TreePart;
@@ -31,6 +33,8 @@ import java.util.List;
 
 import static bran.tree.compositions.expressions.values.Constant.ZERO;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
+import static bran.tree.compositions.statements.Statement.forAll;
+import static bran.tree.compositions.statements.Statement.thereExists;
 
 public class Main {
 
@@ -137,15 +141,26 @@ public class Main {
 				// + "\n" +
 		);
 		VariableStatement x = new VariableStatement('x');
-		System.out.println(Statement.forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
-				.implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var"))).godelNumber());
+		System.out.println(Statement.forAll(x)
+									.in(new BooleanSet())
+									.thatEach(args -> x.nand(new VariableStatement('y')))
+									.proven()
+									.implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")))
+									.godelNumber());
 
+		System.out.println(thereExists(new Variable("a"))
+				.in(new FiniteNumberSet(0, 1, 2))
+				.suchThat(a -> forAll(new Variable("b"))
+								   .in(new FiniteNumberSet(9, 5))
+								   .itHolds(b -> a.times(b).equates(ZERO))
+								   .proven())
+				.proven());
 	}
 
 	public static void verify() {
-		System.out.println(TreePart.treeVerifier(Statement.class, LogicalOperator.class, OperationStatement.class, LineOperator.class, LineStatement.class));
-		System.out.println(TreePart.treeVerifier(Expression.class, Operator.class, OperatorExpression.class, ExpFunction.class, FunctionExpression.class));
-		System.out.println(TreePart.treeVerifier(Set.class, LogicalOperator.class, OperationSet.class, LineOperator.class, LineSet.class));
+		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class, OperationStatement.class, LineOperator.class, LineStatement.class, VariableStatement.class));
+		System.out.println(TreePart.treeVerifier(Expression.class, Double.class, Operator.class, OperatorExpression.class, ExpFunction.class, FunctionExpression.class, Variable.class));
+		System.out.println(TreePart.treeVerifier(Set.class, SetOperator.class, OperationSet.class, LineSetOperator.class, LineSet.class));
 	}
 
 	private static <T> T[] toArray(List<T> list) {

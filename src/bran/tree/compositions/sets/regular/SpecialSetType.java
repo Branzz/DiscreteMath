@@ -22,7 +22,7 @@ public enum SpecialSetType {
 	}
 
 	public String toString() {
-		return name();
+		return formalName + "s";
 	}
 
 }

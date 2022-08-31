@@ -1,7 +1,6 @@
 package bran.tree.compositions.statements.special.equivalences.equation;
 
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.sets.regular.RangedSet;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.statements.special.equivalences.Equivalence;
@@ -27,10 +26,6 @@ public class Equation extends Equivalence {
 	@Override
 	public EquivalenceType getEquivalenceType() {
 		return equationType;
-	}
-
-	public Set toSet() {
-		return null;
 	}
 
 	@Override

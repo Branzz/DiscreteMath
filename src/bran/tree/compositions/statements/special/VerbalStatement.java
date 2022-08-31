@@ -23,11 +23,6 @@ public class VerbalStatement extends Statement {
 	}
 
 	@Override
-	protected boolean isConstant() {
-		return false;
-	}
-
-	@Override
 	protected boolean getTruth() {
 		return truth;
 	}

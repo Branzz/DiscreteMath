@@ -1,21 +1,20 @@
 package bran.tree.compositions.expressions.functions;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.IllegalInverseExpressionException;
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.appliers.DomainSupplier;
 import bran.tree.compositions.expressions.functions.appliers.FunctionDerivable;
 import bran.tree.compositions.expressions.functions.appliers.Functional;
-import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.expressions.values.Constant;
-import bran.tree.compositions.expressions.Expression;
-import bran.exceptions.IllegalArgumentAmountException;
+import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 
 import java.util.function.Function;
 
+import static bran.tree.compositions.expressions.functions.appliers.DomainSupplier.NOT_ZERO;
 import static bran.tree.compositions.expressions.operators.Operator.POW;
 import static bran.tree.compositions.expressions.values.Constant.*;
-import static bran.tree.compositions.expressions.functions.appliers.DomainSupplier.*;
-
 import static java.lang.Math.*;
 
 public enum MultiArgFunction implements ExpFunction {
@@ -52,13 +51,10 @@ public enum MultiArgFunction implements ExpFunction {
 	ACOT  (COT, a -> Math.atan(1 / a), a -> a.derive().div(ONE.minus(a).negate())),
 	 COTH (NOT_ZERO, a -> 1 / Math.tanh(a), a -> CSCH.ofS(a).negate().squared().chain(a)),
 	ACOTH (COTH, e -> e.less(NEG_ONE).or(e.greater(ONE)), a -> .5 * Math.log((1 + a) / (a - 1)), a -> a.derive().div(a.squared().dec())),
-
-	// DER(a -> 0, a -> a[0].derive().derive()),
-	// INT()
-
-	//TODO derivative and integral functions
-
-	RNG(0, a -> VariableStatement.TAUTOLOGY, a -> Math.random(), a -> ZERO);
+	RNG   (0, a -> VariableStatement.TAUTOLOGY, a -> Math.random(), a -> ZERO),
+	NOP   (e -> e), // LINE
+	NULL  (),
+	;
 
 	static {
 		// d/dx (log(b, a))  =  (da - (a*log(b,a)*db/b)) / a*lnb
@@ -143,8 +139,7 @@ public enum MultiArgFunction implements ExpFunction {
 
 	@Override
 	public void checkArguments(int length) throws IllegalArgumentAmountException {
-		if (length != arguments) // only less than?
-			throw new IllegalArgumentAmountException(String.format("wrong number of arguments. given %d but needed %d", length, arguments));
+		checkArguments(length, arguments);
 	}
 
 	@Override
@@ -160,7 +155,7 @@ public enum MultiArgFunction implements ExpFunction {
 
 	@Override
 	public String toString() {
-		return name();
+		return symbols.length > 0 ? symbols[0] : name();
 	}
 
 	@Override

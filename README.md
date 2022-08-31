@@ -113,12 +113,13 @@ Definition.ODD.test(new Constant(5.0))
 ```
 `for the integer 5, it is odd iff 5 % 2 == 1, which is true, so 5 is odd`
 ```java
-new ExistentialStatement<>(
-        a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(Constant.ZERO),
-		new FiniteSet<>(new NumberLiteral(9), new NumberLiteral(5)),
-        true, new Variable("b")),
-        new FiniteSet<>(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
-	new Variable("a"))
+thereExists(new Variable("a")) // 
+    .in(new FiniteNumberSet(0, 1, 2))
+    .that(a -> forAll(new Variable("b"))
+                    .in(new FiniteNumberSet(9, 5))
+                    .that(b -> a.times(b).equates(ZERO))
+                    .proven())
+    .proven(); // this statement is proven true and can be used to deduce truth
 ```
 `{∃a∈{2.0, 1.0, 0.0}|∀b∈{9.0, 5.0}, a * b = 0}`
 ```java

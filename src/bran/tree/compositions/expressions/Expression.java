@@ -33,7 +33,7 @@ import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.SQRT;
 import static bran.tree.compositions.expressions.operators.Operator.*;
 
-public abstract class Expression extends Composition implements Equivalable<Expression>, Comparable<Expression> {
+public abstract class Expression implements Composition, Equivalable<Expression>, Comparable<Expression> {
 
 	protected Statement domainConditions;
 
@@ -87,6 +87,14 @@ public abstract class Expression extends Composition implements Equivalable<Expr
 	}
 
 	public abstract Set<Variable> getVariables();
+
+	public static Set<Variable> combineVariableSets(Expression... expressions) {
+		return Arrays.stream(expressions).flatMap(e -> e.getVariables().stream()).collect(Collectors.toSet());
+	}
+
+	public static Set<Variable> combineVariableSets(Set<Variable>... variables) {
+		return Arrays.stream(variables).flatMap(Collection::stream).collect(Collectors.toSet());
+	}
 
 	public abstract double evaluate();
 

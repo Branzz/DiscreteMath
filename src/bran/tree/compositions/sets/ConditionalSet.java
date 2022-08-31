@@ -5,37 +5,52 @@ import bran.tree.structure.Leaf;
 
 import java.util.function.Function;
 
-public class ConditionalSet extends Set implements Leaf {
+public class ConditionalSet implements Set<NumberLiteral>, Leaf {
 
 	private final Function<NumberLiteral, Boolean> conditionalExpression;
 
-	public ConditionalSet(final Function<NumberLiteral, Boolean> conditionalExpression) {
+	public ConditionalSet(Function<NumberLiteral, Boolean> conditionalExpression) {
 		super();
 		this.conditionalExpression = conditionalExpression;
 	}
 
 	@Override
-	public boolean isSubsetOf(final Set s) {
+	public boolean subsetImpl(Set<NumberLiteral> s) {
 		return false;
 	}
 
 	@Override
-	public boolean isProperSubsetOf(final Set s) {
+	public boolean properSubsetImpl(Set<NumberLiteral> s) {
 		return false;
 	}
 
 	@Override
-	public boolean contains(final Object o) {
-		return o instanceof NumberLiteral n && conditionalExpression.apply(n);
-	}
-
-	@Override
-	public boolean equals(final Object o) { //TODO
+	public boolean equivalentImpl(Set<NumberLiteral> other) {
 		return false;
 	}
 
 	@Override
-	public String toString() {
+	public boolean containsImpl(NumberLiteral e) {
+		return conditionalExpression.apply(e);
+	}
+
+	@Override
+	public Set<NumberLiteral> complementImpl() {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> intersectionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> unionImpl(Set<NumberLiteral> s) {
+		return null;
+	}
+
+	@Override
+	public Set<NumberLiteral> symmetricDifferenceImpl(Set<NumberLiteral> s) {
 		return null;
 	}
 

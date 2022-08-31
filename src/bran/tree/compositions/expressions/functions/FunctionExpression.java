@@ -1,16 +1,16 @@
 package bran.tree.compositions.expressions.functions;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.Composition;
-import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.AbstractFunctionExpression;
 import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.exceptions.IllegalArgumentAmountException;
-import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.godel.GodelBuilder;
-import bran.tree.structure.MultiBranch;
+import bran.tree.compositions.godel.GodelNumberSymbols;
+import bran.tree.compositions.statements.Statement;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +22,7 @@ import static bran.tree.compositions.expressions.functions.MultiArgFunction.LN;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 import static bran.tree.compositions.expressions.operators.Operator.POW;
 
-public class FunctionExpression extends Expression implements MultiBranch<Expression, ExpFunction> {
+public class FunctionExpression extends AbstractFunctionExpression<Expression, ExpFunction> {
 
 	final ExpFunction function;
 	final Expression[] expressions;
@@ -35,7 +35,7 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 		this.expressions = expressions;
 	}
 
-	FunctionExpression(final ExpFunction function, boolean secure, Expression... expressions) {
+	public FunctionExpression(final ExpFunction function, boolean secure, Expression... expressions) {
 		super(Stream.concat(Stream.of(function.domainS(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		this.function = function;
 		this.expressions = expressions;
@@ -160,7 +160,7 @@ public class FunctionExpression extends Expression implements MultiBranch<Expres
 		String argString = Arrays.stream(expressions)
 								 .map(Expression::toString)
 								 .collect(Collectors.joining(", "));
-		final String args = (expressions.length == 1 && expressions[0] instanceof Value ? " " + argString : parens(argString));
+		String args = (expressions.length == 1 && expressions[0] instanceof Constant ? " " + argString : Composition.parens(argString));
 		return function == MultiArgFunction.ABS ? "|" + args + "|" : function + args;
 	}
 

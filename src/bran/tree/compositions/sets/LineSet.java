@@ -1,34 +1,74 @@
 package bran.tree.compositions.sets;
 
-import bran.tree.compositions.statements.operators.LineOperator;
-import bran.tree.compositions.sets.regular.FiniteSet;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
+import bran.tree.compositions.sets.operators.LineSetOperator;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.structure.MonoBranch;
 
-public class LineSet extends Set implements MonoBranch<Set, LineOperator> {
+public class LineSet<E> implements Set<E>, MonoBranch<Set<E>, LineSetOperator> {
 
-	private LineOperator lineOperator;
-	private Set child;
+	private final LineSetOperator lineOperator;
+	private final Set<E> child;
 
 	private SpecialSet s;
 
-	public LineSet(LineOperator lineOperator, Set child) {
+	public LineSet(LineSetOperator lineOperator, Set<E> child) {
 		this.child = child;
 		this.lineOperator = lineOperator;
-		if (child instanceof FiniteSet)
-			; // Behave like all numbers - those.
+		// if (child instanceof FiniteSet)
+		// 	; // Behave like all numbers - those.
 		// else if (child instanceof SpecialSet) // TODO temp commment
 		// 	s = new SpecialSet(child.complement()); //do boolean calculation  // TODO temp commment
 	}
 
 	@Override
-	public Set getChild() {
+	public Set<E> getChild() {
 		return child;
 	}
 
 	@Override
-	public LineOperator getOperator() {
+	public LineSetOperator getOperator() {
 		return lineOperator;
+	}
+
+	@Override
+	public boolean subsetImpl(Set<E> s) {
+		return false;
+	}
+
+	@Override
+	public boolean properSubsetImpl(Set<E> s) {
+		return false;
+	}
+
+	@Override
+	public boolean equivalentImpl(Set<E> other) {
+		return false;
+	}
+
+	@Override
+	public boolean containsImpl(E e) {
+		return false;
+	}
+
+	@Override
+	public Set<E> complementImpl() {
+		return null;
+	}
+
+	@Override
+	public Set<E> intersectionImpl(Set<E> s) {
+		return null;
+	}
+
+	@Override
+	public Set<E> unionImpl(Set<E> s) {
+		return null;
+	}
+
+	@Override
+	public Set<E> symmetricDifferenceImpl(Set<E> s) {
+		return null;
 	}
 
 	// @Override
@@ -41,25 +81,9 @@ public class LineSet extends Set implements MonoBranch<Set, LineOperator> {
 	// 	return new LineSet(lineOperator, child);
 	// }
 
-	@Override
-	public boolean isSubsetOf(Set s) {
-        // for (Object e : this)  // TODO temp commment
-        //     if (!contains(e))  // TODO temp commment
-        //         return false;  // TODO temp commment
-        return true;
-
-//		return child.isSubsetOf(s);//TODO
-	}
-
-	@Override
-	public boolean isProperSubsetOf(Set s) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean contains(Object o0) {
-		return !child.contains(o0);
-	}
+	// @Override
+	// public Statement contains(Object o0) {
+	// 	return !child.contains(o0);
+	// }
 
 }

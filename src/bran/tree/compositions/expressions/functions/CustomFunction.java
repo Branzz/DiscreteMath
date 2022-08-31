@@ -7,8 +7,8 @@ import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.expressions.Expression;
 import bran.exceptions.IllegalArgumentAmountException;
 
-public record CustomFunction(int arguments, ExpFunction inverse, Functional functional, FunctionDerivable functionDerivable, DomainSupplier domainSupplier,
-							 String... symbols) implements ExpFunction {
+public record CustomFunction(int arguments, ExpFunction inverse, Functional functional, FunctionDerivable functionDerivable,
+							 DomainSupplier domainSupplier, String... symbols) implements ExpFunction {
 
 	// Example
 	// CustomFunction INC = new CustomFunction(1, a -> a[0] + 1, (r, e) -> e[0], "inc", "increment");
@@ -41,8 +41,7 @@ public record CustomFunction(int arguments, ExpFunction inverse, Functional func
 
 	@Override
 	public void checkArguments(final int length) throws IllegalArgumentAmountException {
-		if (length != arguments)
-			throw new IllegalArgumentAmountException(String.format("wrong number of arguments. given %d but needed %d", length, arguments));
+		checkArguments(length, arguments);
 	}
 
 	@Override

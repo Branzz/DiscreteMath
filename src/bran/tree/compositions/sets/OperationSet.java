@@ -1,74 +1,78 @@
 package bran.tree.compositions.sets;
 
-import bran.tree.compositions.statements.operators.LogicalOperator;
+import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.structure.Fork;
 
-public class OperationSet extends Set implements Fork<Set, LogicalOperator, Set> {
+public class OperationSet<E> implements Set<E>, Fork<Set, Set, SetOperator, Set> { // TODO generics
 
-	private final Set left;
-	private final LogicalOperator operator;
-	private final Set right;
+	private final Set<E> left;
+	private final SetOperator operator;
+	private final Set<E> right;
 
-	public OperationSet(Set left, LogicalOperator operator, Set right) {
+	public OperationSet(Set<E> left, SetOperator operator, Set<E> right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
 	}
 
-//	public ArrayList<AbstractSet> getElements() {
-//		// TODO
-//		return null;
-//	}
+	//	public ArrayList<AbstractSet> getElements() {
+	//		// TODO
+	//		return null;
+	//	}
 
 	@Override
-	public Set getLeft() {
+	public Set<E> getLeft() {
 		return left;
 	}
 
 	@Override
-	public LogicalOperator getOperator() {
+	public SetOperator getOperator() {
 		return operator;
 	}
 
 	@Override
-	public Set getRight() {
+	public Set<E> getRight() {
 		return right;
 	}
 
-	// @Override
-	// public OperationSet create(final AbstractSet left, final Operator function, final AbstractSet right) {
-	// 	return new OperationSet(left, function, right);
-	// }
-
 	@Override
-	public boolean isSubsetOf(Set s) {
-		switch(operator) {
-		case AND:
-			;
-		case OR:
-			return left.isSubsetOf(s) && right.isSubsetOf(s);
-		case XOR:
-			;
-		default:
-			return false;
-		}
-	}
-
-	@Override
-	public boolean isProperSubsetOf(Set s) {
-		// TODO Auto-generated method stub
+	public boolean subsetImpl(Set<E> s) {
 		return false;
 	}
 
 	@Override
-	public boolean contains(Object o) {
-		// TODO Auto-generated method stub
+	public boolean properSubsetImpl(Set<E> s) {
 		return false;
 	}
 
-	// @Override
-	// public Object clone() {
-	// 	return new OperationSet((Set) left.clone(), operator, (Set) right.clone());
-	// }
+	@Override
+	public boolean equivalentImpl(Set<E> other) {
+		return false;
+	}
+
+	@Override
+	public boolean containsImpl(E e) {
+		return false;
+	}
+
+	@Override
+	public Set<E> complementImpl() {
+		return null;
+	}
+
+	@Override
+	public Set<E> intersectionImpl(Set<E> s) {
+		return null;
+	}
+
+	@Override
+	public Set<E> unionImpl(Set<E> s) {
+		return null;
+	}
+
+	@Override
+	public Set<E> symmetricDifferenceImpl(Set<E> s) {
+		return null;
+	}
 
 }

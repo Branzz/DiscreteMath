@@ -1,41 +1,37 @@
 package bran.run;
 
-import bran.exceptions.ParseException;
-import bran.parser.CompositionParser;
-import bran.parser.ExpressionParser;
-import bran.parser.Parser;
-import bran.parser.StatementParser;
-import bran.tree.compositions.Composition;
-import bran.tree.compositions.sets.regular.MultiRangedSet;
-import bran.tree.compositions.statements.StatementImpl;
-import bran.tree.compositions.statements.special.VerbalStatement;
-import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
 import bran.application.draw.StartViewer;
 import bran.application.draw.exprs.StartExpressionViewer;
-import bran.tree.generators.CompositionGenerator;
-import bran.tree.generators.ExpressionGenerator;
+import bran.exceptions.ParseException;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
 import bran.graphs.Vertex;
-import bran.tree.compositions.statements.special.proofs.Argument;
-import bran.tree.generators.StatementGenerator;
-import bran.tree.compositions.statements.TruthTable;
-import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.VariableStatement;
-import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
-import bran.tree.compositions.statements.special.equivalences.equation.Equation;
-import bran.tree.compositions.expressions.values.Constant;
-import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.values.Variable;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
 import bran.matrices.Matrix;
-import bran.tree.compositions.sets.regular.FiniteSet;
-import bran.tree.compositions.expressions.values.numbers.NumberToText;
-import bran.tree.compositions.sets.regular.SpecialSet;
-import bran.tree.compositions.sets.regular.SpecialSetType;
-import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
-import bran.tree.compositions.godel.GodelNumberFactors;
+import bran.parser.CompositionParser;
 import bran.tree.Holder;
+import bran.tree.compositions.Composition;
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
+import bran.tree.compositions.expressions.values.numbers.NumberToText;
+import bran.tree.compositions.godel.GodelNumberFactors;
+import bran.tree.compositions.sets.regular.*;
+import bran.tree.compositions.sets.regular.var.WithVariableSet;
+import bran.tree.compositions.statements.Statement;
+import bran.tree.compositions.statements.StatementImpl;
+import bran.tree.compositions.statements.TruthTable;
+import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.compositions.statements.special.BooleanSet;
+import bran.tree.compositions.statements.special.VerbalStatement;
+import bran.tree.compositions.statements.special.equivalences.equation.Equation;
+import bran.tree.compositions.statements.special.proofs.Argument;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.tree.compositions.statements.special.quantifier.QuantifiedStatementArguments;
+import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
+import bran.tree.generators.ExpressionGenerator;
+import bran.tree.generators.StatementGenerator;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -47,6 +43,9 @@ import java.util.stream.Stream;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 import static bran.tree.compositions.expressions.operators.Operator.DIV;
 import static bran.tree.compositions.expressions.operators.Operator.MUL;
+import static bran.tree.compositions.expressions.values.Constant.ZERO;
+import static bran.tree.compositions.statements.Statement.forAll;
+import static bran.tree.compositions.statements.Statement.thereExists;
 
 public class MainTest {
 
@@ -59,7 +58,7 @@ public class MainTest {
 		// operationTest();
 		// HamiltonianPathTestingVertices();
 		// hamiltonianPathTestingEdges();
-		parseTest();
+		// parseTest();
 		// statementGeneratorTest();
 		// expressionGeneratorTest();
 		// Stream.of("111", "50").map(Main::solve).forEach(System.out::println);
@@ -74,6 +73,7 @@ public class MainTest {
 		// equivalenceSimplificationTest();
 		// inverseTest();
 		// compareTest();
+		setOperationsTest();
 
 		// System.out.println(ExpressionParser.parseExpression("1 / SQRT(x ^ 2 + 1)").getDomainConditions().simplified());
 		// Variable a = new Variable("a");
@@ -85,6 +85,67 @@ public class MainTest {
 		// 	System.out.println(i + " " + ((i >> 2) - 1));
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().getTable());
 		// System.out.println(new VariableStatement("he has a driver's license").not().revImplies(new VariableStatement("his age is less than 16")).not().simplified().getTable());
+
+	// = new CustomFunction(1, null, a -> {
+	// 	return null;
+	// }, null, null, "limit");
+
+		// System.out.println(LIMIT.test(new LimitExpression(Variable.of("a"), Variable.of("x"), new GenericExpFunction("f")))
+		// .replaceAll(", ", ",\n\t"));
+
+		// System.out.println(CompositionParser.parse("LOG(2, x)").simplified());
+
+
+	}
+
+	static class Property {}
+	static class Element { Element(Property[] properties) {this.properties=properties;} Property[] properties; }
+
+	// a is an element that is abstracted of a set of elements E iff for all elements e in E, a has a property which e contains
+	// for element which holds a set of properties, a set of elements E,
+	// an element A abstracts E ↔ ∀ properties p in A, ∀ elements e in E, ∃ a property q in e such that p = q
+	// ∃ n in Z | n=0
+	// !(∀ n in Z | !n=0)
+
+	Element abstractAbstract(Element[] elements) {
+		return new Element(Arrays.stream(elements).flatMap(e -> Arrays.stream(e.properties)).toArray(Property[]::new));
+	}
+
+	private static void setOperationsTest() {
+		System.out.println(new UniversalStatement<NumberLiteral, Variable>(
+				(QuantifiedStatementArguments<Variable>) (s -> s[0].mod(Constant.TWO).equates(Constant.ZERO)), //(Variable a, WithVariableSet<NumberLiteral, Variable> A)
+				new WithVariableSet<NumberLiteral, Variable>(NumberLiteral.class, Variable.class, new NumberLiteral(2), new NumberLiteral(4)),
+				true,
+				Variable.of("a")).simplified());
+
+		System.out.println(
+				forAll(Variable.of("b")).in(new WithVariableSet<>(NumberLiteral.class, Variable.class, 1, 3))
+										.thatVarSet((Variable b, WithVariableSet<NumberLiteral, Variable> B) -> // (Variable b, WithVariableSet B) ->
+						thereExists(Variable.of("a")).in(new WithVariableSet<>(NumberLiteral.class, Variable.class, 0, 1, 2, 3))
+													 .thatVarSet((Variable a, WithVariableSet<NumberLiteral, Variable> A) -> // (Variable a, WithVariableSet A) ->
+								B.subset(A).iff(A.containsElement(a).and(B.containsElement(a)))
+						).proven()
+				).proven()
+			.toString()
+		);
+		forAll(Variable.of("b")).in(new WithVariableSet<>(NumberLiteral.class, Variable.class, 1, 3))
+								.itHolds(b -> b.equates(Constant.of(3)))
+								.proven();
+		forAll(Variable.of("b")).in(new WithVariableSet<>(NumberLiteral.class, Variable.class, 1, 3))
+								.thatEach(b -> b[0].equates(Constant.of(3)))
+								.proven();
+		System.out.println(thereExists(new Variable("a"))
+								   .in(new FiniteNumberSet(0, 1, 2))
+								   .suchThat(a -> forAll(new Variable("b"))
+														  .in(new FiniteNumberSet(9, 5))
+														  .itHolds(b -> a.times(b).equates(ZERO))
+														  .proven())
+								   .proven());
+
+
+		// System.out.println(
+		// 		forAll(Var.of("person")).in()
+		// );
 	}
 
 	private static void compareTest() {
@@ -175,10 +236,10 @@ public class MainTest {
 		final Variable x = new Variable("x");
 		final Variable y = new Variable("y");
 		final UniversalStatement<NumberLiteral, Variable> test
-				= Statement.forAll(x)
-						   .in(new SpecialSet(SpecialSetType.Z), e0 -> Statement.forAll(y)
-																				.in(new SpecialSet(SpecialSetType.Z), e1 -> e0[0].plus(e1[0]).equates(e1[0].plus(e0[0])))
-																				.proven())
+				= forAll(x).in(new SpecialSet(SpecialSetType.Z))
+						   .itHolds(e0 -> forAll(y)
+												  .in(new SpecialSet(SpecialSetType.Z))
+												  .itHolds(e1 -> e0.plus(e1).equates(e1.plus(e0))).proven())
 						   .proven();
 		System.out.println(test + "\n" + test.not());
 
@@ -186,7 +247,7 @@ public class MainTest {
 
 	public static void godelTest() {
 		VariableStatement x = new VariableStatement('x');
-		Statement s = Statement.forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
+		Statement s = forAll(x).in(new BooleanSet()).thatEach(args -> x.nand(new VariableStatement('y'))).proven()
 							   .implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")));
 		System.out.println(s.godelNumber());
 		System.out.println(new GodelNumberFactors(s.godelNumber().getNumber())); // 25 30
@@ -485,7 +546,7 @@ public class MainTest {
 		y.add(new NumberLiteral(1));
 		y.add(new NumberLiteral(2));
 		System.out.println(x.equals(y));
-		System.out.println(x.isSubsetOf(y));
+		System.out.println(x.subsetImpl(y));
 	}
 
 	private static void jamesGrimesPuzzleTest() {
@@ -613,10 +674,11 @@ public class MainTest {
 		}
 
 		final MountainVariable m = new MountainVariable("Mountain", null);
-		System.out.println(Statement.forAll(m).in(
+		System.out.println(forAll(m).in(
 				new FiniteSet<>(Map.of("Caucus", true, "Tibet", true, "Alps", true, "Rocky", false).entrySet().stream()
-								   .map(e -> new Mountain(e.getKey(), e.getValue()))
-								   .toArray(Mountain[]::new)), args1 -> m)
+								   		.map(e -> new Mountain(e.getKey(), e.getValue()))
+								   		.toArray(Mountain[]::new)))
+									.thatEach(args1 -> m)
 									.unProven()
 									.exhaustiveProofString());
 

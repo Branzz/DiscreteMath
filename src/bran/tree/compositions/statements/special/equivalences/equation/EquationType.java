@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special.equivalences.equation;
 
+import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.statements.StatementDisplayStyle;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
 import bran.tree.structure.mapper.Mapper;
@@ -10,10 +11,10 @@ public enum EquationType implements EquivalenceType {
 	EQUAL  ((l, r) -> l.compareTo(r) == 0, "EQUALS", "=", "=", "==", "!=", "=", "="),
 	UNEQUAL((l, r) -> l.compareTo(r) != 0, "DOES NOT EQUAL", "\u2260", "\u2260", "!=", "!=");
 
-	private final Comparison<Comparable, Comparable<Comparable>> comparison;
+	private final Comparison<Expression, Expression> comparison;
 	private final String[] symbols;
 
-	EquationType(Comparison<Comparable, Comparable<Comparable>> comparison, final String... symbols) {
+	EquationType(Comparison<Expression, Expression> comparison, final String... symbols) {
 		this.comparison = comparison;
 		this.symbols = symbols;
 	}
@@ -46,7 +47,7 @@ public enum EquationType implements EquivalenceType {
 	}
 
 	@Override
-	public <R, L extends Comparable<R>> boolean evaluate(Comparable<L> left, Comparable<R> right) {
+	public boolean evaluate(Expression left, Expression right) {
 		return comparison.apply(left, right);
 	}
 

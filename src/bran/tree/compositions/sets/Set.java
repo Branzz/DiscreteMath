@@ -1,24 +1,78 @@
 package bran.tree.compositions.sets;
 
-import bran.exceptions.VariableExpressionException;
+import bran.exceptions.ArrayUnpopulatedException;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.godel.GodelNumberSymbols;
-import bran.tree.compositions.sets.regular.SpecialSet;
-import bran.tree.compositions.sets.regular.SpecialSetType;
-import bran.tree.compositions.statements.operators.LineOperator;
-import bran.tree.compositions.statements.operators.LogicalOperator;
-import bran.tree.structure.TreePart;
+import bran.tree.compositions.sets.operators.LineSetOperator;
+import bran.tree.compositions.sets.operators.SetOperator;
+import bran.tree.compositions.sets.regular.*;
+import bran.tree.compositions.statements.Statement;
 
-public abstract class Set extends Composition implements TreePart
-//Comparable<AbstractSet>,
- {
+import static bran.tree.compositions.sets.SetStatementOperator.*;
+import static bran.tree.compositions.sets.regular.ElementSetRelation.*;
 
-	public abstract boolean isSubsetOf(Set s);
+public interface Set<E> extends Composition { //Comparable<AbstractSet>,
 
-	public abstract boolean isProperSubsetOf(Set s);
+	boolean subsetImpl(Set<E> s);
 
-	public abstract boolean contains(Object o);
+	default SetStatement<E> subset(Set<E> s) {
+		 return new SetStatement<>(this, SUBSET, s);
+	}
+
+	boolean properSubsetImpl(Set<E> s);
+
+	default SetStatement<E> properSubsetOf(Set<E> s) {
+		return new SetStatement<>(this, PROPER_SUBSET, s);
+	}
+
+	boolean equivalentImpl(Set<E> other);
+
+	default SetStatement<E> equivalent(Set<E> other) {
+		return new SetStatement<>(this, SetStatementOperator.BIJECTION, other);
+	}
+
+	boolean containsImpl(E e);
+
+	default Statement containsElement(E o) {
+		return new ElementSetStatement<>(this, CONTAINS_ELEMENT(), o);
+	}
+
+	// public ElementSetStatement<E> containsElement(Holder<E> o) {
+	// 	return new ElementSetStatement<>(this, ELEMENT_OF(), o.get());
+	// }
+
+	default boolean notContainsImpl(E e) {
+		return !containsImpl(e);
+	}
+
+	default ElementSetStatement<E> notContains(E o) {
+		return new ElementSetStatement<>(this, NOT_CONTAINS_ELEMENT(), o);
+	}
+
+	Set<E> complementImpl();
+
+	default LineSet<E> complement() {
+		return new LineSet<>(LineSetOperator.COMPLEMENT, this);
+	}
+
+	Set<E> intersectionImpl(Set<E> s);
+
+	default OperationSet<E> intersection(Set<E>... s) {
+		return operation(SetOperator.INTERSECTION, s);
+	}
+
+	Set<E> unionImpl(Set<E> s);
+
+	default OperationSet<E> union(Set<E>... s) {
+		return operation(SetOperator.UNION, s);
+	}
+
+	Set<E> symmetricDifferenceImpl(Set<E> s);
+
+	default OperationSet<E> symmetricDifference(Set<E>... s) {
+		return operation(SetOperator.SYMMETRIC_DIFFERENCE, s);
+	}
 
 	// Object clone();
 
@@ -29,36 +83,26 @@ public abstract class Set extends Composition implements TreePart
 	// public abstract String toString();
 
 	 @Override
-	 public void replaceAll(final Composition original, final Composition replacement) {
+	 default void replaceAll(Composition original, Composition replacement) {
 		 // do nothing
 	 }
 
-	 public OperationSet operation(LogicalOperator o, Set... s) {
+	 default OperationSet<E> operation(SetOperator o, Set<E>... s) {
 		if (s.length < 0)
-			throw new VariableExpressionException();
+			throw new ArrayUnpopulatedException();
 		if (s.length == 0)
-			return new OperationSet(this, o, this);
-		OperationSet combinedStatements = new OperationSet(this, o, s[0]);
+			return new OperationSet<>(this, o, this);
+		OperationSet<E> combinedStatements = new OperationSet<>(this, o, s[0]);
 		for (int i = 1; i < s.length; i++)
-			combinedStatements = new OperationSet(combinedStatements, o, s[i]);
+			combinedStatements = new OperationSet<>(combinedStatements, o, s[i]);
 		return combinedStatements;
 	}
 
-	public Set complement() {
-		return new LineSet(LineOperator.NOT, this);
-	}
 
 //	LineStatement self() {
 //		return new LineStatement(this.clone(), true);
 //	}
-	
-	public OperationSet intersection(Set... s) {
-		return operation(LogicalOperator.AND, s);
-	}
 
-	public OperationSet union(Set... s) {
-		return operation(LogicalOperator.OR, s);
-	}
 
 //	default OperationSet nand(AbstractSet... s) {
 //		return operation(Operator.NAND, s);
@@ -68,52 +112,39 @@ public abstract class Set extends Composition implements TreePart
 //		return operation(Operator.NOR, s);
 //	}
 
-	public OperationSet symmetricDifference(Set... s) {
-		return operation(LogicalOperator.XOR, s);
+	@Override
+	default Composition simplified() {
+		 return null;
 	}
 
-	 @Override
-	 public String toFullString() {
-		 return toString();
-	 }
-
-	 @Override
-	 public String toString() {
-		 return null;
-	 }
-
-	 @Override
-	 public boolean equals(final Object s) {
-		 return this == s;
-	 }
-
-	 @Override
-	 public Composition simplified() {
-		 return null;
-	 }
-
-	 // @Override
-	 // public int compareTo(final Composition statement) {
+	// @Override
+	// public int compareTo(final Composition statement) {
 		//  return 0;
-	 // }
+	// }
 
-	 @Override
-	 public void appendGodelNumbers(final GodelBuilder godelBuilder) {
+	@Override
+	default void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		 godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
-	 }
+	}
 
-	 private static final Set emptySet = new SpecialSet(SpecialSetType.O); // TODO weird warning
+	static <EE> Set<EE> emptySet() {
+		 return new EmptySet<>();
+	}
 
-	 public static Set empty() {
-		 return emptySet;
-	 }
-
-	 //	default OperationSet xnor(AbstractSet... s) {
+	//	default OperationSet xnor(AbstractSet... s) {
 //		return operation(Operator.XNOR, s);
 //	}
 //
 //	default OperationSet implies(AbstractSet s) {
 //		return operation(Operator.IMPLIES, s);
 //	}
+
+	@Override
+	default String toFullString() {
+		return toString();
+	}
+
+	@Override
+	String toString();
 
 }

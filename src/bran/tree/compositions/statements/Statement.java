@@ -1,9 +1,14 @@
 package bran.tree.compositions.statements;
 
-import bran.exceptions.VariableExpressionException;
+import bran.exceptions.ArrayUnpopulatedException;
+import bran.tree.compositions.sets.regular.SpecialSet;
+import bran.tree.compositions.sets.regular.SpecialSetType;
+import bran.tree.compositions.sets.regular.var.WithVariableSet;
 import bran.tree.compositions.statements.operators.LineOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.ConditionalStatement;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.tree.compositions.statements.special.quantifier.QuantifiedStatement;
 import bran.tree.compositions.statements.special.quantifier.QuantifiedStatementArguments;
 import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
 import bran.tree.compositions.sets.Set;
@@ -13,17 +18,22 @@ import bran.tree.Equivalable;
 import bran.tree.Holder;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static bran.tree.compositions.statements.operators.LogicalOperator.*;
 import static java.util.Collections.emptyList;
 
-public abstract class Statement extends Composition implements Equivalable<Statement>, Comparable<Statement> {
+public abstract class Statement implements Composition, Equivalable<Statement>, Comparable<Statement> {
 
 	private static byte comparisonType = 0; // 0: brute force table, 1: check full tree
 
 	public Statement() { }
 
-	protected abstract boolean isConstant();
+	public boolean isConstant() {
+		return false;
+	}
 
 	protected abstract boolean getTruth();
 
@@ -106,7 +116,7 @@ public abstract class Statement extends Composition implements Equivalable<State
 
 	public static Statement operationOf(LogicalOperator o, Statement... s) {
 		if (s.length == 0)
-			throw new VariableExpressionException();
+			throw new ArrayUnpopulatedException();
 		Statement combinedStatements = s[0];
 		for (int i = 1; i < s.length; i++)
 			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
@@ -115,7 +125,7 @@ public abstract class Statement extends Composition implements Equivalable<State
 
 	public OperationStatement operation(LogicalOperator o, Statement... s) {
 		if (s.length == 0)
-			throw new VariableExpressionException();
+			throw new ArrayUnpopulatedException();
 		OperationStatement combinedStatements = new OperationStatement(this, o, s[0]);
 		for (int i = 1; i < s.length; i++)
 			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
@@ -154,6 +164,14 @@ public abstract class Statement extends Composition implements Equivalable<State
 		return operationOf(XNOR, s);
 	}
 
+	public Statement bijection(Statement s) {
+		return xnorOf(s);
+	}
+
+	public Statement iff(Statement s) {
+		return xnorOf(s);
+	}
+
 	public static Statement impliesOf(Statement r, Statement s) {
 		return operationOf(IMPLIES, r, s);
 	}
@@ -161,6 +179,10 @@ public abstract class Statement extends Composition implements Equivalable<State
 	public Statement not() {
 		return new LineStatement(LineOperator.NOT, this);
 	}
+
+	// public Statement realNot() {
+	// 	return new LineStatement(this).realNot();
+	// }
 
 	public LineStatement self() {
 		return new LineStatement(LineOperator.CONSTANT, this);
@@ -207,24 +229,17 @@ public abstract class Statement extends Composition implements Equivalable<State
 	// }
 
 	private static final Statement emptyStatement = new Statement() {
-		@Override public boolean equivalentTo(final Statement other) { return this == other; }
-		@Override public boolean equals(final Object s)				 { return this == s; }
+		@Override public boolean equivalentTo(Statement other) { return this == other; }
+		@Override public boolean equals(Object s)				 { return this == s; }
 		@Override public Statement simplified()						 { return empty(); }
-		@Override public void appendGodelNumbers(final GodelBuilder godelBuilder) { }
-		@Override protected boolean isConstant()					 { return false; }
+		@Override public void appendGodelNumbers(GodelBuilder godelBuilder) { }
+		@Override public boolean isConstant()						 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
 		@Override public List<Statement> getChildren()				 { return emptyList(); }
 		@Override public List<VariableStatement> getVariables()		 { return emptyList(); }
-		@Override public String toFullString()							 { return "()"; }
-		@Override public String toString()				 { return "()"; }
+		@Override public String toFullString()						 { return "()"; }
 	// @Override public Statement clone()							 { return emptyStatement; }
 	};
-
-	// Imperative style assistance classes
-
-	public static <I, E extends Composition & Holder<I> & Equivalable<? super E>> UniversalStatementVariables<I, E> forAll(E... variables) {
-		return new UniversalStatementVariables<>(variables);
-	}
 
 	public String getFullTable() {
 		return TruthTable.getFullTable(this);
@@ -236,30 +251,172 @@ public abstract class Statement extends Composition implements Equivalable<State
 
 	public boolean equalsNot(final Statement other) {
 		return this instanceof LineStatement thisL && thisL.getChild().equals(other)
-				|| other instanceof LineStatement otherL && otherL.getChild().equals(this);
+			   || other instanceof LineStatement otherL && otherL.getChild().equals(this);
 	}
 
-	public static record UniversalStatementVariables<I, E extends Composition & Holder<I> & Equivalable<? super E>> (E... variables) {
-		public UniversalStatementDomainStatement<I, E> in(Set domain, QuantifiedStatementArguments<E> statement) {
-			return new UniversalStatementDomainStatement<>(domain, statement, variables);
-		}
-		// public UniversalStatementDomainStatement<I, E> in(SpecialSet domain, QuantifiedStatementArguments<E> statement) {
-		// 	return new UniversalStatementDomainStatement<>(domain, statement, variables);
-		// }
+	// Imperative style assistance classes
+
+	// Quantified Statement
+
+	public static <I, E extends Holder<I>, S extends Set<I>>
+	QuantifiedBuilder<I, E, UniversalStatement<I, E>, S>.UniversalStatementSet forAll(E... variables) {
+		return new QuantifiedBuilder<I, E, UniversalStatement<I, E>, S>(variables).new UniversalStatementSet();
 	}
 
-	public static record UniversalStatementDomainStatement<I, E extends Composition & Holder<I> & Equivalable<? super E>>
-			(Set domain, QuantifiedStatementArguments<E> statement, E... variables) {
-		public UniversalStatement<I, E> proven() {
-			return new UniversalStatement<>(statement, domain, true, variables);
-		}
-		public UniversalStatement<I, E> unProven() {
-			return new UniversalStatement<>(statement, domain, false, variables);
-		}
+	public static <I, E extends Holder<I>, S extends Set<I>>
+	QuantifiedBuilder<I, E, ExistentialStatement<I, E>, S>.ExistentialStatementSet thereExists(E... variables) {
+		return new QuantifiedBuilder<I, E, ExistentialStatement<I, E>, S>(variables).new ExistentialStatementSet();
 	}
 
-	// public Statement realNot() {
-	// 	return new LineStatement(this).realNot();
-	// }
+	public static class QuantifiedBuilder<I, E extends Holder<I>, T extends QuantifiedStatement<I, E>, S extends Set<I>> {
+
+		protected Supplier<T> quantifierSupplier;
+		protected E[] variables;
+		protected S domain;
+		protected boolean proven;
+		protected WithVariableSet<I, E> varSetDomain;
+		protected QuantifiedStatementArguments<E> statement;
+
+		QuantifiedBuilder(E[] variables) {
+			this.variables = variables;
+		}
+
+		@FunctionalInterface
+		private interface QuantifierSupplier<I, E extends Holder<I>, T extends QuantifiedStatement<I, E>, S extends Set<I>> {
+			T create(QuantifiedStatementArguments<E> statement, S domain, boolean proven, E[] variables);
+		}
+
+		public class UniversalStatementSet {
+			public UniversalStatementThat in(S domain) {
+				QuantifiedBuilder.this.domain = domain;
+				return new UniversalStatementThat();
+			}
+			public UniversalStatementVarSetThat in(WithVariableSet<I, E> domain) {
+				QuantifiedBuilder.this.varSetDomain = domain;
+				return new UniversalStatementVarSetThat();
+			}
+			public UniversalStatementThat in(SpecialSetType specialSetType) {
+				QuantifiedBuilder.this.domain = (S) new SpecialSet(specialSetType);
+				return new UniversalStatementThat();
+			}
+		}
+
+		public class ExistentialStatementSet {
+			public ExistentialStatementThat in(S domain) {
+				QuantifiedBuilder.this.domain = domain;
+				return new ExistentialStatementThat();
+			}
+			public ExistentialStatementVarSetThat in(WithVariableSet<I, E> domain) {
+				QuantifiedBuilder.this.varSetDomain = domain;
+				return new ExistentialStatementVarSetThat();
+			}
+			public ExistentialStatementThat in(SpecialSetType specialSetType) {
+				QuantifiedBuilder.this.domain = (S) new SpecialSet(specialSetType);
+				return new ExistentialStatementThat();
+			}
+		}
+
+		public abstract class QuantifiedStatementThat {
+			public QuantifiedStatementProven thatEach(QuantifiedStatementArguments<E> statement) {
+				QuantifiedBuilder.this.statement = statement;
+				quantifierSupplier = getQuantifierSupplier();
+				return new QuantifiedStatementProven();
+			}
+			protected QuantifiedStatementProven that(Function<E, Statement> oneArgQSA) {
+				return thatEach(es -> oneArgQSA.apply(es[0]));
+			}
+			protected QuantifiedStatementProven that(BiFunction<E, S, Statement> oneArgQSAWithSet) {
+				return thatEach(es -> oneArgQSAWithSet.apply(es[0], domain));
+			}
+			protected abstract Supplier<T> getQuantifierSupplier();
+		}
+
+		public abstract class QuantifiedStatementVarSetThat extends QuantifiedStatementThat {
+			public QuantifiedStatementProven thatVarSet(BiFunction<E, WithVariableSet<I, E>, Statement> oneArgQSAWithSet) {
+				return thatEach(es -> oneArgQSAWithSet.apply(es[0], varSetDomain));
+			}
+		}
+
+		public abstract class QuantifiedStatementSetThat extends QuantifiedStatementThat {
+		}
+
+		public class ExistentialStatementThat extends QuantifiedStatementSetThat {
+			@Override protected Supplier<T> getQuantifierSupplier() {
+				return () -> (T) new ExistentialStatement<>(statement, domain, proven, variables);
+			}
+			public QuantifiedStatementProven suchThat(Function<E, Statement> oneArgQSA) {
+				return that(oneArgQSA);
+			}
+			public QuantifiedStatementProven suchThat(BiFunction<E, S, Statement> oneArgQSAWithSet) {
+				return that(oneArgQSAWithSet);
+			}
+		}
+
+		public class UniversalStatementThat extends QuantifiedStatementSetThat {
+			@Override protected Supplier<T> getQuantifierSupplier() {
+				return () -> (T) new ExistentialStatement<>(statement, domain, proven, variables);
+			}
+			public QuantifiedStatementProven itHolds(Function<E, Statement> oneArgQSA) {
+				return that(oneArgQSA);
+			}
+			public QuantifiedStatementProven itHolds(BiFunction<E, S, Statement> oneArgQSAWithSet) {
+				return that(oneArgQSAWithSet);
+			}
+		}
+
+		public class ExistentialStatementVarSetThat extends QuantifiedStatementVarSetThat {
+			@Override protected Supplier<T> getQuantifierSupplier() {
+				return () -> (T) new ExistentialStatement<>(statement, varSetDomain, proven, variables);
+			}
+			public QuantifiedStatementProven suchThat(Function<E, Statement> oneArgQSA) {
+				return that(oneArgQSA);
+			}
+			public QuantifiedStatementProven suchThat(BiFunction<E, S, Statement> oneArgQSAWithSet) {
+				return that(oneArgQSAWithSet);
+			}
+		}
+
+		public class UniversalStatementVarSetThat extends QuantifiedStatementVarSetThat {
+			@Override protected Supplier<T> getQuantifierSupplier() {
+				return () -> (T) new UniversalStatement<>(statement, varSetDomain, proven, variables);
+			}
+			public QuantifiedStatementProven itHolds(Function<E, Statement> oneArgQSA) {
+				return that(oneArgQSA);
+			}
+			public QuantifiedStatementProven itHolds(BiFunction<E, S, Statement> oneArgQSAWithSet) {
+				return that(oneArgQSAWithSet);
+			}
+		}
+
+		public class QuantifiedStatementProven {
+			public T proven() { return create(true); }
+			public T unProven() { return create(false); }
+			protected T create(boolean proven) {
+				QuantifiedBuilder.this.proven = proven;
+				return quantifierSupplier.get();
+			}
+		}
+
+	}
+
+	private static class Test {
+		public static void main(String[] args) {
+			new X<String, EVS>(new EVS());
+
+		}
+		static class W<T> {
+			W(A<T> a) {
+
+			}
+		}
+		static class X<T, Z extends A<T>> {
+			X(Z z) {
+				new W<>(z);
+			}
+		}
+		static class A<T> { void method(T t) {} }
+		static class VS<T> extends A<T> {}
+		static class EVS extends VS<String> {}
+	}
 
 }
