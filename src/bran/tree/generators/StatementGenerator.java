@@ -1,6 +1,6 @@
 package bran.tree.generators;
 
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.statements.operators.LogicalOperator;
@@ -122,8 +122,8 @@ public class StatementGenerator {
 		private void appendOperationStatement() {
 			LogicalOperator nextOp = operators[rand.nextInt(operators.length)];
 			boolean leftSide = rand.nextDouble() < leftSideProb;
-			composite = leftSide ? new OperationStatement(composite, nextOp, nextVariableStatement())
-								 : new OperationStatement(nextVariableStatement(), nextOp, composite);
+			composite = leftSide ? new StatementOperation(composite, nextOp, nextVariableStatement())
+								 : new StatementOperation(nextVariableStatement(), nextOp, composite);
 		}
 
 	}

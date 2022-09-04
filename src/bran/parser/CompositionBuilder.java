@@ -8,12 +8,12 @@ import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
 import bran.tree.compositions.expressions.functions.MultiArgFunction;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.statements.LineStatement;
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
+import bran.tree.compositions.statements.UnaryStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.equivalences.Equivalence;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceType;
@@ -49,8 +49,8 @@ public class CompositionBuilder {
 			add(statement, sP);
 		else if (obj instanceof ExpFunction expFunction)
 			add(expFunction, sP);
-		else if (obj instanceof LineOperator lineOperator)
-			add(lineOperator, sP);
+		else if (obj instanceof UnaryStatementOperator unaryStatementOperator)
+			add(unaryStatementOperator, sP);
 		else if (obj instanceof ForkOperator forkOperator)
 			add(forkOperator, sP); //
 		else if (obj instanceof CommaSeparatedComposition compositions)
@@ -71,8 +71,8 @@ public class CompositionBuilder {
 		compositionChain.addNode(new CompositionChain.FunctionNode(expFunction, sP));
 	}
 
-	public void add(LineOperator lineOperator, StringPart sP) {
-		compositionChain.addNode(new CompositionChain.LineOperatorNode(lineOperator, sP));
+	public void add(UnaryStatementOperator unaryStatementOperator, StringPart sP) {
+		compositionChain.addNode(new CompositionChain.LineOperatorNode(unaryStatementOperator, sP));
 	}
 
 	public void add(ForkOperator forkOperator, StringPart sP) {
@@ -373,8 +373,8 @@ public class CompositionBuilder {
 			}
 
 			private Composition getBranchComposition(BranchOperator op, Node child) {
-				if (op instanceof LineOperator lOp) {
-					return new LineStatement(lOp, getAsStatement(child));
+				if (op instanceof UnaryStatementOperator lOp) {
+					return new UnaryStatement(lOp, getAsStatement(child));
 				} else if (op instanceof MultiArgFunction mAF) {
 					try {
 						return new FunctionExpression(mAF, getAsExpression(child));
@@ -386,10 +386,10 @@ public class CompositionBuilder {
 			}
 
 			private Composition getComposition(Node left, ForkOperator op, Node right) {
-				if (op instanceof Operator operator)
-					return new OperatorExpression(getAsExpression(left), operator, getAsExpression(right));
+				if (op instanceof ArithmeticOperator arithmeticOperator)
+					return new ExpressionOperation(getAsExpression(left), arithmeticOperator, getAsExpression(right));
 				else if (op instanceof LogicalOperator logOp)
-					return new OperationStatement(getAsStatement(left), logOp, getAsStatement(right));
+					return new StatementOperation(getAsStatement(left), logOp, getAsStatement(right));
 				else if (op instanceof EquivalenceType eN)
 					return Equivalence.of(getAsExpression(left), eN, getAsExpression(right));
 				else
@@ -561,15 +561,16 @@ public class CompositionBuilder {
 			public OperatorNode(ForkOperator operator, StringPart stringPart) {
 				super(stringPart);
 				this.operator = operator;
-				this.isExpression = operator instanceof Operator;
+				this.isExpression = operator instanceof ArithmeticOperator;
 			}
 			@Override public boolean isExpression() { return isExpression; }
 		}
 
 		private static class LineOperatorNode extends Node {
-			final LineOperator operator;
-			@Override LineOperator value() { return operator; }
-			public LineOperatorNode(LineOperator operator, StringPart stringPart) {
+			final UnaryStatementOperator operator;
+			@Override
+			UnaryStatementOperator value() { return operator; }
+			public LineOperatorNode(UnaryStatementOperator operator, StringPart stringPart) {
 				super(stringPart);
 				this.operator = operator;
 			}

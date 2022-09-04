@@ -9,7 +9,7 @@ import static bran.tree.compositions.sets.SetDisplayStyle.setStyle;
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
 public enum EquivalenceTypeImpl implements EquivalenceType {
-
+	// TODO Deprecate variations
 	// TODO Implement order of operations compatibility with other types
 	LESS		 ((l, r) -> l.compareTo(r) <  0, true,  false, "less than", "<", "<", "<", "<", "<"),
 	LESS_EQUAL	 ((l, r) -> l.compareTo(r) <= 0, true,   true, "less than or equal to", "\u2264", "\u2264", "<=", "<="),

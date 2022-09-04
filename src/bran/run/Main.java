@@ -2,15 +2,15 @@ package bran.run;
 
 import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.sets.LineSet;
-import bran.tree.compositions.sets.OperationSet;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
+import bran.tree.compositions.sets.UnarySet;
+import bran.tree.compositions.sets.SetOperation;
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.sets.operators.LineSetOperator;
+import bran.tree.compositions.sets.operators.UnarySetOperator;
 import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.compositions.sets.regular.FiniteNumberSet;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.BooleanSet;
 import bran.tree.generators.StatementGenerator;
@@ -158,9 +158,12 @@ public class Main {
 	}
 
 	public static void verify() {
-		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class, OperationStatement.class, LineOperator.class, LineStatement.class, VariableStatement.class));
-		System.out.println(TreePart.treeVerifier(Expression.class, Double.class, Operator.class, OperatorExpression.class, ExpFunction.class, FunctionExpression.class, Variable.class));
-		System.out.println(TreePart.treeVerifier(Set.class, SetOperator.class, OperationSet.class, LineSetOperator.class, LineSet.class));
+		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class, StatementOperation.class,
+				UnaryStatementOperator.class, UnaryStatement.class, VariableStatement.class));
+		System.out.println(TreePart.treeVerifier(Expression.class, Double.class, ArithmeticOperator.class, ExpressionOperation.class,
+				ExpFunction.class, FunctionExpression.class, Variable.class));
+		System.out.println(TreePart.treeVerifier(Set.class, Set.class, SetOperator.class, SetOperation.class,
+				UnarySetOperator.class, UnarySet.class, null));
 	}
 
 	private static <T> T[] toArray(List<T> list) {

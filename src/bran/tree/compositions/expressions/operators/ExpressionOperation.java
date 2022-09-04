@@ -12,19 +12,19 @@ import bran.tree.compositions.expressions.functions.FunctionExpression;
 import java.util.*;
 import java.util.function.Function;
 
-import static bran.tree.compositions.expressions.operators.Operator.*;
+import static bran.tree.compositions.expressions.operators.ArithmeticOperator.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 
-public class OperatorExpression extends Expression implements Fork<Double, Expression, Operator, Expression> {
+public class ExpressionOperation extends Expression implements Fork<Double, Expression, ArithmeticOperator, Expression> {
 
 	private Expression left;
-	private final Operator operator;
+	private final ArithmeticOperator arithmeticOperator;
 	private Expression right;
 
-	public OperatorExpression(final Expression left, final Operator operator, final Expression right) {
-		super(left.getDomainConditions().and(right.getDomainConditions()).and(operator.domain(left, right)));
+	public ExpressionOperation(final Expression left, final ArithmeticOperator arithmeticOperator, final Expression right) {
+		super(left.getDomainConditions().and(right.getDomainConditions()).and(arithmeticOperator.domain(left, right)));
 		this.left = left;
-		this.operator = operator;
+		this.arithmeticOperator = arithmeticOperator;
 		this.right = right;
 	}
 
@@ -34,8 +34,8 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 	}
 
 	@Override
-	public Operator getOperator() {
-		return operator;
+	public ArithmeticOperator getOperator() {
+		return arithmeticOperator;
 	}
 
 	@Override
@@ -45,12 +45,12 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	@Override
 	public double evaluate() {
-		return operator.operate(left, right);
+		return arithmeticOperator.operate(left, right);
 	}
 
 	@Override
 	public Expression derive() {
-		return operator.derive(left, right);
+		return arithmeticOperator.derive(left, right);
 	}
 
 	public <R, T> R traverse(T t, Function<T, R> function) {
@@ -78,17 +78,17 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	@Override
 	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
-		boolean leftParens = left instanceof OperatorExpression leftOperator
-							 && leftOperator.getOperator().godelOrder() < operator.godelOrder();
-		boolean rightParens = right instanceof OperatorExpression rightOperator &&
-							  (rightOperator.getOperator().godelOrder() <= operator.godelOrder()
-							   && operator.godelOperator() != GodelNumberSymbols.SYNTAX_ERROR);
+		boolean leftParens = left instanceof ExpressionOperation leftOperator
+							 && leftOperator.getOperator().godelOrder() < arithmeticOperator.godelOrder();
+		boolean rightParens = right instanceof ExpressionOperation rightOperator &&
+							  (rightOperator.getOperator().godelOrder() <= arithmeticOperator.godelOrder()
+							   && arithmeticOperator.godelOperator() != GodelNumberSymbols.SYNTAX_ERROR);
 		if (leftParens)
 			godelBuilder.push(GodelNumberSymbols.LEFT);
 		left.appendGodelNumbers(godelBuilder);
 		if (leftParens)
 			godelBuilder.push(GodelNumberSymbols.RIGHT);
-		godelBuilder.push(operator.godelOperator());
+		godelBuilder.push(arithmeticOperator.godelOperator());
 		if (rightParens)
 			godelBuilder.push(GodelNumberSymbols.LEFT);
 		right.appendGodelNumbers(godelBuilder);
@@ -108,13 +108,13 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	@Override
 	public boolean equals(Object o) {
-		return this == o || (o instanceof OperatorExpression opExp &&
-				operator == opExp.getOperator() && left.equals(opExp.getLeft()) && right.equals(opExp.getRight()));
+		return this == o || (o instanceof ExpressionOperation opExp &&
+				arithmeticOperator == opExp.getOperator() && left.equals(opExp.getLeft()) && right.equals(opExp.getRight()));
 	}
 
 	@Override
-	public OperatorExpression reciprocal() {
-		if (operator == DIV)
+	public ExpressionOperation reciprocal() {
+		if (arithmeticOperator == DIV)
 			return right.div(left);
 		else
 			return Constant.ONE.div(this);
@@ -122,67 +122,67 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	@Override
 	public String toFullString() {
-		return "(" + left.toFullString() + ' ' + operator + ' ' + right.toFullString() + ')';
+		return "(" + left.toFullString() + ' ' + arithmeticOperator + ' ' + right.toFullString() + ')';
 	}
 
 	/**
 	 * @return full string, but with multiplication operator reduction
 	 */
 	public String toSemiFullString() {
-		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL))
+		if ((left.equals(Constant.ZERO) && arithmeticOperator == SUB) || (left.equals(Constant.NEG_ONE) && arithmeticOperator == MUL))
 			return "-" + right.toFullString(); // negative is a visual illusion
 		else {
-			if (operator == MUL) {
+			if (arithmeticOperator == MUL) {
 				if (right instanceof Constant && !(left instanceof Constant))
 					return "(" + right.toFullString() + left.toFullString() + ')';
 				else if (!(right instanceof Constant)) // left is a constant
 					return "(" + left.toFullString() + right.toFullString() + ')'; // "2 * 3" != "23"
 			}
 		}
-		return "(" + left.toFullString() + ' ' + operator + ' ' + right.toFullString() + ')';
+		return "(" + left.toFullString() + ' ' + arithmeticOperator + ' ' + right.toFullString() + ')';
 	}
 
 	@Override
 	public String toString() {
 		String leftString = left.toString();
 		String rightString = right.toString();
-		if ((left.equals(Constant.ZERO) && operator == SUB) || (left.equals(Constant.NEG_ONE) && operator == MUL)) {
-			if (right instanceof OperatorExpression
-				&& ADD.level().precedence() <= operator.precedence())
+		if ((left.equals(Constant.ZERO) && arithmeticOperator == SUB) || (left.equals(Constant.NEG_ONE) && arithmeticOperator == MUL)) {
+			if (right instanceof ExpressionOperation
+				&& ADD.level().precedence() <= arithmeticOperator.precedence())
 				rightString = Composition.parens(rightString);
 			return '-' + rightString;
 		}
 		boolean leftGiven = true;
 		boolean rightGiven = true;
-		if (left instanceof OperatorExpression leftOperator) {
-			if (leftOperator.getOperator().precedence() < operator.precedence()) {
+		if (left instanceof ExpressionOperation leftOperator) {
+			if (leftOperator.getOperator().precedence() < arithmeticOperator.precedence()) {
 					leftString = Composition.parens(leftString);
 			} else
 				leftGiven = false;
 		}
-		if (right instanceof OperatorExpression rightOperator) {
-			if ((rightOperator.getOperator().precedence() > operator.precedence()
+		if (right instanceof ExpressionOperation rightOperator) {
+			if ((rightOperator.getOperator().precedence() > arithmeticOperator.precedence()
 				    && !(rightOperator.hideMultiply()))
-				|| (rightOperator.getOperator().precedence() == operator.precedence()
+				|| (rightOperator.getOperator().precedence() == arithmeticOperator.precedence()
 					&& !rightOperator.getOperator().isCommutative())
-				|| (operator == SUB)) {
+				|| (arithmeticOperator == SUB)) {
 				rightString = Composition.parens(rightString);
 			} else
 				rightGiven = false;
 		}
-		if (leftGiven && rightGiven && operator == MUL
+		if (leftGiven && rightGiven && arithmeticOperator == MUL
 			&& !(right instanceof Constant rightConstant &&
 				   (left instanceof FunctionExpression || left instanceof Variable || left instanceof Constant || rightConstant.evaluate() < 0))
 			&& !(left instanceof Variable && right instanceof Variable))
 			// && !(left instanceof Variable leftVariable && right instanceof Variable rightVariable && leftVariable.equals(rightVariable)))
 			return leftString + rightString;
-		return leftString + " " + operator + " " + rightString;
+		return leftString + " " + arithmeticOperator + " " + rightString;
 	}
 
 	boolean hideMultiply() {
-		return !(left instanceof OperatorExpression leftOperator && (leftOperator.getOperator().precedence() >= operator.precedence()))
-		&& !(right instanceof OperatorExpression rightOperator && (rightOperator.getOperator().precedence() >= operator.precedence() || !rightOperator.hideMultiply()))
-		&& (operator.precedence() == MUL.precedence() && !(right instanceof Constant rightConstant && (left instanceof Constant || rightConstant.evaluate() < 0)));
+		return !(left instanceof ExpressionOperation leftOperator && (leftOperator.getOperator().precedence() >= arithmeticOperator.precedence()))
+		&& !(right instanceof ExpressionOperation rightOperator && (rightOperator.getOperator().precedence() >= arithmeticOperator.precedence() || !rightOperator.hideMultiply()))
+		&& (arithmeticOperator.precedence() == MUL.precedence() && !(right instanceof Constant rightConstant && (left instanceof Constant || rightConstant.evaluate() < 0)));
 	}
 
 	/*
@@ -210,11 +210,11 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	//@Nullable
 	private Expression simplifiedNoDomain(Expression leftSimplified, Expression rightSimplified) {
-		return simplifiedNoDomain(leftSimplified, operator, rightSimplified, true);
+		return simplifiedNoDomain(leftSimplified, arithmeticOperator, rightSimplified, true);
 	}
 
 	private Expression nullToNew(Expression simplified, Expression leftSimplified, Expression rightSimplified) {
-		return simplified == null ? new OperatorExpression(leftSimplified, operator, rightSimplified) : simplified;
+		return simplified == null ? new ExpressionOperation(leftSimplified, arithmeticOperator, rightSimplified) : simplified;
 	}
 
 	/**
@@ -222,11 +222,11 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 	 * TODO a searcher agent
 	 * to pass in the parameters manually if they were guaranteed to already have been simplified
 	 */
-	private Expression simplifiedNoDomain(Expression leftSimplified, Operator operator, Expression rightSimplified, boolean commutativeSearch) {
+	private Expression simplifiedNoDomain(Expression leftSimplified, ArithmeticOperator arithmeticOperator, Expression rightSimplified, boolean commutativeSearch) {
 		if (leftSimplified instanceof Constant && rightSimplified instanceof Constant rightConst
-			&& !(operator == DIV && rightConst.equals(Constant.ZERO)))
-			return Constant.of(operator.operate(leftSimplified, rightSimplified)); // causes negative token to be evaluated as highest precedence
-		switch (operator) {
+			&& !(arithmeticOperator == DIV && rightConst.equals(Constant.ZERO)))
+			return Constant.of(arithmeticOperator.operate(leftSimplified, rightSimplified)); // causes negative token to be evaluated as highest precedence
+		switch (arithmeticOperator) {
 			case POW:
 				if (rightSimplified instanceof Constant rightConstant) {
 					if (rightConstant.equals(Constant.ZERO))
@@ -257,7 +257,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 						return rightSimplified;
 					else if (leftConstant.equals(Constant.NEG_ONE))
 						return rightSimplified.negate();
-					else if (rightSimplified instanceof OperatorExpression rightOperator)
+					else if (rightSimplified instanceof ExpressionOperation rightOperator)
 						if (rightOperator.getLeft() instanceof Constant rightLeftConstant) {
 							if (rightOperator.getOperator() == MUL)
 								return Constant.of(leftConstant.evaluate() * rightLeftConstant.evaluate()).times(rightOperator.getRight());
@@ -276,7 +276,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 						return leftSimplified;
 					else if (rightConstant.equals(Constant.NEG_ONE))
 						return leftSimplified.negate();
-					else if (leftSimplified instanceof OperatorExpression leftOperator)
+					else if (leftSimplified instanceof ExpressionOperation leftOperator)
 						if (leftOperator.getLeft() instanceof Constant leftLeftConstant) {
 							if (leftOperator.getOperator() == MUL)
 								return Constant.of(leftLeftConstant.evaluate() * rightConstant.evaluate()).times(leftOperator.getRight());
@@ -288,9 +288,9 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 							else if (leftOperator.getOperator() == DIV)
 								return leftOperator.getLeft().times(Constant.of(rightConstant.evaluate() / leftRightConstant.evaluate()));
 						}
-				} else if (leftSimplified instanceof OperatorExpression leftOperator) {
+				} else if (leftSimplified instanceof ExpressionOperation leftOperator) {
 					if (leftOperator.getOperator() == POW) {
-						if (rightSimplified instanceof OperatorExpression rightOperator) {
+						if (rightSimplified instanceof ExpressionOperation rightOperator) {
 							if (rightOperator.getOperator() == POW)
 								if (leftOperator.getLeft().equals(rightOperator.getLeft()))
 									return leftOperator.getLeft().pow(leftOperator.getRight().plus(rightOperator.getRight()).simplified());
@@ -299,7 +299,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 					} else if (leftOperator.getOperator() == DIV) {
 						return (leftOperator.getLeft().times(rightSimplified).simplified(leftOperator.getLeft(), rightSimplified)).div(leftOperator.getRight());
 					}
-				} else if (rightSimplified instanceof OperatorExpression rightOperator) {
+				} else if (rightSimplified instanceof ExpressionOperation rightOperator) {
 					if (rightOperator.getOperator() == POW) {
 						if (rightOperator.getLeft().equals(leftSimplified))
 							return rightOperator.getLeft().pow(rightOperator.getRight().plus(Constant.ONE).simplified());
@@ -320,7 +320,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 				else if (leftSimplified instanceof Constant leftConstant) {
 					if (leftConstant.equals(Constant.ZERO))
 						return Constant.ZERO;
-					else if (rightSimplified instanceof OperatorExpression rightOperator)
+					else if (rightSimplified instanceof ExpressionOperation rightOperator)
 						if (rightOperator.getLeft() instanceof Constant rightLeftConstant) {
 							if (rightOperator.getOperator() == MUL)
 								return Constant.of(leftConstant.evaluate() / rightLeftConstant.evaluate()).div(rightOperator.getRight());
@@ -335,7 +335,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 				} else if (rightSimplified instanceof Constant rightConstant) {
 					if (rightConstant.equals(Constant.ONE))
 						return leftSimplified;
-					else if (leftSimplified instanceof OperatorExpression leftOperator)
+					else if (leftSimplified instanceof ExpressionOperation leftOperator)
 						if (leftOperator.getLeft() instanceof Constant leftLeftConstant) {
 							if (leftOperator.getOperator() == MUL)
 								return Constant.of(leftLeftConstant.evaluate() / rightConstant.evaluate()).times(leftOperator.getRight());
@@ -347,8 +347,8 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 							else if (leftOperator.getOperator() == DIV)
 								return leftOperator.getLeft().div(Constant.of(leftRightConstant.evaluate() * rightConstant.evaluate()));
 						}
-				} else if (leftSimplified instanceof OperatorExpression leftOperator) {
-					if (rightSimplified instanceof OperatorExpression rightOperator) {
+				} else if (leftSimplified instanceof ExpressionOperation leftOperator) {
+					if (rightSimplified instanceof ExpressionOperation rightOperator) {
 						if (leftOperator.getOperator() == POW) {
 							if (rightOperator.getOperator() == POW)
 								if (leftOperator.getLeft().equals(rightOperator.getLeft()))
@@ -368,7 +368,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 						if (leftOperator.getOperator() == DIV) // (a / b) / c
 							return leftOperator.getLeft().div(leftOperator.getRight().times(rightSimplified).simplified());
 					}
-				} else if (rightSimplified instanceof OperatorExpression rightOperator) {
+				} else if (rightSimplified instanceof ExpressionOperation rightOperator) {
 					if (rightOperator.getOperator() == POW) {
 						if (rightOperator.getLeft().equals(leftSimplified))
 							return rightOperator.getLeft().pow(rightOperator.getRight().minus(Constant.ONE).simplified());
@@ -395,7 +395,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 					else if (leftFunction.getFunction() == LOG && rightFunction.getFunction() == LOG && leftFunction.getChildren()[0].equals(rightFunction.getChildren()[1]))
 						return LOG.ofS(leftFunction.getChildren()[0], left.times(right).simplified());
 				} // TODO extract exponent power
-				else if (leftSimplified instanceof OperatorExpression leftOperator && rightSimplified instanceof OperatorExpression rightOperator) {
+				else if (leftSimplified instanceof ExpressionOperation leftOperator && rightSimplified instanceof ExpressionOperation rightOperator) {
 					if (leftOperator.getOperator() == DIV && rightOperator.getOperator() == DIV && leftOperator.getRight().equals(rightOperator.getRight()))
 							return leftOperator.plus(rightOperator).simplified().div(leftOperator.getRight());
 					if (leftOperator.getOperator() == POW && rightOperator.getOperator() == POW
@@ -428,7 +428,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 				}
 				if (leftSimplified instanceof Constant leftConstant) {
 					if (leftConstant.equals(Constant.ZERO))
-						return new OperatorExpression(Constant.NEG_ONE, MUL, rightSimplified);
+						return new ExpressionOperation(Constant.NEG_ONE, MUL, rightSimplified);
 				}
 				FactorParts subFactorParts = factor(leftSimplified, rightSimplified);
 				if (subFactorParts != null) {
@@ -447,12 +447,12 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 			default:
 		}
 		if (commutativeSearch) {
-			final boolean commutativeOp = operator.isCommutative();
-			if (commutativeOp || (operator.inverse() != null && operator.inverse().isCommutative())) {
+			final boolean commutativeOp = arithmeticOperator.isCommutative();
+			if (commutativeOp || (arithmeticOperator.inverse() != null && arithmeticOperator.inverse().isCommutative())) {
 				final Expression simplified = commutativeCrossSearch(leftSimplified,
 																	 rightSimplified,
 																	 !commutativeOp,
-																	 commutativeOp ? operator : operator.inverse());
+																	 commutativeOp ? arithmeticOperator : arithmeticOperator.inverse());
 				if (simplified != null)
 					return simplified;
 			}
@@ -463,9 +463,9 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 	public static record FactorParts(Expression factor, Expression leftPart, Expression rightPart) { }
 
 	private FactorParts factor0(Expression leftSimplified, Expression rightSimplified) {
-		if (leftSimplified instanceof OperatorExpression leftOperator) { // tree search for all mults
+		if (leftSimplified instanceof ExpressionOperation leftOperator) { // tree search for all mults
 			if (leftOperator.getOperator() == MUL) {
-				if (rightSimplified instanceof OperatorExpression rightOperator && rightOperator.getOperator() == MUL) {
+				if (rightSimplified instanceof ExpressionOperation rightOperator && rightOperator.getOperator() == MUL) {
 					if (leftOperator.getLeft().equals(rightOperator.getLeft()))
 						return new FactorParts(leftOperator.getLeft(), leftOperator.getRight(), rightOperator.getRight());
 					else if (leftOperator.getLeft().equals(rightOperator.getRight()))
@@ -481,7 +481,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 						return new FactorParts(leftOperator.getRight(), Constant.ONE, leftOperator.getLeft());
 				}
 			}
-		} else if (rightSimplified instanceof OperatorExpression rightOperator && rightOperator.getOperator() == MUL) {
+		} else if (rightSimplified instanceof ExpressionOperation rightOperator && rightOperator.getOperator() == MUL) {
 			if (rightOperator.getLeft().equals(leftSimplified))
 				return new FactorParts(rightOperator.getLeft(), rightOperator.getRight(), Constant.ONE);
 			else if (rightOperator.getRight().equals(leftSimplified))
@@ -513,7 +513,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	public static final record Term(Expression expression, boolean inverted) {
 
-		public Expression expressionInvertCorrected(Operator op) {
+		public Expression expressionInvertCorrected(ArithmeticOperator op) {
 			if (!inverted)
 				return expression;
 			return op.inverse().invertSimplifier(expression);
@@ -521,7 +521,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 
 	}
 
-	private Expression commutativeCrossSearch(Expression leftStatement, Expression rightStatement, boolean inverted, Operator op) {
+	private Expression commutativeCrossSearch(Expression leftStatement, Expression rightStatement, boolean inverted, ArithmeticOperator op) {
 		List<Term> leftTerms = commutativeSearch(leftStatement, false, op);
 		List<Term> rightTerms = commutativeSearch(rightStatement, inverted, op);
 		List<Term> newTerms = new ArrayList<>();
@@ -549,21 +549,22 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 		else {
 			newTerms.addAll(leftTerms);
 			newTerms.addAll(rightTerms);
-			return combine(newTerms, operator);
+			return combine(newTerms, arithmeticOperator);
 		}
 	}
 
-	public static Expression combine(Collection<OperatorExpression.Term> terms, Operator operator) {
+	public static Expression combine(Collection<ExpressionOperation.Term> terms, ArithmeticOperator arithmeticOperator) {
 		final Iterator<Term> iterator = terms.iterator();
 		if (terms.size() == 1)
 			return iterator.next().expression();
-		OperatorExpression combinedExpressions = new OperatorExpression(iterator.next().expression(), operator, iterator.next().expression());
+		ExpressionOperation
+				combinedExpressions = new ExpressionOperation(iterator.next().expression(), arithmeticOperator, iterator.next().expression());
 		while (iterator.hasNext())
-			combinedExpressions = new OperatorExpression(combinedExpressions, operator, iterator.next().expression());
+			combinedExpressions = new ExpressionOperation(combinedExpressions, arithmeticOperator, iterator.next().expression());
 		return combinedExpressions;
 	}
 
-	private Expression accumulateTerms(final List<Term> terms, Expression newTerm, final Operator op, boolean newTermLeftSide) {
+	private Expression accumulateTerms(final List<Term> terms, Expression newTerm, final ArithmeticOperator op, boolean newTermLeftSide) {
 		for (int i = 0; i < terms.size(); i++) {
 			Expression accNewTerm = simplifiedNoDomain(newTermLeftSide ? newTerm : terms.get(i).expression(),
 													   newTermLeftSide && terms.get(i).inverted() ? op.inverse() : op,
@@ -577,17 +578,17 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 		return newTerm;
 	}
 
-	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final Operator op) {
+	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final ArithmeticOperator op) {
 		List<Term> terms = new ArrayList<>();
 		commutativeSearch(statement, terms, inverted,op);
 		return terms;
 	}
 
-	public static void commutativeSearch(Expression statement, Collection<Term> terms, boolean inverted, final Operator op) {
-		if (statement instanceof OperatorExpression operatorExpression) {
-			if (operatorExpression.getOperator() == op || operatorExpression.getOperator() == op.inverse()) {
-				commutativeSearch(operatorExpression.getLeft(), terms, inverted, op);
-				commutativeSearch(operatorExpression.getRight(), terms, (operatorExpression.getOperator() == SUB || operatorExpression.getOperator() == DIV) ^ inverted, op);
+	public static void commutativeSearch(Expression statement, Collection<Term> terms, boolean inverted, final ArithmeticOperator op) {
+		if (statement instanceof ExpressionOperation expressionOperation) {
+			if (expressionOperation.getOperator() == op || expressionOperation.getOperator() == op.inverse()) {
+				commutativeSearch(expressionOperation.getLeft(), terms, inverted, op);
+				commutativeSearch(expressionOperation.getRight(), terms, (expressionOperation.getOperator() == SUB || expressionOperation.getOperator() == DIV) ^ inverted, op);
 				return;
 			}
 		}
@@ -777,7 +778,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 		}
 
 		private void seekFactors(final Expression exp, boolean inverse, Collection<Factor> pool) {
-			if (exp instanceof OperatorExpression operatorExp && (operatorExp.getOperator() == MUL || operatorExp.getOperator() == DIV)) {
+			if (exp instanceof ExpressionOperation operatorExp && (operatorExp.getOperator() == MUL || operatorExp.getOperator() == DIV)) {
 				seekFactors(operatorExp.getLeft(), inverse, pool);
 				seekFactors(operatorExp.getRight(), inverse ^ (operatorExp.getOperator() == DIV), pool);
 			} else if (!exp.equals(Constant.ZERO)) {
@@ -832,7 +833,7 @@ public class OperatorExpression extends Expression implements Fork<Double, Expre
 				// source = expression;
 				this.inverse = inverse;
 				// noPower = false;
-				if (expression instanceof OperatorExpression operatorExp && operatorExp.getOperator() == POW) {
+				if (expression instanceof ExpressionOperation operatorExp && operatorExp.getOperator() == POW) {
 					base = operatorExp.getLeft();
 					power = operatorExp.getRight();
 					if (power instanceof Constant powerConstant) {

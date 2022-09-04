@@ -5,8 +5,8 @@ import bran.exceptions.ParseException;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
@@ -33,8 +33,8 @@ public class ExpressionBuilder {
 	public void add(Object obj) {
 		if (obj instanceof Expression statement)
 			add(statement);
-		else if (obj instanceof Operator operator)
-			add(operator);
+		else if (obj instanceof ArithmeticOperator arithmeticOperator)
+			add(arithmeticOperator);
 		else if (obj instanceof ExpFunction lineOperator)
 			add(lineOperator);
 		else if (obj instanceof CommaSeparatedExpression expressions)
@@ -45,8 +45,8 @@ public class ExpressionBuilder {
 		expressionChain.addNode(new ExpressionChain.ExpressionNode(statement));
 	}
 
-	public void add(Operator operator) {
-		expressionChain.addNode(new ExpressionChain.OperatorNode(operator));
+	public void add(ArithmeticOperator arithmeticOperator) {
+		expressionChain.addNode(new ExpressionChain.OperatorNode(arithmeticOperator));
 	}
 
 	public void add(ExpFunction lineOperator) {
@@ -180,22 +180,22 @@ public class ExpressionBuilder {
 				Node x = head;
 				while (x.next != null && x.next.next != null) {
 					if (x == head) { // x can be the head after the 1st iteration
-						if (x.next instanceof OperatorNode op && op.operator.precedence() == order) {
+						if (x.next instanceof OperatorNode op && op.arithmeticOperator.precedence() == order) {
 							//	x -> x.next	-> x.next.next -> x.n.n.n
 							//	S -> O	    -> S	-> ?/null
-							Node insert = new ExpressionNode(new OperatorExpression(
-									(Expression) x.value(), (Operator) x.next.value(), (Expression) x.next.next.value()));
+							Node insert = new ExpressionNode(new ExpressionOperation(
+									(Expression) x.value(), (ArithmeticOperator) x.next.value(), (Expression) x.next.next.value()));
 							insert.next = x.next.next.next;
 							x = head = insert;
 							size -= 2;
 						} else
 							x = x.next;
 					}
-					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.precedence() == order) {
+					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.arithmeticOperator.precedence() == order) {
 						//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
 						//	? -> S		-> O			-> S	-> ?/null
-						Node insert = new ExpressionNode(new OperatorExpression(
-								(Expression) x.next.value(), (Operator) x.next.next.value(), (Expression) x.next.next.next.value()));
+						Node insert = new ExpressionNode(new ExpressionOperation(
+								(Expression) x.next.value(), (ArithmeticOperator) x.next.next.value(), (Expression) x.next.next.next.value()));
 						insert.next = x.next.next.next.next;
 						x.next = insert;
 						size -= 2;
@@ -222,7 +222,7 @@ public class ExpressionBuilder {
 			static Node of(Object o) {
 				if (o instanceof Expression st)
 					return new ExpressionNode(st);
-				else if (o instanceof Operator op)
+				else if (o instanceof ArithmeticOperator op)
 					return new OperatorNode(op);
 				else if (o instanceof ExpFunction lO)
 					return new LineOperatorNode(lO);
@@ -245,10 +245,10 @@ public class ExpressionBuilder {
 		}
 
 		private static class OperatorNode extends Node {
-			final Operator operator;
-			@Override Object value() { return operator; }
-			public OperatorNode(final Operator operator) {
-				this.operator = operator;
+			final ArithmeticOperator arithmeticOperator;
+			@Override Object value() { return arithmeticOperator; }
+			public OperatorNode(final ArithmeticOperator arithmeticOperator) {
+				this.arithmeticOperator = arithmeticOperator;
 			}
 			@Override Node append(Object next) {
 				return this.next = (ExpressionNode) next;

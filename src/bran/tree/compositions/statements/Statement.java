@@ -4,7 +4,7 @@ import bran.exceptions.ArrayUnpopulatedException;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.compositions.sets.regular.SpecialSetType;
 import bran.tree.compositions.sets.regular.var.WithVariableSet;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.ConditionalStatement;
 import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
@@ -119,25 +119,25 @@ public abstract class Statement implements Composition, Equivalable<Statement>, 
 			throw new ArrayUnpopulatedException();
 		Statement combinedStatements = s[0];
 		for (int i = 1; i < s.length; i++)
-			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
+			combinedStatements = new StatementOperation(combinedStatements, o, s[i]);
 		return combinedStatements;
 	}
 
-	public OperationStatement operation(LogicalOperator o, Statement... s) {
+	public StatementOperation operation(LogicalOperator o, Statement... s) {
 		if (s.length == 0)
 			throw new ArrayUnpopulatedException();
-		OperationStatement combinedStatements = new OperationStatement(this, o, s[0]);
+		StatementOperation combinedStatements = new StatementOperation(this, o, s[0]);
 		for (int i = 1; i < s.length; i++)
-			combinedStatements = new OperationStatement(combinedStatements, o, s[i]);
+			combinedStatements = new StatementOperation(combinedStatements, o, s[i]);
 		return combinedStatements;
 	}
 
-	public static LineStatement notOf(Statement s) {
-		return new LineStatement(LineOperator.NOT, s);
+	public static UnaryStatement notOf(Statement s) {
+		return new UnaryStatement(UnaryStatementOperator.NOT, s);
 	}
 
-	public static LineStatement selfOf(Statement s) {
-		return new LineStatement(LineOperator.CONSTANT, s);
+	public static UnaryStatement selfOf(Statement s) {
+		return new UnaryStatement(UnaryStatementOperator.CONSTANT, s);
 	}
 	
 	public static Statement andOf(Statement... s) {
@@ -177,46 +177,46 @@ public abstract class Statement implements Composition, Equivalable<Statement>, 
 	}
 
 	public Statement not() {
-		return new LineStatement(LineOperator.NOT, this);
+		return new UnaryStatement(UnaryStatementOperator.NOT, this);
 	}
 
 	// public Statement realNot() {
 	// 	return new LineStatement(this).realNot();
 	// }
 
-	public LineStatement self() {
-		return new LineStatement(LineOperator.CONSTANT, this);
+	public UnaryStatement self() {
+		return new UnaryStatement(UnaryStatementOperator.CONSTANT, this);
 	}
 	
-	public OperationStatement and(Statement... s) {
+	public StatementOperation and(Statement... s) {
 		return operation(AND, s);
 	}
 
-	public OperationStatement or(Statement... s) {
+	public StatementOperation or(Statement... s) {
 		return operation(OR, s);
 	}
 
-	public OperationStatement nand(Statement... s) {
+	public StatementOperation nand(Statement... s) {
 		return operation(NAND, s);
 	}
 
-	public OperationStatement nor(Statement... s) {
+	public StatementOperation nor(Statement... s) {
 		return operation(NOR, s);
 	}
 
-	public OperationStatement xor(Statement... s) {
+	public StatementOperation xor(Statement... s) {
 		return operation(XOR, s);
 	}
 
-	public OperationStatement xnor(Statement... s) {
+	public StatementOperation xnor(Statement... s) {
 		return operation(XNOR, s);
 	}
 
-	public OperationStatement implies(Statement... s) {
+	public StatementOperation implies(Statement... s) {
 		return operation(IMPLIES, andOf(s));
 	}
 
-	public OperationStatement revImplies(Statement s) {
+	public StatementOperation revImplies(Statement s) {
 		return operation(REV_IMPLIES, s);
 	}
 
@@ -250,8 +250,8 @@ public abstract class Statement implements Composition, Equivalable<Statement>, 
 	}
 
 	public boolean equalsNot(final Statement other) {
-		return this instanceof LineStatement thisL && thisL.getChild().equals(other)
-			   || other instanceof LineStatement otherL && otherL.getChild().equals(this);
+		return this instanceof UnaryStatement thisL && thisL.getChild().equals(other)
+			   || other instanceof UnaryStatement otherL && otherL.getChild().equals(this);
 	}
 
 	// Imperative style assistance classes

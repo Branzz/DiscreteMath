@@ -17,13 +17,13 @@ import bran.tree.structure.Fork;
 import static bran.tree.compositions.statements.VariableStatement.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.*;
 
-public class OperationStatement extends Statement implements Fork<Boolean, Statement, LogicalOperator, Statement> {
+public class StatementOperation extends Statement implements Fork<Boolean, Statement, LogicalOperator, Statement> {
 
 	private Statement left;
 	private LogicalOperator operator;
 	private Statement right;
 
-	public OperationStatement(Statement left, LogicalOperator operator, Statement right) {
+	public StatementOperation(Statement left, LogicalOperator operator, Statement right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
@@ -126,10 +126,10 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 	public String toString() {
 		String leftString = left.toString();
 		String rightString = right.toString();
-		if (left instanceof OperationStatement leftOperation
+		if (left instanceof StatementOperation leftOperation
 			&& leftOperation.getOperator().precedence() > operator.precedence())
 			leftString = Composition.parens(leftString);
-		if (right instanceof OperationStatement rightOperation
+		if (right instanceof StatementOperation rightOperation
 			&& rightOperation.getOperator().precedence() > operator.precedence())
 			rightString = Composition.parens(rightString);
 		return leftString + " " + operator.toString() + " " + rightString;
@@ -137,7 +137,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 
 	@Override
 	public boolean equals(Object s) {
-		return s instanceof OperationStatement s0 && s0.getOperator().equals(operator) && left.equals(s0.getLeft()) && right.equals(s0.getRight());
+		return s instanceof StatementOperation s0 && s0.getOperator().equals(operator) && left.equals(s0.getLeft()) && right.equals(s0.getRight());
 	}
 
 	// @FunctionalInterface interface LawCheck { boolean check(); }
@@ -150,7 +150,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 		final Statement leftSimplified = left.simplified();
 		final Statement rightSimplified = right.simplified();
 		final Statement simplified = simplified(leftSimplified, operator, rightSimplified, true);
-		return simplified == null ? new OperationStatement(leftSimplified, operator, rightSimplified) : simplified;
+		return simplified == null ? new StatementOperation(leftSimplified, operator, rightSimplified) : simplified;
 	}
 
 	/**
@@ -265,7 +265,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 				return equivalenceSolver(leftEq.getRight(), leftEq.getLeft(), rightEq.getLeft(), leftEq.getEquivalenceType().flipped(), rightEq.getEquivalenceType().flipped());
 			}
 		}
-		else if (right instanceof OperationStatement rightO) {
+		else if (right instanceof StatementOperation rightO) {
 			// rightO = rightOp;
 			// <--- TODO if left instanceof operation then you can factor
 			if (rightO.getLeft().equals(left)) {
@@ -278,7 +278,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 		// else if (right instanceof LineStatement rightL && rightL.getChild() instanceof OperationStatement rightLO) {
 		// 	// rightO = rightLO.deMorgans();
 		// }
-		else if (left instanceof OperationStatement leftO) {
+		else if (left instanceof StatementOperation leftO) {
 			if (leftO.getLeft().equals(right)) {
 				return (!operator.isCommutative() ? absorptionBAB : absorptionLeftOp)
 							   .get(leftO.getOperator(), operator).absorb(leftO.getRight(), right);
@@ -334,7 +334,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 			return Equivalence.of(base, types[num8 - 1], rightExp);
 
 		LogicalOperator center = (numLine & 0b00100) == 0b00100 ? AND : OR;
-		return new OperationStatement(Equivalence.of(base, types[(numLine >> 2) - 1], leftExp), center, Equivalence.of(base, types[num8 - 1], rightExp));
+		return new StatementOperation(Equivalence.of(base, types[(numLine >> 2) - 1], leftExp), center, Equivalence.of(base, types[num8 - 1], rightExp));
 	}
 
 	// /**
@@ -391,9 +391,9 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 			final Iterator<Statement> iterator = newTerms.iterator();
 			if (newTerms.size() == 1)
 				return iterator.next();
-			OperationStatement combinedStatements = new OperationStatement(iterator.next(), operator, iterator.next());
+			StatementOperation combinedStatements = new StatementOperation(iterator.next(), operator, iterator.next());
 			while (iterator.hasNext())
-				combinedStatements = new OperationStatement(combinedStatements, operator, iterator.next());
+				combinedStatements = new StatementOperation(combinedStatements, operator, iterator.next());
 			return combinedStatements;
 		}
 	}
@@ -410,10 +410,10 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 	}
 
 	private void commutativeSearch(Statement statement, LogicalOperator operator, Collection<Statement> terms) {
-		if (statement instanceof OperationStatement operationStatement
-			&& operationStatement.getOperator() == operator) {
-				commutativeSearch(operationStatement.getLeft(), operator, terms);
-				commutativeSearch(operationStatement.getRight(), operator, terms);
+		if (statement instanceof StatementOperation statementOperation
+			&& statementOperation.getOperator() == operator) {
+				commutativeSearch(statementOperation.getLeft(), operator, terms);
+				commutativeSearch(statementOperation.getRight(), operator, terms);
 		} else
 			terms.add(statement);
 	}
@@ -441,7 +441,7 @@ public class OperationStatement extends Statement implements Fork<Boolean, State
 	   and now, one can check a law themself */
 
 	public Statement deMorgans() {
-		return new OperationStatement(left.not(), switch (operator) {
+		return new StatementOperation(left.not(), switch (operator) {
 			case AND -> OR;
 			case OR -> AND;
 			case NAND -> NOR;

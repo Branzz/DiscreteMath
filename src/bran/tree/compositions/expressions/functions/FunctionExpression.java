@@ -4,7 +4,7 @@ import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.AbstractFunctionExpression;
 import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
-import static bran.tree.compositions.expressions.operators.Operator.POW;
+import static bran.tree.compositions.expressions.operators.ArithmeticOperator.POW;
 
 public class FunctionExpression extends AbstractFunctionExpression<Expression, ExpFunction> {
 
@@ -73,7 +73,7 @@ public class FunctionExpression extends AbstractFunctionExpression<Expression, E
 			if (mF == LOG) {
 				if (simplifiedExpressions[0].equals(Constant.E))
 					return new FunctionExpression(LN, true, simplifiedExpressions[1]);
-				if (simplifiedExpressions[1] instanceof OperatorExpression rightOp && rightOp.getOperator() == POW
+				if (simplifiedExpressions[1] instanceof ExpressionOperation rightOp && rightOp.getOperator() == POW
 							&& simplifiedExpressions[0].equals(rightOp.getLeft()))
 					return rightOp.getRight();
 			} else if (mF == TETRA) {

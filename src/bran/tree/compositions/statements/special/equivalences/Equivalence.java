@@ -3,15 +3,15 @@ package bran.tree.compositions.statements.special.equivalences;
 import bran.exceptions.IllegalInverseExpressionException;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.SpecialStatement;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
 import bran.tree.compositions.statements.special.equivalences.inequality.Inequality;
@@ -116,7 +116,7 @@ public abstract class Equivalence extends SpecialStatement implements Fork<Boole
 				it should be very rare that more than one variable can be simplified upon TODO is it possible?
 		 */
 
-		final OperatorExpression oneSide = new OperatorExpression(leftSimplified, Operator.SUB, rightSimplified);
+		final ExpressionOperation oneSide = new ExpressionOperation(leftSimplified, ArithmeticOperator.SUB, rightSimplified);
 		Expression oneSideSimplified;
 		if (leftSimplified.equals(Constant.ZERO) || rightSimplified.equals(Constant.ZERO))
 			oneSideSimplified = oneSide;
@@ -150,7 +150,7 @@ public abstract class Equivalence extends SpecialStatement implements Fork<Boole
 				equivSup.apply(0);
 				Statement combinedStatements = equivSup.apply(0);
 				for (int i = 1; i < inverse.size(); i++)
-					combinedStatements = new OperationStatement(combinedStatements, LogicalOperator.AND, equivSup.apply(1));
+					combinedStatements = new StatementOperation(combinedStatements, LogicalOperator.AND, equivSup.apply(1));
 				return combinedStatements;
 
 			}

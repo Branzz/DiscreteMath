@@ -1,11 +1,11 @@
 package bran.tree.compositions.sets;
 
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
-import bran.tree.structure.mapper.ForkOperator;
+import bran.tree.structure.mapper.RelationalOperator;
 
 import java.util.function.BiFunction;
 
-public enum SetStatementOperator implements ForkOperator<Boolean, Set, Set> {
+public enum SetStatementOperator implements RelationalOperator<Boolean, Set> {
 	SUBSET(Set::subsetImpl, "\u2286"),
 	PROPER_SUBSET(Set::properSubsetImpl, "\u2282"),
 	BIJECTION(Set::equivalentImpl, "\u2194"),

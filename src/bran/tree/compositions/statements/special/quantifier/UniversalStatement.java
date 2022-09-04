@@ -3,7 +3,7 @@ package bran.tree.compositions.statements.special.quantifier;
 import bran.combinatorics.Counter;
 import bran.tree.compositions.sets.regular.var.WithVariableSet;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.Holder;
@@ -115,7 +115,7 @@ public class UniversalStatement<I, E extends Holder<I>> extends QuantifiedStatem
 
 	@Override
 	public void appendGodelNumbers(GodelBuilder godelBuilder) {
-		LineOperator.NOT.of(negation()).appendGodelNumbers(godelBuilder); // No Godel Universal Symbol, so convert to Existential
+		UnaryStatementOperator.NOT.of(negation()).appendGodelNumbers(godelBuilder); // No Godel Universal Symbol, so convert to Existential
 	}
 
 	@Override

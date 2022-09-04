@@ -4,7 +4,7 @@ import bran.exceptions.ArrayUnpopulatedException;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.godel.GodelNumberSymbols;
-import bran.tree.compositions.sets.operators.LineSetOperator;
+import bran.tree.compositions.sets.operators.UnarySetOperator;
 import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.compositions.sets.regular.*;
 import bran.tree.compositions.statements.Statement;
@@ -52,25 +52,25 @@ public interface Set<E> extends Composition { //Comparable<AbstractSet>,
 
 	Set<E> complementImpl();
 
-	default LineSet<E> complement() {
-		return new LineSet<>(LineSetOperator.COMPLEMENT, this);
+	default UnarySet<E> complement() {
+		return new UnarySet<>(UnarySetOperator.COMPLEMENT, this);
 	}
 
 	Set<E> intersectionImpl(Set<E> s);
 
-	default OperationSet<E> intersection(Set<E>... s) {
+	default SetOperation<E> intersection(Set<E>... s) {
 		return operation(SetOperator.INTERSECTION, s);
 	}
 
 	Set<E> unionImpl(Set<E> s);
 
-	default OperationSet<E> union(Set<E>... s) {
+	default SetOperation<E> union(Set<E>... s) {
 		return operation(SetOperator.UNION, s);
 	}
 
 	Set<E> symmetricDifferenceImpl(Set<E> s);
 
-	default OperationSet<E> symmetricDifference(Set<E>... s) {
+	default SetOperation<E> symmetricDifference(Set<E>... s) {
 		return operation(SetOperator.SYMMETRIC_DIFFERENCE, s);
 	}
 
@@ -87,14 +87,14 @@ public interface Set<E> extends Composition { //Comparable<AbstractSet>,
 		 // do nothing
 	 }
 
-	 default OperationSet<E> operation(SetOperator o, Set<E>... s) {
+	 default SetOperation<E> operation(SetOperator o, Set<E>... s) {
 		if (s.length < 0)
 			throw new ArrayUnpopulatedException();
 		if (s.length == 0)
-			return new OperationSet<>(this, o, this);
-		OperationSet<E> combinedStatements = new OperationSet<>(this, o, s[0]);
+			return new SetOperation<>(this, o, this);
+		SetOperation<E> combinedStatements = new SetOperation<>(this, o, s[0]);
 		for (int i = 1; i < s.length; i++)
-			combinedStatements = new OperationSet<>(combinedStatements, o, s[i]);
+			combinedStatements = new SetOperation<>(combinedStatements, o, s[i]);
 		return combinedStatements;
 	}
 

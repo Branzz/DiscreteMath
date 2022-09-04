@@ -2,7 +2,6 @@ package bran.tree.compositions.sets.regular;
 
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.sets.SetStatement;
 import bran.tree.structure.Leaf;
 import org.jetbrains.annotations.NotNull;
 

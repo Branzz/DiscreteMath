@@ -1,13 +1,13 @@
 package bran.tree.compositions.statements.operators;
 
-import bran.tree.compositions.statements.LineStatement;
+import bran.tree.compositions.statements.UnaryStatement;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.BranchOperator;
 
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
-public enum LineOperator implements BranchOperator {
+public enum UnaryStatementOperator implements BranchOperator {
 	CONSTANT(b -> b,  1, "self", "self", "self", "self", "self", "self"),
 	NOT     (b -> !b, 1, "\u00ac", "~", "!", "~", "complement", "\\", "not");
 	/* All true, all false */
@@ -16,7 +16,7 @@ public enum LineOperator implements BranchOperator {
 	private final AssociativityPrecedenceLevel level;
 	private final LineOperable lineOperable;
 
-	LineOperator(final LineOperable lineOperable, int level, final String... symbols) {
+	UnaryStatementOperator(final LineOperable lineOperable, int level, final String... symbols) {
 		this.lineOperable = lineOperable;
 		this.level = AssociativityPrecedenceLevel.of(level);
 		this.symbols = symbols;
@@ -43,8 +43,8 @@ public enum LineOperator implements BranchOperator {
 		return level;
 	}
 
-	public LineStatement of(final Statement statement) {
-		return new LineStatement(this, statement);
+	public UnaryStatement of(final Statement statement) {
+		return new UnaryStatement(this, statement);
 	}
 
 	@FunctionalInterface

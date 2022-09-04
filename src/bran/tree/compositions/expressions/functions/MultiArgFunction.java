@@ -11,9 +11,10 @@ import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static bran.tree.compositions.expressions.functions.appliers.DomainSupplier.NOT_ZERO;
-import static bran.tree.compositions.expressions.operators.Operator.POW;
+import static bran.tree.compositions.expressions.operators.ArithmeticOperator.POW;
 import static bran.tree.compositions.expressions.values.Constant.*;
 import static java.lang.Math.*;
 
@@ -52,9 +53,6 @@ public enum MultiArgFunction implements ExpFunction {
 	 COTH (NOT_ZERO, a -> 1 / Math.tanh(a), a -> CSCH.ofS(a).negate().squared().chain(a)),
 	ACOTH (COTH, e -> e.less(NEG_ONE).or(e.greater(ONE)), a -> .5 * Math.log((1 + a) / (a - 1)), a -> a.derive().div(a.squared().dec())),
 	RNG   (0, a -> VariableStatement.TAUTOLOGY, a -> Math.random(), a -> ZERO),
-	ACOT  (COT, a -> atan(1 / a), a -> a.derive().div(ONE.minus(a).negate())),
-	 COTH (NOT_ZERO, a -> 1 / tanh(a), a -> CSCH.ofS(a).negate().squared().chain(a)),
-	ACOTH (COTH, e -> e.less(NEG_ONE).or(e.greater(ONE)), a -> .5 * log((1 + a) / (a - 1)), a -> a.derive().div(a.squared().dec())),
 
 //	INVERSE((Double e) -> e, (Expression e) -> e[0].inverse().iterator().next().derive()),
 

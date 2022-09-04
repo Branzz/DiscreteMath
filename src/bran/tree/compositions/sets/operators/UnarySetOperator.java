@@ -3,7 +3,7 @@ package bran.tree.compositions.sets.operators;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.BranchOperator;
 
-public enum LineSetOperator implements BranchOperator {
+public enum UnarySetOperator implements BranchOperator {
 	COMPLEMENT
 	;
 

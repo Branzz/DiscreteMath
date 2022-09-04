@@ -1,11 +1,6 @@
 package bran.tree.structure;
 
 import bran.tree.Holder;
-import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.functions.ExpFunction;
-import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
-import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.structure.mapper.ForkOperator;
 import bran.tree.structure.mapper.Mapper;
 
@@ -17,11 +12,11 @@ public interface TreePart {
 			F extends Fork<O, ? extends P, FO, ? extends P>,	Fc extends Class<F>,
 			M extends Mapper,							  		Mc extends Class<M>,
 			B extends Branch<? extends P, M>,			  		Bc extends Class<B>,
-			V extends Holder<O>,								Vc extends Class<V>>
+			V extends Holder<?>,								Vc extends Class<V>>
 	String treeVerifier(Pc mainType, Oc representingType, FOc forkOp, Fc fork, Mc branchOp, Bc branch, Vc variable) {
 		return mainType.getSimpleName() + ": "
 			   + fork.getSimpleName() + "(" + mainType.getSimpleName() + " " + forkOp.getSimpleName() + " " + mainType.getSimpleName()
-			   + ") = " + variable.getSimpleName() + "(" + representingType.getSimpleName() + "), "
+			   + "), " + (variable == null ? "null" : variable.getSimpleName()) + "(" + representingType.getSimpleName() + "), "
 			   + branch.getSimpleName() + "(" + branchOp.getSimpleName() + " " + mainType.getSimpleName() + ")";
 	}
 

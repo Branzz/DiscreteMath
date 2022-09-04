@@ -3,7 +3,7 @@ package bran.parser;
 import bran.exceptions.ParseException;
 import bran.tree.compositions.statements.special.proofs.Argument;
 import bran.tree.compositions.statements.*;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 
 import java.util.*;
@@ -26,7 +26,7 @@ public class StatementParser {
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
 	static final Map<String, LogicalOperator> statementOperators = Parser.getSymbolMapping(LogicalOperator.values());
-	static final Map<String, LineOperator> statementLineOperators = Parser.getSymbolMapping(LineOperator.values());
+	static final Map<String, UnaryStatementOperator> statementLineOperators = Parser.getSymbolMapping(UnaryStatementOperator.values());
 
 	enum TokenType {
 

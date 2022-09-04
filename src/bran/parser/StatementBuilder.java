@@ -2,7 +2,7 @@ package bran.parser;
 
 import bran.exceptions.ParseException;
 import bran.tree.compositions.statements.*;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 
 import java.util.AbstractCollection;
@@ -35,8 +35,8 @@ public class StatementBuilder {
 		statementChain.addNode(new StatementChain.OperatorNode(operator));
 	}
 
-	public void add(LineOperator lineOperator) {
-		statementChain.addNode(new StatementChain.LineOperatorNode(lineOperator));
+	public void add(UnaryStatementOperator unaryStatementOperator) {
+		statementChain.addNode(new StatementChain.LineOperatorNode(unaryStatementOperator));
 	}
 
 	private static class StatementChain extends AbstractCollection<Object> {
@@ -123,7 +123,7 @@ public class StatementBuilder {
 
 		Statement lineStream(Node x, Node start) {
 			if (x instanceof LineOperatorNode lONnext){
-				return new LineStatement(lONnext.operator, lineStream(x.next, start));
+				return new UnaryStatement(lONnext.operator, lineStream(x.next, start));
 			} else if (x instanceof StatementNode nextStatement) { // base case
 				start.next = x.next;
 				return nextStatement.statement;
@@ -139,7 +139,7 @@ public class StatementBuilder {
 						if (x.next instanceof OperatorNode op && op.operator.precedence() == order) {
 							//	x -> x.next	-> x.next.next -> x.n.n.n
 							//	S -> O	    -> S	-> ?/null
-							Node insert = new StatementNode(new OperationStatement(
+							Node insert = new StatementNode(new StatementOperation(
 									(Statement) x.value(), (LogicalOperator) x.next.value(), (Statement) x.next.next.value()));
 							insert.next = x.next.next.next;
 							x = head = insert;
@@ -150,7 +150,7 @@ public class StatementBuilder {
 					else if (x.next.next.next != null && x.next.next instanceof OperatorNode op && op.operator.precedence() == order) {
 						//	x -> x.next -> x.next.next	-> x.next.next.next -> x.n.n.n.n
 						//	? -> S		-> O			-> S	-> ?/null
-						Node insert = new StatementNode(new OperationStatement(
+						Node insert = new StatementNode(new StatementOperation(
 								(Statement) x.next.value(), (LogicalOperator) x.next.next.value(), (Statement) x.next.next.next.value()));
 						insert.next = x.next.next.next.next;
 						x.next = insert;
@@ -180,7 +180,7 @@ public class StatementBuilder {
 					return new StatementNode(st);
 				else if (o instanceof LogicalOperator op)
 					return new OperatorNode(op);
-				else if (o instanceof LineOperator lO)
+				else if (o instanceof UnaryStatementOperator lO)
 					return new LineOperatorNode(lO);
 				throw new ParseException("statement parsing, unknown (this shouldn't've happened)");
 			}
@@ -210,9 +210,9 @@ public class StatementBuilder {
 		}
 
 		private static class LineOperatorNode extends StatementNode {
-			final LineOperator operator;
+			final UnaryStatementOperator operator;
 			Object value() { return operator; }
-			public LineOperatorNode(final LineOperator operator) {
+			public LineOperatorNode(final UnaryStatementOperator operator) {
 				super(null);
 				this.operator = operator;
 			}

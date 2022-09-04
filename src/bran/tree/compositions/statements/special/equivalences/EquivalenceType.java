@@ -2,11 +2,11 @@ package bran.tree.compositions.statements.special.equivalences;
 
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
-import bran.tree.structure.mapper.ForkOperator;
+import bran.tree.structure.mapper.RelationalOperator;
 
 import java.util.function.BiFunction;
 
-public interface EquivalenceType extends ForkOperator<Boolean, Expression, Expression> {
+public interface EquivalenceType extends RelationalOperator<Boolean, Expression> {
 
 	EquivalenceType opposite();
 

@@ -3,13 +3,13 @@ package bran.tree.compositions.sets;
 import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.structure.Fork;
 
-public class OperationSet<E> implements Set<E>, Fork<Set, Set, SetOperator, Set> { // TODO generics
+public class SetOperation<E> implements Set<E>, Fork<Set, Set, SetOperator, Set> { // TODO generics
 
 	private final Set<E> left;
 	private final SetOperator operator;
 	private final Set<E> right;
 
-	public OperationSet(Set<E> left, SetOperator operator, Set<E> right) {
+	public SetOperation(Set<E> left, SetOperator operator, Set<E> right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;

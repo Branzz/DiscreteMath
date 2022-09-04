@@ -1,18 +1,17 @@
 package bran.tree.compositions.sets;
 
-import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
-import bran.tree.compositions.sets.operators.LineSetOperator;
+import bran.tree.compositions.sets.operators.UnarySetOperator;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.structure.MonoBranch;
 
-public class LineSet<E> implements Set<E>, MonoBranch<Set<E>, LineSetOperator> {
+public class UnarySet<E> implements Set<E>, MonoBranch<Set<E>, UnarySetOperator> {
 
-	private final LineSetOperator lineOperator;
+	private final UnarySetOperator lineOperator;
 	private final Set<E> child;
 
 	private SpecialSet s;
 
-	public LineSet(LineSetOperator lineOperator, Set<E> child) {
+	public UnarySet(UnarySetOperator lineOperator, Set<E> child) {
 		this.child = child;
 		this.lineOperator = lineOperator;
 		// if (child instanceof FiniteSet)
@@ -27,7 +26,7 @@ public class LineSet<E> implements Set<E>, MonoBranch<Set<E>, LineSetOperator> {
 	}
 
 	@Override
-	public LineSetOperator getOperator() {
+	public UnarySetOperator getOperator() {
 		return lineOperator;
 	}
 

@@ -5,11 +5,11 @@ import bran.exceptions.ParseException;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.MultiArgFunction;
-import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceTypeImpl;
 import bran.tree.structure.mapper.Mapper;
@@ -101,12 +101,12 @@ public class CompositionParser {
 	enum TokenType {
 		LEFT_IDENTIFIER(START, START, BOTH, r -> "("), // becomes middle after the (expression) is simplified
 		FUNCTION(START, START, true, EXPRESSION, MultiArgFunction.class),
-		LINE_OPERATOR(START, START, true, STATEMENT, LineOperator.class),
+		LINE_OPERATOR(START, START, true, STATEMENT, UnaryStatementOperator.class),
 		VARIABLE(START, MIDDLE, BOTH, r -> String.valueOf((char) ('a' + (int) (r * 3)))),
 		CONSTANT(START, MIDDLE, EXPRESSION, r -> r > .2 ? String.valueOf((int) ((r - .8) * 50 - 5)) : String.valueOf(r * 12.5 - 5).substring(0, 5)),
 		COMMA(MIDDLE, START, BOTH, r -> ","),
 		EQUIVALENCE(MIDDLE, START, true, STATEMENT, EquivalenceTypeImpl.class),
-		EXP_OPERATOR(MIDDLE, START, true, EXPRESSION, Operator.class),
+		EXP_OPERATOR(MIDDLE, START, true, EXPRESSION, ArithmeticOperator.class),
 		SMT_OPERATOR(MIDDLE, START, true, STATEMENT, LogicalOperator.class),
 		RIGHT_IDENTIFIER(MIDDLE, MIDDLE, BOTH, r -> ")"),
 		WHITESPACE(ANY, NOWHERE, BOTH, r -> " "), // the previous type

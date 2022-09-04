@@ -1,7 +1,7 @@
 package bran.tree.compositions.statements;
 
 import bran.tree.compositions.Composition;
-import bran.tree.compositions.statements.operators.LineOperator;
+import bran.tree.compositions.statements.operators.UnaryStatementOperator;
 import bran.tree.compositions.statements.operators.LogicalOperator;
 import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
@@ -16,17 +16,17 @@ import java.util.List;
 
 import static bran.tree.compositions.statements.VariableStatement.CONTRADICTION;
 import static bran.tree.compositions.statements.VariableStatement.TAUTOLOGY;
-import static bran.tree.compositions.statements.operators.LineOperator.CONSTANT;
-import static bran.tree.compositions.statements.operators.LineOperator.NOT;
+import static bran.tree.compositions.statements.operators.UnaryStatementOperator.CONSTANT;
+import static bran.tree.compositions.statements.operators.UnaryStatementOperator.NOT;
 
-public class LineStatement extends Statement implements MonoBranch<Statement, LineOperator> { // One child
+public class UnaryStatement extends Statement implements MonoBranch<Statement, UnaryStatementOperator> { // One child
 
-	private final LineOperator lineOperator;
+	private final UnaryStatementOperator unaryStatementOperator;
 	private Statement child;
 
-	public LineStatement(Statement child) {
+	public UnaryStatement(Statement child) {
 		this.child = child;
-		lineOperator = NOT;
+		unaryStatementOperator = NOT;
 	}
 
 	// public LineStatement(Statement child, boolean value) {
@@ -34,9 +34,9 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 	// 	lineOperator = value ? CONSTANT : NOT;
 	// }
 
-	public LineStatement(LineOperator lineOperator, Statement child) {
+	public UnaryStatement(UnaryStatementOperator unaryStatementOperator, Statement child) {
 		this.child = child;
-		this.lineOperator = lineOperator;
+		this.unaryStatementOperator = unaryStatementOperator;
 	}
 
 	// /**
@@ -54,8 +54,8 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 	}
 
 	@Override
-	public LineOperator getOperator() {
-		return lineOperator;
+	public UnaryStatementOperator getOperator() {
+		return unaryStatementOperator;
 	}
 
 	// @Override
@@ -74,16 +74,16 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 
 	@Override
 	public boolean equals(Object s) {
-		return s instanceof LineStatement lineStatement && lineOperator == lineStatement.lineOperator && child.equals(lineStatement.getChild());
+		return s instanceof UnaryStatement unaryStatement && unaryStatementOperator == unaryStatement.unaryStatementOperator && child.equals(unaryStatement.getChild());
 	}
 
 	@Override
 	public Statement simplified() { // TODO child Special statement switch
 		Statement child = this.child.simplified();
-		if (lineOperator == CONSTANT)
+		if (unaryStatementOperator == CONSTANT)
 			return child;
 		// ### operator is NOT ###
-		if (child instanceof LineStatement childLine) // Double Negation Law - since child's simplified, it is a NOT
+		if (child instanceof UnaryStatement childLine) // Double Negation Law - since child's simplified, it is a NOT
 			return childLine.child;
 		if (child instanceof VariableStatement childVariable) { // Negate Constants Law
 			if (childVariable.equals(TAUTOLOGY))
@@ -94,13 +94,13 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 			return new Inequality(childEquivalence.getLeft(), (InequalityType) childEquivalence.getEquivalenceType().opposite(), childEquivalence.getRight());
 		} else if (child instanceof Equation childEquivalence) {
 			return new Equation(childEquivalence.getLeft(), (EquationType) childEquivalence.getEquivalenceType().opposite(), childEquivalence.getRight());
-		} else if (child instanceof OperationStatement childOperation) {
+		} else if (child instanceof StatementOperation childOperation) {
 			LogicalOperator operator = childOperation.getOperator();
 			if (operator == LogicalOperator.IMPLIES) {
-				if (childOperation.getRight() instanceof LineStatement rightLine)
-					return new OperationStatement(childOperation.getLeft(), LogicalOperator.AND, rightLine.getChild());
-				else if (childOperation.getLeft() instanceof LineStatement leftLine)
-					return new OperationStatement(leftLine.getChild(), LogicalOperator.NOR, childOperation.getRight());
+				if (childOperation.getRight() instanceof UnaryStatement rightLine)
+					return new StatementOperation(childOperation.getLeft(), LogicalOperator.AND, rightLine.getChild());
+				else if (childOperation.getLeft() instanceof UnaryStatement leftLine)
+					return new StatementOperation(leftLine.getChild(), LogicalOperator.NOR, childOperation.getRight());
 				// else if (childOperation.getRight().equals(TAUTOLOGY)) TODO
 				// 	return new OperationStatement(childOperation.getLeft(), Operator.AND, CONTRADICTION);
 				// else if (childOperation.getRight().equals(CONTRADICTION))
@@ -110,19 +110,19 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 				// else if (childOperation.getLeft().equals(CONTRADICTION))
 				// 	return new OperationStatement(TAUTOLOGY, Operator.AND, childOperation.getRight());
 			} else if (operator == LogicalOperator.REV_IMPLIES) {
-				if (childOperation.getLeft() instanceof LineStatement leftLine)
-					return new OperationStatement(leftLine.getChild(), LogicalOperator.AND, childOperation.getRight());
-				else if (childOperation.getRight() instanceof LineStatement rightLine)
-					return new OperationStatement(childOperation.getLeft(), LogicalOperator.NOR, rightLine.getChild());
+				if (childOperation.getLeft() instanceof UnaryStatement leftLine)
+					return new StatementOperation(leftLine.getChild(), LogicalOperator.AND, childOperation.getRight());
+				else if (childOperation.getRight() instanceof UnaryStatement rightLine)
+					return new StatementOperation(childOperation.getLeft(), LogicalOperator.NOR, rightLine.getChild());
 			} else
-				return new OperationStatement(childOperation.getLeft(), childOperation.getOperator().not(), childOperation.getRight());
+				return new StatementOperation(childOperation.getLeft(), childOperation.getOperator().not(), childOperation.getRight());
 		}
-		return new LineStatement(child);
+		return new UnaryStatement(child);
 	}
 
 	@Override
 	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
-		if (lineOperator == NOT) {
+		if (unaryStatementOperator == NOT) {
 			godelBuilder.push(GodelNumberSymbols.LOGICAL_NOT);
 			boolean childIsVar = child instanceof VariableStatement;
 			if (!childIsVar)
@@ -142,7 +142,7 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 
 	@Override
 	protected boolean getTruth() {
-		return lineOperator.operate(child.getTruth());
+		return unaryStatementOperator.operate(child.getTruth());
 	}
 
 	@Override
@@ -160,12 +160,12 @@ public class LineStatement extends Statement implements MonoBranch<Statement, Li
 
 	@Override
 	public String toFullString() {
-		return '(' + lineOperator.toString() + child.toFullString() + ')'; // TODO (parens around function?)
+		return '(' + unaryStatementOperator.toString() + child.toFullString() + ')'; // TODO (parens around function?)
 	}
 
 	@Override
 	public String toString() {
-		return lineOperator.toString() + child.toString();
+		return unaryStatementOperator.toString() + child.toString();
 	}
 
 	// @Override

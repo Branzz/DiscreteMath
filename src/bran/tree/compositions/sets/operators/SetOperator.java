@@ -9,9 +9,9 @@ import java.util.function.BiFunction;
 public enum SetOperator implements ForkOperator<Set, Set, Set> {
 	UNION(Set::union, "\u222A"),
 	INTERSECTION(Set::intersection, "\u2229"),
-	// –
-	// CARTESIAN_PRODUCT
-	SYMMETRIC_DIFFERENCE(Set::symmetricDifference, "\u2206");
+//	DIFFERENCE(Set::difference, ""),
+	// TODO CARTESIAN_PRODUCT
+	SYMMETRIC_DIFFERENCE(Set::symmetricDifference, "\u2206", "\u2295"); // TODO SYMBOLS
 
 
 	private final BiFunction<Set, Set, Set> operator;

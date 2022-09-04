@@ -5,7 +5,7 @@ import bran.exceptions.IllegalInverseExpressionException;
 import bran.tree.Equivalable;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
@@ -13,7 +13,7 @@ import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.compositions.sets.regular.SpecialSetType;
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.statements.special.equivalences.equation.Equation;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.LOG;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.SQRT;
-import static bran.tree.compositions.expressions.operators.Operator.*;
+import static bran.tree.compositions.expressions.operators.ArithmeticOperator.*;
 import static bran.tree.compositions.expressions.values.Constant.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.AND;
 import static bran.tree.compositions.statements.special.equivalences.inequality.InequalityType.*;
@@ -75,9 +75,9 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 			return VariableStatement.TAUTOLOGY;
 		if (statements.size() == 1)
 			return statements.get(0);
-		OperationStatement combinedStatements = new OperationStatement(statements.get(0), AND, statements.get(1));
+		StatementOperation combinedStatements = new StatementOperation(statements.get(0), AND, statements.get(1));
 		for (int i = 2; i < statements.size(); i++)
-			combinedStatements = new OperationStatement(combinedStatements, AND, statements.get(i));
+			combinedStatements = new StatementOperation(combinedStatements, AND, statements.get(i));
 		return combinedStatements;
 	}
 
@@ -159,7 +159,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 			return -1;
 		else if (expression.equals(NEG_INFINITY))
 			return 1;
-		final OperatorExpression subtraction = this.minus(expression);
+		final ExpressionOperation subtraction = this.minus(expression);
 		Expression leftComp = subtraction.simplified();
 		// a compare b = a - b compare 0
 		// the domain of f(f'(x)) is the domain of f'(x)
@@ -201,7 +201,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		Expression thisSide = this;
 		boolean simplifiedStep = false;
 		while (!(thisSide instanceof Variable)) {
-			if (thisSide instanceof OperatorExpression opExp) {
+			if (thisSide instanceof ExpressionOperation opExp) {
 				boolean varsOnLeft = !opExp.getLeft().getVariables().isEmpty();
 				boolean varsOnRight = !opExp.getRight().getVariables().isEmpty();
 				if (varsOnLeft && varsOnRight) {
@@ -220,7 +220,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 								otherSides.set(i, otherSides.get(i).sqrt());
 							}
 							for (int i = 0; i < originalSize; i++) {
-								otherSides.add(new OperatorExpression(NEG_ONE, MUL, otherSides.get(i)));
+								otherSides.add(new ExpressionOperation(NEG_ONE, MUL, otherSides.get(i)));
 							}
 					} else
 						map(otherSides, otherSide -> opExp.getOperator().inverse(varsOnLeft ? 0 : 1, otherSide, varsOnLeft ? opExp.getRight() : opExp.getLeft()));
@@ -320,55 +320,55 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		return deepnessTotal == 0 ? 0 : (double) deepnessPositivity / deepnessTotal;
 	}
 
-	public OperatorExpression pow(Expression exp) {
-		return new OperatorExpression(this, POW, exp);
+	public ExpressionOperation pow(Expression exp) {
+		return new ExpressionOperation(this, POW, exp);
 	}
 
 	public FunctionExpression log(Expression exp) throws IllegalArgumentAmountException {
 		return new FunctionExpression(LOG, this, exp);
 	}
 
-	public OperatorExpression squared() {
+	public ExpressionOperation squared() {
 		return pow(TWO);
 	}
 
-	public OperatorExpression cubed() {
+	public ExpressionOperation cubed() {
 		return pow(Constant.of(3));
 	}
 
-	public OperatorExpression times(Expression multiplicand) {
-		return new OperatorExpression(this, MUL, multiplicand);
+	public ExpressionOperation times(Expression multiplicand) {
+		return new ExpressionOperation(this, MUL, multiplicand);
 	}
 
-	public OperatorExpression div(Expression divisor) {
-		return new OperatorExpression(this, DIV, divisor);
+	public ExpressionOperation div(Expression divisor) {
+		return new ExpressionOperation(this, DIV, divisor);
 	}
 
-	public OperatorExpression mod(Expression divisor) {
-		return new OperatorExpression(this, MOD, divisor);
+	public ExpressionOperation mod(Expression divisor) {
+		return new ExpressionOperation(this, MOD, divisor);
 	}
 
-	public OperatorExpression plus(Expression addend) {
-		return new OperatorExpression(this, ADD, addend);
+	public ExpressionOperation plus(Expression addend) {
+		return new ExpressionOperation(this, ADD, addend);
 	}
 
-	public OperatorExpression minus(Expression subtrahend) {
-		return new OperatorExpression(this, SUB, subtrahend);
+	public ExpressionOperation minus(Expression subtrahend) {
+		return new ExpressionOperation(this, SUB, subtrahend);
 	}
 
-	public OperatorExpression reciprocal() {
+	public ExpressionOperation reciprocal() {
 		return ONE.div(this);
 	}
 
-	public OperatorExpression negate() {
+	public ExpressionOperation negate() {
 		return ZERO.minus(this);
 	}
 
-	public OperatorExpression inc() {
+	public ExpressionOperation inc() {
 		return this.plus(ONE);
 	}
 
-	public OperatorExpression dec() {
+	public ExpressionOperation dec() {
 		return this.minus(ONE);
 	}
 

@@ -18,28 +18,30 @@ import static bran.tree.compositions.expressions.operators.DomainSupplier.DENOM_
 import static bran.tree.compositions.expressions.values.Constant.*;
 
 /**
+ * <pre>
  * reasoning for the power's domain
- * from {@link java.lang.FdLibm.Pow}:							| simplified logic:
- * for x**p,													|
- *   1.  (anything) ** 0  is 1									| p == 0 OR
- *   4.  NAN ** (anything except 0) is NAN						| 	(((x exists AND
- *   14. -0 ** (odd integer) = -( +0 ** (odd integer) )			|
- *   10. +0 ** (+anything except 0, NAN)               is +0	|
- *   11. -0 ** (+anything except 0, NAN, odd integer)  is +0	|
- *   12. +0 ** (-anything except 0, NAN)               is +INF	|
- *   13. -0 ** (-anything except 0, NAN, odd integer)  is +INF	| 		NOT (x == +-0 AND p < 0)) OR
- *   16. +INF ** (-anything except 0,NAN) is +0					| 	// already checked p==0
- *   17. -INF ** (anything)  = -0 ** (-anything)				| 	(x == +-INF AND p < 0) ) AND
- *   3.  (anything)  **   NAN is NAN							| 	(p exists OR
- *   9.  +-1         ** +-INF is NAN							|
- *   5.  +-(|x| > 1) **  +INF is +INF							|
- *   8.  +-(|x| < 1) **  -INF is +INF							|
- *   6.  +-(|x| > 1) **  -INF is +0								| 	(p == -INF AND (x < -1 OR x > 1)) OR
- *   7.  +-(|x| < 1) **  +INF is +0								| 	(p == +INF AND (x > -1 AND x < 1)) AND
- *   15. +INF ** (+anything except 0,NAN) is +INF				|
- * 	 19. (-anything except 0 and inf) ** (non-integer) is NAN	| NOT (x < 0 && p not int)))
+ * from {@link java.lang.FdLibm.Pow}:                                            | simplified logic:
+ * for x**p,                                                   |
+ *   1.  (anything) ** 0  is 1                                 | p == 0 OR
+ *   4.  NAN ** (anything except 0) is NAN                     | (((x exists AND
+ *   14. -0 ** (odd integer) = -( +0 ** (odd integer) )        |
+ *   10. +0 ** (+anything except 0, NAN)               is +0   |
+ *   11. -0 ** (+anything except 0, NAN, odd integer)  is +0   |
+ *   12. +0 ** (-anything except 0, NAN)               is +INF |
+ *   13. -0 ** (-anything except 0, NAN, odd integer)  is +INF | NOT (x == +-0 AND p < 0)) OR
+ *   16. +INF ** (-anything except 0,NAN) is +0                | // already checked p==0
+ *   17. -INF ** (anything)  = -0 ** (-anything)               | (x == +-INF AND p < 0) ) AND
+ *   3.  (anything)  **   NAN is NAN                           | (p exists OR
+ *   9.  +-1         ** +-INF is NAN                           |
+ *   5.  +-(|x| > 1) **  +INF is +INF                          |
+ *   8.  +-(|x| < 1) **  -INF is +INF                          |
+ *   6.  +-(|x| > 1) **  -INF is +0                            | (p == -INF AND (x < -1 OR x > 1)) OR
+ *   7.  +-(|x| < 1) **  +INF is +0                            | (p == +INF AND (x > -1 AND x < 1)) AND
+ *   15. +INF ** (+anything except 0,NAN) is +INF              |
+ *   19. (-anything except 0 and inf) ** (non-integer) is NAN  | NOT (x < 0 && p not int)))
+ * </pre>
  */
-public enum Operator implements ForkOperator<Double, Expression, Expression> {
+public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expression> {
 	POW(2, Math::pow, (a, b) -> (a.pow(b)).times((b.div(a).times(a.derive())).plus(LN.ofS(a).times(b.derive()))),
 		(x, p) -> p.equates(ZERO)
 				.or(((x.getDomainConditions()
@@ -56,7 +58,7 @@ public enum Operator implements ForkOperator<Double, Expression, Expression> {
 	ADD(4, Double::sum,     (a, b) -> a.derive().plus(b.derive()), true, GodelNumberSymbols.PLUS, "+", "plus"),
 	SUB(4, (a, b) -> a - b, (a, b) -> a.derive().minus(b.derive()), false, "-", "minus");
 
-	private Operator inverse;
+	private ArithmeticOperator inverse;
 	private Function<Expression, Expression> inverter;
 	private Function<Expression, Expression> invertAndSimplifier;
 
@@ -68,23 +70,23 @@ public enum Operator implements ForkOperator<Double, Expression, Expression> {
 	private final boolean commutative;
 	private final GodelNumberSymbols godelNumberSymbols;
 
-	Operator(int level, final Operable operable, final OperatorDerivable derivable,
-			 boolean commutative, final String... symbols) {
+	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable,
+					   boolean commutative, final String... symbols) {
 		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
 	}
 
-	Operator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
-			 boolean commutative, final String... symbols) {
+	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+					   boolean commutative, final String... symbols) {
 		this(level, operable, derivable, domainSupplier, commutative, GodelNumberSymbols.SYNTAX_ERROR, symbols);
 	}
 
-	Operator(int level, final Operable operable, final OperatorDerivable derivable,
-			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
+	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable,
+					   boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
 		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, godelNumberSymbols, symbols);
 	}
 
-	Operator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
-			 boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
+	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+					   boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
 		this.level = AssociativityPrecedenceLevel.of(level);
 		this.operable = operable;
 		this.derivable = derivable;
@@ -145,7 +147,7 @@ public enum Operator implements ForkOperator<Double, Expression, Expression> {
 	}
 
 	@Override
-	public Operator inverse() {
+	public ArithmeticOperator inverse() {
 		return inverse;
 	}
 
@@ -166,7 +168,7 @@ public enum Operator implements ForkOperator<Double, Expression, Expression> {
 	}
 
 	public Expression of(final Expression left, final Expression right) {
-		return new OperatorExpression(left, this, right);
+		return new ExpressionOperation(left, this, right);
 	}
 
 	/**

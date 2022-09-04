@@ -6,7 +6,7 @@ import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.expressions.functions.MultiArgFunction;
-import bran.tree.compositions.expressions.operators.Operator;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
 import bran.tree.structure.TreePart;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class ExpressionParser {
 	// 		.replaceAll("x", "\\s*\\(" + lineOperatorsRegex + "\\)\\s+)*[A-Za-z][A-Za-z_\\d]*\\s+\\(" + operatorsRegex + "\\)\\s*X")
 	// 		.replaceAll("n", "(\\(" + lineOperatorsRegex + "\\)\\s+)*\\((" + lineOperatorsRegex + "\\)\\s*)?")).matcher("");
 
-	public static final Map<String, Operator> expressionOperators = Parser.getSymbolMapping(Operator.values());
+	public static final Map<String, ArithmeticOperator> expressionOperators = Parser.getSymbolMapping(ArithmeticOperator.values());
 	public static final Map<String, MultiArgFunction> expressionLineOperators = Parser.getSymbolMapping(MultiArgFunction.values());
 
 	// private static final Set<String> statementLeftIdentifiers = "([{".chars().mapToObj(Character::toString).collect(Collectors.toSet());

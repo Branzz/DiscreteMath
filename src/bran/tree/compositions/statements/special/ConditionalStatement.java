@@ -1,6 +1,6 @@
 package bran.tree.compositions.statements.special;
 
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.statements.operators.LogicalOperator;
@@ -12,10 +12,10 @@ import java.util.List;
 
 public class ConditionalStatement extends SpecialStatement {
 
-	private final OperationStatement conditional;
+	private final StatementOperation conditional;
 
 	public ConditionalStatement(final Statement hypothesis, final Statement conclusion) {
-		conditional = new OperationStatement(hypothesis, LogicalOperator.IMPLIES, conclusion);
+		conditional = new StatementOperation(hypothesis, LogicalOperator.IMPLIES, conclusion);
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class ConditionalStatement extends SpecialStatement {
 	@Override
 	public Statement simplified() {
 		final Statement simplifiedConditional = conditional.simplified();
-		if (simplifiedConditional instanceof OperationStatement operationStatement && operationStatement.getOperator() == LogicalOperator.IMPLIES)
-			return new ConditionalStatement(operationStatement.getLeft(), operationStatement.getRight());
+		if (simplifiedConditional instanceof StatementOperation statementOperation && statementOperation.getOperator() == LogicalOperator.IMPLIES)
+			return new ConditionalStatement(statementOperation.getLeft(), statementOperation.getRight());
 		else
 			return simplifiedConditional;
 	}

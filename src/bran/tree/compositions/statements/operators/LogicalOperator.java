@@ -1,7 +1,7 @@
 package bran.tree.compositions.statements.operators;
 
-import bran.tree.compositions.statements.LineStatement;
-import bran.tree.compositions.statements.OperationStatement;
+import bran.tree.compositions.statements.UnaryStatement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
@@ -87,8 +87,8 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 		return level;
 	}
 
-	public OperationStatement of(final Statement left, final Statement right) {
-		return new OperationStatement(left, this, right);
+	public StatementOperation of(final Statement left, final Statement right) {
+		return new StatementOperation(left, this, right);
 	}
 
 	public LogicalOperator not() {
@@ -156,9 +156,9 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 	public interface AbsorbedOperationStatement {
 		Statement absorb(Statement a, Statement b);
 		static AbsorbedOperationStatement ofAbsorbed(final Statement A, final Statement B, Statement x) {
-			return x instanceof OperationStatement xO ? (a, b) -> new OperationStatement(a, xO.getOperator(), b)
+			return x instanceof StatementOperation xO ? (a, b) -> new StatementOperation(a, xO.getOperator(), b)
 						: x == A ? (a, b) -> a : x == B ? (a, b) -> b
-						: x instanceof LineStatement xL ? xL.getChild() instanceof OperationStatement xLC ? (a, b) -> new OperationStatement(a, xLC.getOperator(), b).not()
+						: x instanceof UnaryStatement xL ? xL.getChild() instanceof StatementOperation xLC ? (a, b) -> new StatementOperation(a, xLC.getOperator(), b).not()
 						: (a, b) -> (xL.getChild() == A ? a : b).not()
 						: x == TAUTOLOGY ? (a, b) -> TAUTOLOGY : (a, b) ->  CONTRADICTION;
 		}
@@ -184,8 +184,8 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 		VariableStatement B = new VariableStatement("b");
 
 		Map<Byte, Statement> ops =
-			Stream.concat(Arrays.stream(LogicalOperator.values()).map(o -> new OperationStatement(A, o, B)), // every possible logic outcome
-						  Stream.of(A, B, A.not(), B.not(), TAUTOLOGY, CONTRADICTION, new OperationStatement(A, IMPLIES, B).not(), new OperationStatement(A, REV_IMPLIES, B).not()))
+			Stream.concat(Arrays.stream(LogicalOperator.values()).map(o -> new StatementOperation(A, o, B)), // every possible logic outcome
+						  Stream.of(A, B, A.not(), B.not(), TAUTOLOGY, CONTRADICTION, new StatementOperation(A, IMPLIES, B).not(), new StatementOperation(A, REV_IMPLIES, B).not()))
 				  .collect(toMap(s -> { // converted to just 4 bits
 					  byte truth = 0b0000;
 					  for (int n = 0; n <= 3; n++) {

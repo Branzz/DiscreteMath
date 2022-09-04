@@ -7,14 +7,14 @@ import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
 import bran.exceptions.IllegalArgumentAmountException;
 import bran.tree.compositions.expressions.functions.MultiArgFunction;
-import bran.tree.compositions.expressions.operators.Operator;
-import bran.tree.compositions.expressions.operators.OperatorExpression;
+import bran.tree.compositions.expressions.operators.ArithmeticOperator;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static bran.tree.compositions.expressions.operators.Operator.MOD;
+import static bran.tree.compositions.expressions.operators.ArithmeticOperator.MOD;
 
 public class ExpressionGenerator {
 
@@ -53,7 +53,7 @@ public class ExpressionGenerator {
 		private boolean generated;
 		List<Variable> variables;
 
-		private static final Operator[] operators = Operator.values();
+		private static final ArithmeticOperator[] ARITHMETIC_OPERATORS = ArithmeticOperator.values();
 		private static final MultiArgFunction[] functions = MultiArgFunction.values();
 
 		// This could just be another method in the outer class, but it does exactly the same thing.
@@ -146,22 +146,22 @@ public class ExpressionGenerator {
 		}
 
 		private void appendOperationExpression() {
-			Operator nextOp = operators[rand.nextInt(operators.length)];
+			ArithmeticOperator nextOp = ARITHMETIC_OPERATORS[rand.nextInt(ARITHMETIC_OPERATORS.length)];
 			if (nextOp == MOD) // TODO ???
 				return;
 			boolean leftSide = rand.nextDouble() < leftSideProb;
 			Value nextVal = nextValue();
-			if (composite instanceof OperatorExpression opExp) {
+			if (composite instanceof ExpressionOperation opExp) {
 				if (rand.nextDouble() < DEEP_CHANCE) {
-					composite = leftSide ? new OperatorExpression(new OperatorExpression(nextVal, nextOp, opExp.getLeft()),
+					composite = leftSide ? new ExpressionOperation(new ExpressionOperation(nextVal, nextOp, opExp.getLeft()),
 																  opExp.getOperator(), opExp.getRight())
-										: new OperatorExpression(opExp.getLeft(), opExp.getOperator(),
-																 new OperatorExpression(opExp.getRight(), nextOp, nextVal));
+										: new ExpressionOperation(opExp.getLeft(), opExp.getOperator(),
+																 new ExpressionOperation(opExp.getRight(), nextOp, nextVal));
 				}
 			}
 			else {
-				composite = leftSide ? new OperatorExpression(composite, nextOp, nextVal)
-									: new OperatorExpression(nextVal, nextOp, composite);
+				composite = leftSide ? new ExpressionOperation(composite, nextOp, nextVal)
+									: new ExpressionOperation(nextVal, nextOp, composite);
 			}
 		}
 	}
