@@ -158,12 +158,14 @@ public class Main {
 	}
 
 	public static void verify() {
-		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class, StatementOperation.class,
-				UnaryStatementOperator.class, UnaryStatement.class, VariableStatement.class));
-		System.out.println(TreePart.treeVerifier(Expression.class, Double.class, ArithmeticOperator.class, ExpressionOperation.class,
-				ExpFunction.class, FunctionExpression.class, Variable.class));
-		System.out.println(TreePart.treeVerifier(Set.class, Set.class, SetOperator.class, SetOperation.class,
-				UnarySetOperator.class, UnarySet.class, null));
+		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class,
+				StatementOperation.class, UnaryStatementOperator.class, UnaryStatement.class, VariableStatement.class));
+
+		System.out.println(TreePart.treeVerifier(Expression.class, Double.class, ArithmeticOperator.class,
+				ExpressionOperation.class, ExpFunction.class, FunctionExpression.class, Variable.class));
+
+		System.out.println(TreePart.treeVerifier(Set.class, Set.class, SetOperator.class,
+				SetOperation.class, UnarySetOperator.class, UnarySet.class, null));
 	}
 
 	private static <T> T[] toArray(List<T> list) {
@@ -173,6 +175,5 @@ public class Main {
 		}
 		return toR;
 	}
-
 
 }

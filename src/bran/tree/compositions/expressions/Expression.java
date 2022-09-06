@@ -229,11 +229,11 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 				simplifiedStep = false;
 			} else if (thisSide instanceof FunctionExpression fExp) {
 				if (fExp.getFunction().getArgAmount() == 1) {
-					thisSide = fExp.getChildren()[0];
+					thisSide = fExp.getExpressions()[0];
 					map(otherSides, otherSide -> fExp.getFunction().inverse(0, otherSide));
 				} else if (fExp.getFunction().getArgAmount() == 2) {
-					boolean varsOnLeft = !fExp.getChildren()[0].getVariables().isEmpty();
-					boolean varsOnRight = !fExp.getChildren()[1].getVariables().isEmpty();
+					boolean varsOnLeft = !fExp.getExpressions()[0].getVariables().isEmpty();
+					boolean varsOnRight = !fExp.getExpressions()[1].getVariables().isEmpty();
 					if (varsOnLeft && varsOnRight) {
 						if (simplifiedStep)
 							throw new IllegalInverseExpressionException("can't create the inverse of " + fExp.getFunction());
@@ -243,7 +243,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 					} else if (!varsOnLeft && !varsOnRight) {
 						throw new IllegalStateException("simplification of constants was weak; coder's fault");
 					}
-					thisSide = fExp.getChildren()[0];
+					thisSide = fExp.getExpressions()[0];
 					map(otherSides, otherSide -> fExp.getFunction().inverse(varsOnLeft ? 0 : 1, otherSide));
 				}
 			} else if (thisSide instanceof Value) {

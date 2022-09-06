@@ -1,9 +1,9 @@
 package bran.tree.compositions.sets;
 
 import bran.tree.compositions.sets.operators.SetOperator;
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 
-public class SetOperation<E> implements Set<E>, Fork<Set, Set, SetOperator, Set> { // TODO generics
+public class SetOperation<E> implements Set<E>, MonoTypeFork<Set, Set, SetOperator> { // TODO generics
 
 	private final Set<E> left;
 	private final SetOperator operator;

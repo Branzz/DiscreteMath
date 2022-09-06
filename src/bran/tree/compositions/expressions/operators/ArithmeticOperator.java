@@ -1,5 +1,7 @@
 package bran.tree.compositions.expressions.operators;
 
+import bran.parser.matching.Pattern;
+import bran.parser.matching.Tokenable;
 import bran.tree.compositions.Definition;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
@@ -9,6 +11,7 @@ import bran.tree.compositions.statements.Statement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
+import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 import static bran.tree.compositions.expressions.ExpressionDisplayStyle.expressionStyle;
@@ -120,7 +123,7 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 		return operable.operate(left.evaluate(), right.evaluate());
 	}
 
-	public Expression derive(final Expression left, final Expression right) {
+	public Expression derive(Expression left, Expression right) {
 		return derivable.derive(left, right);
 	}
 
@@ -167,7 +170,7 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 		};
 	}
 
-	public Expression of(final Expression left, final Expression right) {
+	public Expression of(Expression left, Expression right) {
 		return new ExpressionOperation(left, this, right);
 	}
 
@@ -194,4 +197,17 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 	public Expression invertSimplifier(Expression expression) {
 		return invertAndSimplifier == null ? expression : invertAndSimplifier.apply(expression);
 	}
+
+	// @Override
+	// public Pattern<ExpressionOperation> pattern() {
+	// 	return new Pattern<>(precedence(),
+	// 						 (Constructor<ExpressionOperation>) ExpressionOperation.class.getConstructors()[0],
+	// 						 Expression.class, ArithmeticOperator.class, Expression.class);
+	// }
+
+	@Override
+	public Class<? extends Tokenable> constructedForkClass() {
+		return ExpressionOperation.class;
+	}
+
 }

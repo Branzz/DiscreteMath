@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special.equivalences;
 
+import bran.parser.abst.CompilerOp;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.godel.GodelBuilder;

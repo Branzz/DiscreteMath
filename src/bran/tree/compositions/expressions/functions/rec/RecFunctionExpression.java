@@ -9,12 +9,13 @@ import bran.tree.compositions.godel.GodelNumberSymbols;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static bran.tree.compositions.expressions.functions.rec.RecFunction.DERIVE;
 
-public class RecFunctionExpression extends AbstractFunctionExpression<Expression, RecFunction> {
+public class RecFunctionExpression extends AbstractFunctionExpression<RecFunction, Expression> {
 
 	RecFunction function;
 	Expression[] expressions;
@@ -87,7 +88,7 @@ public class RecFunctionExpression extends AbstractFunctionExpression<Expression
 	}
 
 	@Override
-	public Expression[] getChildren() {
+	public List<? extends Expression> getChildren() {
 		return new Expression[0];
 	}
 

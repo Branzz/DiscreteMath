@@ -1,0 +1,29 @@
+package bran.tree.structure;
+
+import bran.tree.structure.mapper.ForkOperator;
+
+import java.util.List;
+
+public interface MonoTypeFork<O, T, F extends ForkOperator<O, T, T>> extends MonoTypeChildBranch<F, T> {
+
+	T getLeft();
+
+	F getOperator();
+
+	T getRight();
+
+	default O operate() {
+		return getOperator().operate(getLeft(), getRight());
+	}
+
+	@Override
+	default F getMapper() {
+		return getOperator();
+	}
+
+	@Override
+	default List<? extends T> getChildren() {
+		return List.of(getLeft(), getRight());
+	}
+
+}

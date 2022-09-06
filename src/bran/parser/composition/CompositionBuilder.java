@@ -1,8 +1,7 @@
-package bran.parser;
+package bran.parser.composition;
 
 import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.ParseException;
-import bran.parser.CompositionParser.StringPart;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.ExpFunction;
@@ -353,7 +352,7 @@ public class CompositionBuilder {
 				for (Node n = from; n != to; n = n.next)
 					combinedStr.append(n.stringPart.string()).append(' ');
 				combinedStr.append(to.stringPart.string());
-				return new StringPart(combinedStr.toString(), from.stringPart.from(), to.stringPart.to(), CompositionParser.TokenType.UNKNOWN);
+				return new StringPart(combinedStr.toString(), from.stringPart.from(), to.stringPart.to(), TokenType.UNKNOWN);
 			}
 
 			// a -> x.prev -> op -> x.next -> b ===> a -> new -> b

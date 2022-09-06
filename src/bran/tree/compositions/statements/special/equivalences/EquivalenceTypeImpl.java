@@ -48,7 +48,7 @@ public enum EquivalenceTypeImpl implements EquivalenceType {
 	}
 
 	@Override
-	public  boolean evaluate(Expression left, Expression right) {
+	public boolean evaluate(Expression left, Expression right) {
 		return comparison.apply(left, right);
 	}
 

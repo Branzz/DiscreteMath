@@ -17,6 +17,7 @@ import bran.tree.compositions.Composition;
 import bran.tree.Equivalable;
 import bran.tree.Holder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -76,14 +77,16 @@ public abstract class Statement implements Composition, Equivalable<Statement>, 
 		return Statement.emptyStatement;
 	}
 
-	public abstract List<Statement> getChildren();
+	public List<? extends Composition> getChildren() {
+		return Collections.emptyList();
+	}
 
 	@Override
-	public void replaceAll(final Composition original, final Composition replacement) {
+	public void replaceAll(Composition original, Composition replacement) {
 		// do nothing
 	}
 
-	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
+	public abstract void appendGodelNumbers(GodelBuilder godelBuilder);
 
 //	public boolean logicallyEquivalentTo(Statement statement) {
 //		//check if structure matches
@@ -235,7 +238,7 @@ public abstract class Statement implements Composition, Equivalable<Statement>, 
 		@Override public void appendGodelNumbers(GodelBuilder godelBuilder) { }
 		@Override public boolean isConstant()						 { return false; }
 		@Override protected boolean getTruth()						 { return false; }
-		@Override public List<Statement> getChildren()				 { return emptyList(); }
+		@Override public List<Composition> getChildren()				 { return emptyList(); }
 		@Override public List<VariableStatement> getVariables()		 { return emptyList(); }
 		@Override public String toFullString()						 { return "()"; }
 	// @Override public Statement clone()							 { return emptyStatement; }

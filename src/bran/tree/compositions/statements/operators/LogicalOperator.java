@@ -1,5 +1,7 @@
 package bran.tree.compositions.statements.operators;
 
+import bran.parser.matching.Tokenable;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.statements.UnaryStatement;
 import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
@@ -139,6 +141,11 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 		boolean operate(boolean left, boolean right);
 	}
 
+	@Override
+	public Boolean operate(Statement left, Statement right) {
+		return operate(left.truth(), right.truth());
+	}
+
 	public boolean operate(boolean left, boolean right) {
 		return operable.operate(left, right);
 	}
@@ -259,6 +266,11 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 			}
 		}
 		// rightOperators.forEach((key, value) -> System.out.println(key + " = " + value.absorb(A, B)));
+	}
+
+	@Override
+	public Class<? extends Tokenable> constructedForkClass() {
+		return StatementOperation.class;
 	}
 
 }

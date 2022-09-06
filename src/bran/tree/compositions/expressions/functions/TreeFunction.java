@@ -45,4 +45,9 @@ public class TreeFunction implements AbstractFunction<TreePart> {
 		return AssociativityPrecedenceLevel.of(1);
 	}
 
+	@Override
+	public Function<TreePart[], TreePart> operator() {
+		return function;
+	}
+
 }

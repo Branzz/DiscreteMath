@@ -3,6 +3,7 @@ package bran.tree.compositions.statements.special.proofs;
 import java.util.ArrayList;
 import java.util.List;
 
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.statements.special.SpecialStatement;
@@ -67,7 +68,7 @@ public class Argument extends SpecialStatement {
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return null;
 	}
 

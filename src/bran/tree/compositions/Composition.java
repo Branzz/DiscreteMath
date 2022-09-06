@@ -1,15 +1,16 @@
 package bran.tree.compositions;
 
+import bran.parser.abst.CompositionTokens;
+import bran.parser.matching.Token;
+import bran.parser.matching.Tokenable;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.godel.GodelNumber;
 import bran.tree.compositions.godel.GodelNumberFactors;
 import bran.tree.structure.TreePart;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Function;
+public interface Composition extends TreePart, Tokenable {
 
-public interface Composition extends TreePart { // TODO group (theory)
+	// TODO group (theory)
 
 	String toFullString();
 
@@ -29,7 +30,8 @@ public interface Composition extends TreePart { // TODO group (theory)
 
 	// public abstract <T> Collection<T> getAll(Function<T, Boolean> matcher);
 
-	void appendGodelNumbers(final GodelBuilder godelBuilder);
+	default void appendGodelNumbers(GodelBuilder godelBuilder) {
+	}
 
 	default GodelNumberFactors godelNumber() {
 		final GodelBuilder godelBuilder = new GodelBuilder();
@@ -49,6 +51,16 @@ public interface Composition extends TreePart { // TODO group (theory)
 
 	static Composition empty() {
 		return emptyComposition;
+	}
+
+	// @Override
+	// Token token();
+
+	// final static SimpleToken<Composition> COMPOSITION_TOKEN = new SimpleToken<Composition>(getClass(), Set.SET_TOKEN);
+
+	@Override
+	default Token<? extends Composition> token() {
+		return CompositionTokens.token(this.getClass());
 	}
 
 }

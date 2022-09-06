@@ -7,7 +7,7 @@ import bran.tree.structure.mapper.BranchOperator;
 
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
 
-public enum UnaryStatementOperator implements BranchOperator {
+public enum UnaryStatementOperator implements BranchOperator<Boolean, Boolean> {
 	CONSTANT(b -> b,  1, "self", "self", "self", "self", "self", "self"),
 	NOT     (b -> !b, 1, "\u00ac", "~", "!", "~", "complement", "\\", "not");
 	/* All true, all false */
@@ -34,9 +34,14 @@ public enum UnaryStatementOperator implements BranchOperator {
 		};
 	}
 
-	public boolean operate(boolean value) { // TODO abstract
+	@Override
+	public Boolean operate(Boolean value) {
 		return lineOperable.operate(value);
 	}
+
+	// public boolean operate(boolean value) { // TODO abstract
+	// 	return lineOperable.operate(value);
+	// }
 
 	@Override
 	public AssociativityPrecedenceLevel level() {

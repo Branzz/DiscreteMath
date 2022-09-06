@@ -16,12 +16,12 @@ import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.equivalences.equation.EquationType;
 import bran.tree.compositions.statements.special.equivalences.inequality.Inequality;
 import bran.tree.compositions.statements.special.equivalences.inequality.InequalityType;
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 
 import java.util.*;
 import java.util.function.Function;
 
-public abstract class Equivalence extends SpecialStatement implements Fork<Boolean, Expression, EquivalenceType, Expression> {
+public abstract class Equivalence extends SpecialStatement implements MonoTypeFork<Boolean, Expression, EquivalenceType> {
 
 	protected Expression left;
 	protected Expression right;
@@ -226,7 +226,7 @@ public abstract class Equivalence extends SpecialStatement implements Fork<Boole
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<? extends Expression> getChildren() {
 		List<Statement> variables = new ArrayList<>();
 		// variables.addAll(left.getChildren());
 		// variables.addAll(right.getVariables());

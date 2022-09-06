@@ -1,10 +1,10 @@
 package bran.tree.supplier;
 
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 import bran.tree.structure.TreePart;
 import bran.tree.structure.mapper.ForkOperator;
 
 @FunctionalInterface
-public interface ForkSupplier <O, L extends TreePart, F extends ForkOperator<O, L, R>, R extends TreePart> {
-	Fork<O, L, F, R> get(L left, F forkFunction, R right);
+public interface ForkSupplier <O, T extends TreePart, F extends ForkOperator<O, T, T>> {
+	MonoTypeFork<O, T, F> get(T left, F forkFunction, T right);
 }

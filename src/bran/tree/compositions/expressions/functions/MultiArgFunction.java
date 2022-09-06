@@ -2,12 +2,15 @@ package bran.tree.compositions.expressions.functions;
 
 import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.IllegalInverseExpressionException;
+import bran.parser.matching.Tokenable;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.functions.appliers.DomainSupplier;
 import bran.tree.compositions.expressions.functions.appliers.FunctionDerivable;
 import bran.tree.compositions.expressions.functions.appliers.Functional;
+import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.statements.Statement;
+import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.VariableStatement;
 
 import java.util.function.Function;

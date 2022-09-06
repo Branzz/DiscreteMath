@@ -1,4 +1,4 @@
-package bran.parser;
+package bran.parser.composition;
 
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;

@@ -14,6 +14,7 @@ import bran.tree.compositions.statements.Statement;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,12 +22,12 @@ import java.util.stream.Stream;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 import static bran.tree.compositions.expressions.operators.ArithmeticOperator.POW;
 
-public class FunctionExpression extends AbstractFunctionExpression<Expression, ExpFunction> {
+public class FunctionExpression extends AbstractFunctionExpression<ExpFunction, Expression> {
 
 	final ExpFunction function;
 	final Expression[] expressions;
 
-	public FunctionExpression(final ExpFunction function, Expression... expressions) throws IllegalArgumentAmountException {
+	public FunctionExpression(ExpFunction function, Expression... expressions) throws IllegalArgumentAmountException {
 		super(Stream.concat(Stream.of(function.domain(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		expressions = Arrays.stream(expressions).filter(e -> !e.equals(Composition.empty())).toArray(Expression[]::new);
 		function.checkArguments(expressions.length);
@@ -34,14 +35,18 @@ public class FunctionExpression extends AbstractFunctionExpression<Expression, E
 		this.expressions = expressions;
 	}
 
-	public FunctionExpression(final ExpFunction function, boolean secure, Expression... expressions) {
+	public FunctionExpression(ExpFunction function, boolean secure, Expression... expressions) {
 		super(Stream.concat(Stream.of(function.domainS(expressions)), Arrays.stream(expressions).map(Expression::getDomainConditions)).toArray(Statement[]::new));
 		this.function = function;
 		this.expressions = expressions;
 	}
 
 	@Override
-	public Expression[] getChildren() {
+	public List<? extends Expression> getChildren() {
+		return List.of(expressions);
+	}
+
+	public Expression[] getExpressions() {
 		return expressions;
 	}
 
@@ -122,7 +127,7 @@ public class FunctionExpression extends AbstractFunctionExpression<Expression, E
 	@Override
 	public void appendGodelNumbers(final GodelBuilder godelBuilder) {
 		godelBuilder.push(GodelNumberSymbols.SYNTAX_ERROR);
-		boolean childIsVar = getChildren()[0] instanceof Value;
+		boolean childIsVar = this.getExpressions()[0] instanceof Value;
 		if (!childIsVar)
 			godelBuilder.push(GodelNumberSymbols.LEFT);
 		if (expressions.length == 1)
@@ -155,7 +160,7 @@ public class FunctionExpression extends AbstractFunctionExpression<Expression, E
 	@Override
 	public boolean equals(final Object other) {
 		return this == other || other instanceof FunctionExpression func && function.equals(func.getFunction())
-				&& Arrays.equals(expressions, func.getChildren());
+				&& Arrays.equals(expressions, func.getExpressions());
 	}
 
 	@Override

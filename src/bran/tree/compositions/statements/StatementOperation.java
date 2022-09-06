@@ -12,12 +12,12 @@ import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.godel.GodelBuilder;
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 
 import static bran.tree.compositions.statements.VariableStatement.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.*;
 
-public class StatementOperation extends Statement implements Fork<Boolean, Statement, LogicalOperator, Statement> {
+public class StatementOperation extends Statement implements MonoTypeFork<Boolean, Statement, LogicalOperator> {
 
 	private Statement left;
 	private LogicalOperator operator;
@@ -70,12 +70,12 @@ public class StatementOperation extends Statement implements Fork<Boolean, State
 //		this.right = right;
 //	}
 
-	public boolean operate(boolean truth1, boolean truth2) {
-		return operator.operate(truth1, truth2);
+	public boolean operate(boolean left, boolean right) {
+		return operator.operate(left, right);
 	}
 
-	public static boolean operate(boolean truth1, LogicalOperator operator, boolean truth2) {
-		return operator.operate(truth1, truth2);
+	public static boolean operate(boolean left, LogicalOperator operator, boolean right) {
+		return operator.operate(left, right);
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class StatementOperation extends Statement implements Fork<Boolean, State
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		ArrayList<Statement> current = new ArrayList<>();
 		current.add(this);
 		current.addAll(left.getChildren());

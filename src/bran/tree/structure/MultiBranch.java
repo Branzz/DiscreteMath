@@ -2,9 +2,11 @@ package bran.tree.structure;
 
 import bran.tree.structure.mapper.Mapper;
 
-public interface MultiBranch<T extends TreePart, F extends Mapper> extends Branch<T, F> {
+import java.util.List;
 
-	T[] getChildren();
+public interface MultiBranch<F extends Mapper, T extends TreePart> extends MonoTypeChildBranch<F, T> {
+
+	List<? extends T> getChildren();
 
 	F getFunction();
 

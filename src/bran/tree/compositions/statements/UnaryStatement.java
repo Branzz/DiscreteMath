@@ -146,7 +146,7 @@ public class UnaryStatement extends Statement implements MonoBranch<Statement, U
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		List<Statement> current = new ArrayList<>();
 		current.add(this);
 		current.addAll(child.getChildren());

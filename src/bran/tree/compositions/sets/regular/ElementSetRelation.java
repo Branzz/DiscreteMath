@@ -1,5 +1,8 @@
 package bran.tree.compositions.sets.regular;
 
+import bran.parser.abst.CompilerOp;
+import bran.parser.matching.Tokenable;
+import bran.tree.compositions.expressions.functions.MultiArgFunction;
 import bran.tree.compositions.sets.Set;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
@@ -21,6 +24,7 @@ public class ElementSetRelation<E> implements ForkOperator<Boolean, Set<E>, E> {
 			this.symbols = symbols;
 		}
 	}
+
 	public static <EE> ElementSetRelation<EE> CONTAINS_ELEMENT() {
 		return new ElementSetRelation<>(CONTAINS_ELEMENT, Set::containsImpl);
 	}
@@ -49,7 +53,7 @@ public class ElementSetRelation<E> implements ForkOperator<Boolean, Set<E>, E> {
 
 	@Override
 	public AssociativityPrecedenceLevel level() {
-		return null;
+		return AssociativityPrecedenceLevel.of(12);
 	}
 
 	@Override
@@ -72,6 +76,16 @@ public class ElementSetRelation<E> implements ForkOperator<Boolean, Set<E>, E> {
 	@Override
 	public int hashCode() {
 		return info.ID;
+	}
+
+	@Override
+	public Class<? extends Tokenable> constructedForkClass() {
+		return ElementSetStatement.class;
+	}
+
+	@CompilerOp
+	public static ElementSetRelation[] getTokens() {
+		return new ElementSetRelation[] { CONTAINS_ELEMENT(), NOT_CONTAINS_ELEMENT() };
 	}
 
 }

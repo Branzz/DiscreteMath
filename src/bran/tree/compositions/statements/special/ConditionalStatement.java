@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special;
 
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -55,7 +56,7 @@ public class ConditionalStatement extends SpecialStatement {
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return Collections.singletonList(conditional);
 	}
 

@@ -8,6 +8,7 @@ import bran.tree.compositions.sets.operators.UnarySetOperator;
 import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.compositions.sets.regular.*;
 import bran.tree.compositions.statements.Statement;
+import bran.tree.structure.TreePart;
 
 import static bran.tree.compositions.sets.SetStatementOperator.*;
 import static bran.tree.compositions.sets.regular.ElementSetRelation.*;

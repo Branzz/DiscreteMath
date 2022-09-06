@@ -1,5 +1,6 @@
 package bran.tree.compositions.statements.special;
 
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
 import bran.tree.compositions.godel.GodelNumberSymbols;
@@ -28,7 +29,7 @@ public class VerbalStatement extends Statement {
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return new ArrayList<>();
 	}
 

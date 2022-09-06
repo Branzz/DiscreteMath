@@ -1,13 +1,14 @@
 package bran.tree.compositions.sets;
 
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 
 import java.util.List;
 
-public class SetStatement<E> extends Statement implements Fork<Boolean, Set, SetStatementOperator, Set> {
+public class SetStatement<E> extends Statement implements MonoTypeFork<Boolean, Set, SetStatementOperator> {
 
 	private final Set<E> left;
 	private final SetStatementOperator operator;
@@ -65,7 +66,7 @@ public class SetStatement<E> extends Statement implements Fork<Boolean, Set, Set
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return null;
 	}
 

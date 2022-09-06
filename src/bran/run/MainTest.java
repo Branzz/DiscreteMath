@@ -1,7 +1,7 @@
 package bran.run;
 
 import bran.exceptions.ParseException;
-import bran.parser.CompositionParser;
+import bran.parser.composition.CompositionParser;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.sets.regular.MultiRangedSet;
 import bran.tree.compositions.statements.StatementImpl;

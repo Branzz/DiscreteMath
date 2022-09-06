@@ -2,7 +2,9 @@ package bran.tree.structure;
 
 import bran.tree.structure.mapper.BranchOperator;
 
-public interface MonoBranch<C extends TreePart, F extends BranchOperator> extends Branch<C, F> {
+import java.util.List;
+
+public interface MonoBranch<C extends TreePart, F extends BranchOperator> extends MonoTypeChildBranch<F, C> {
 
 	C getChild();
 
@@ -12,7 +14,7 @@ public interface MonoBranch<C extends TreePart, F extends BranchOperator> extend
 		return getOperator();
 	}
 
-	default Object getChildren() {
+	default List<? extends C> getChildren() {
 		return getChild();
 	}
 

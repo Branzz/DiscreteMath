@@ -1,6 +1,7 @@
 package bran.tree.compositions.statements.special.quantifier;
 
 import bran.tree.Holder;
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -46,7 +47,7 @@ public abstract class QuantifiedStatement<I, E extends Holder<I>> extends Specia
 	public abstract String exhaustiveProofString();
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		List<Statement> current = new ArrayList<>();
 		current.add(this);
 		current.addAll(statement.getChildren());

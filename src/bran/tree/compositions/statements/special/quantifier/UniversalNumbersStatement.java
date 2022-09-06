@@ -83,7 +83,7 @@ public class UniversalNumbersStatement extends SpecialStatement {
 	}
 
 	@Override
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return null;
 	}
 

@@ -22,7 +22,7 @@ public class Parser {
 		// 		= new TreeBuilder<>(LineSet::new, OperationSet::new);
 	}
 
-	static <T extends Mapper> Map<String, T> getSymbolMapping(T[] mapper) {
+	public static <T extends Mapper> Map<String, T> getSymbolMapping(T[] mapper) {
 		return Stream.of(mapper)
 					 .flatMap(o -> Arrays.stream(o.getSymbols())
 										 .distinct()

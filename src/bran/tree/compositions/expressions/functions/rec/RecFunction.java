@@ -57,5 +57,9 @@ public enum RecFunction implements AbstractFunction<Expression> {
 		return new RecFunctionExpression(this, input);
 	}
 
+	@Override
+	public Function<Expression[], Expression> operator() {
+		return function;
+	}
 }
 

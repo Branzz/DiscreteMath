@@ -8,7 +8,7 @@ import bran.tree.compositions.statements.operators.LogicalOperator;
 
 import java.util.*;
 
-import static bran.parser.CompositionParser.*;
+import static bran.parser.composition.CompositionParser.*;
 import static bran.parser.StatementParser.TokenType.*;
 import static bran.parser.StatementParser.TokenType.ExpressionZone.*;
 import static java.util.stream.Collectors.joining;

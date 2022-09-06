@@ -12,7 +12,7 @@ import bran.tree.structure.TreePart;
 import java.util.*;
 import java.util.function.Function;
 
-import static bran.parser.CompositionParser.*;
+import static bran.parser.composition.CompositionParser.*;
 import static bran.parser.ExpressionParser.TokenType.ExpressionZone.*;
 import static bran.parser.ExpressionParser.TokenType.*;
 import static java.util.stream.Collectors.toMap;

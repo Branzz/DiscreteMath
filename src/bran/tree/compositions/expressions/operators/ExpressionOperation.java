@@ -3,7 +3,7 @@ package bran.tree.compositions.expressions.operators;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.godel.GodelBuilder;
-import bran.tree.structure.Fork;
+import bran.tree.structure.MonoTypeFork;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.values.Variable;
@@ -15,13 +15,13 @@ import java.util.function.Function;
 import static bran.tree.compositions.expressions.operators.ArithmeticOperator.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 
-public class ExpressionOperation extends Expression implements Fork<Double, Expression, ArithmeticOperator, Expression> {
+public class ExpressionOperation extends Expression implements MonoTypeFork<Double, Expression, ArithmeticOperator> {
 
 	private Expression left;
 	private final ArithmeticOperator arithmeticOperator;
 	private Expression right;
 
-	public ExpressionOperation(final Expression left, final ArithmeticOperator arithmeticOperator, final Expression right) {
+	public ExpressionOperation(Expression left, ArithmeticOperator arithmeticOperator, Expression right) {
 		super(left.getDomainConditions().and(right.getDomainConditions()).and(arithmeticOperator.domain(left, right)));
 		this.left = left;
 		this.arithmeticOperator = arithmeticOperator;
@@ -242,12 +242,12 @@ public class ExpressionOperation extends Expression implements Fork<Double, Expr
 				}
 				else if (rightSimplified instanceof FunctionExpression rightFunction)
 					if (rightFunction.getFunction() == LOG) {
-						if (leftSimplified.equals(rightFunction.getChildren()[0]))
-							return rightFunction.getChildren()[1];
+						if (leftSimplified.equals(rightFunction.getExpressions()[0]))
+							return rightFunction.getExpressions()[1];
 					}
 					else if (rightFunction.getFunction() == LN)
-						if (Constant.E.equals(rightFunction.getChildren()[0]))
-							return rightFunction.getChildren()[1];
+						if (Constant.E.equals(rightFunction.getExpressions()[0]))
+							return rightFunction.getExpressions()[1];
 				break;
 			case MUL: // a^b * a = a^(b + 1)
 				if (leftSimplified instanceof Constant leftConstant) {
@@ -389,11 +389,11 @@ public class ExpressionOperation extends Expression implements Fork<Double, Expr
 				if (addFactorParts != null)
 					return addFactorParts.factor.times(addFactorParts.leftPart.plus(addFactorParts.rightPart)).simplified();
 				if (leftSimplified instanceof FunctionExpression leftFunction && rightSimplified instanceof FunctionExpression rightFunction) {
-					if (( leftFunction.getFunction() == LN ||  leftFunction.getFunction() == LOG &&  leftFunction.getChildren()[0].equals(Constant.E))
-					 && (rightFunction.getFunction() == LN || rightFunction.getFunction() == LOG && rightFunction.getChildren()[0].equals(Constant.E)))
+					if (( leftFunction.getFunction() == LN ||  leftFunction.getFunction() == LOG &&  leftFunction.getExpressions()[0].equals(Constant.E))
+					 && (rightFunction.getFunction() == LN || rightFunction.getFunction() == LOG && rightFunction.getExpressions()[0].equals(Constant.E)))
 						return LN.ofS(left.times(right).simplified());
-					else if (leftFunction.getFunction() == LOG && rightFunction.getFunction() == LOG && leftFunction.getChildren()[0].equals(rightFunction.getChildren()[1]))
-						return LOG.ofS(leftFunction.getChildren()[0], left.times(right).simplified());
+					else if (leftFunction.getFunction() == LOG && rightFunction.getFunction() == LOG && leftFunction.getExpressions()[0].equals(rightFunction.getExpressions()[1]))
+						return LOG.ofS(leftFunction.getExpressions()[0], left.times(right).simplified());
 				} // TODO extract exponent power
 				else if (leftSimplified instanceof ExpressionOperation leftOperator && rightSimplified instanceof ExpressionOperation rightOperator) {
 					if (leftOperator.getOperator() == DIV && rightOperator.getOperator() == DIV && leftOperator.getRight().equals(rightOperator.getRight()))
@@ -435,11 +435,11 @@ public class ExpressionOperation extends Expression implements Fork<Double, Expr
 					return subFactorParts.factor.times(subFactorParts.leftPart.minus(subFactorParts.rightPart)).simplified();
 				}
 				if (leftSimplified instanceof FunctionExpression leftFunction && rightSimplified instanceof FunctionExpression rightFunction) {
-					if ((leftFunction.getFunction() == LN || leftFunction.getFunction() == LOG && leftFunction.getChildren()[0].equals(Constant.E))
-						&& (rightFunction.getFunction() == LN || rightFunction.getFunction() == LOG && rightFunction.getChildren()[0].equals(Constant.E)))
+					if ((leftFunction.getFunction() == LN || leftFunction.getFunction() == LOG && leftFunction.getExpressions()[0].equals(Constant.E))
+						&& (rightFunction.getFunction() == LN || rightFunction.getFunction() == LOG && rightFunction.getExpressions()[0].equals(Constant.E)))
 						return LN.ofS(left.div(right).simplified());
-					else if (leftFunction.getFunction() == LOG && rightFunction.getFunction() == LOG && leftFunction.getChildren()[0].equals(rightFunction.getChildren()[1]))
-						return LOG.ofS(leftFunction.getChildren()[0], left.div(right).simplified());
+					else if (leftFunction.getFunction() == LOG && rightFunction.getFunction() == LOG && leftFunction.getExpressions()[0].equals(rightFunction.getExpressions()[1]))
+						return LOG.ofS(leftFunction.getExpressions()[0], left.div(right).simplified());
 				}
 				if (leftSimplified.equals(rightSimplified))
 					return Constant.ZERO;

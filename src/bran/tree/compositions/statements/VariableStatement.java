@@ -2,9 +2,8 @@ package bran.tree.compositions.statements;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.Holder;
@@ -84,7 +83,7 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		return value;
 	}
 
-	public List<Statement> getChildren() {
+	public List<Composition> getChildren() {
 		return new ArrayList<>();
 	}
 

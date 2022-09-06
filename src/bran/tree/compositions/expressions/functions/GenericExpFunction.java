@@ -143,7 +143,7 @@ public class GenericExpFunction extends Expression implements Holder<ExpFunction
 
 	@Override
 	public Expression derive() {
-		return DERIVE.function(this);
+		return DERIVE.operate(this);
 		// return new GenericFunction(name, expFunction.de);
 	}
 
