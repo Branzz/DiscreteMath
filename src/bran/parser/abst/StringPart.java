@@ -2,16 +2,17 @@ package bran.parser.abst;
 
 import bran.parser.matching.Token;
 
-public class StringPart2<T> {
+public class StringPart<T> {
 
-	private final String string;
+//	private final EnumerableRange<Character> string = new ArrayRange<>();
+	private final String string; // TODO lazily create? (PatternBuilder greedily)
 	private final int from;
 	private final int to;
 	private final boolean typeless;
 	private final Token<T> tokenType;
 	private final T actual;
 
-	public StringPart2(String string, int from, int to, T actual, Token<T> tokenType) {
+	public StringPart(String string, int from, int to, T actual, Token<T> tokenType) {
 		this.string = string;
 		this.from = from;
 		this.to = to;
@@ -20,7 +21,7 @@ public class StringPart2<T> {
 		this.tokenType = tokenType;
 	}
 
-	public StringPart2(String string, int from, int to) {
+	public StringPart(String string, int from, int to) {
 		this(string, from, to, null, null);
 	}
 
@@ -47,6 +48,10 @@ public class StringPart2<T> {
 
 	public T actual() {
 		return actual;
+	}
+
+	public StringPart<T> casted(T actual, Token<T> tokenType) {
+		return new StringPart<>(string, from, to, actual, tokenType);
 	}
 
 }

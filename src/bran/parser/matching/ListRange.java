@@ -1,7 +1,5 @@
 package bran.parser.matching;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ListRange<T> extends EnumerableRange<T> {
@@ -24,6 +22,11 @@ public class ListRange<T> extends EnumerableRange<T> {
 	@Override
 	public T set(int ind, T t) {
 		return list.set(from + ind, t);
+	}
+
+	@Override
+	public int size() {
+		return list.size();
 	}
 
 	/**

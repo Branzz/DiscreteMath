@@ -2,6 +2,7 @@ package bran.parser.abst;
 
 import bran.exceptions.ParseException;
 import bran.parser.matching.Pattern;
+import bran.parser.matching.Pattern.PatternBuilder;
 import bran.parser.matching.Token;
 import bran.parser.matching.Tokenable;
 import bran.tree.compositions.Composition;
@@ -99,17 +100,21 @@ public class CompositionTokens {
 		constructedTokens.put(token.representingClass(), token);
 	}
 
-	public static final AbstractCompiler<TreePart> compositionParser;
+	public static final AbstractCompiler<TreePart> compositionCompiler;
 
 	static {
 		Set<Pattern> patterns = new HashSet<>();
 		patterns.addAll(constructedTokenPatterns.values());
 		Collections.addAll(patterns,
-				new Pattern<>(e -> ((Composition) e.at(1).actual()), 0, LEFT_PAREN, token(Composition.class), RIGHT_PAREN),
-				new Pattern<>(0, e -> new TreePart[] {((TreePart) e.at(0).actual()), ((TreePart) e.at(2).actual())},
-							  token(TreePart.class), DELIMIT, token(TreePart.class))
+				new PatternBuilder<>(16)
+						.tokens(LEFT_PAREN, token(Composition.class), RIGHT_PAREN)
+						.pureReduceToOne(e -> (Composition) e.at(1).actual(), token(Composition.class)).build()
+
+//				new PatternBuilder<>(0)
+//						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
+//						.reduce(e -> new TreePart[] {((TreePart) e.at(0).actual()), ((TreePart) e.at(2).actual())}).build()
 		);
-		compositionParser = new AbstractCompiler<>(patterns, true);
+		compositionCompiler = new AbstractCompiler<>(patterns, true);
 	}
 
 }

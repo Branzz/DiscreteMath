@@ -1,9 +1,5 @@
 package bran.parser.matching;
 
-import bran.parser.abst.AbstractCompiler;
-
-import java.util.Arrays;
-
 public class ArrayRange<T> extends EnumerableRange<T> {
 
 	T[] arr;
@@ -24,6 +20,11 @@ public class ArrayRange<T> extends EnumerableRange<T> {
 		T prev = arr[from + ind];
 		arr[from + ind] = t;
 		return prev;
+	}
+
+	@Override
+	public int size() {
+		return arr.length;
 	}
 
 	/**

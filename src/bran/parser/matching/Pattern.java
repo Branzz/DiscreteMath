@@ -1,9 +1,8 @@
 package bran.parser.matching;
 
 import bran.parser.abst.AbstractCompiler;
-import bran.parser.abst.StringPart2;
+import bran.parser.abst.StringPart;
 import bran.parser.abst.CompositionTokens;
-import bran.parser.composition.CompositionParser;
 import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 
@@ -18,26 +17,26 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 
 	private final int size;
 	private final Token[] tokens;
-	private final Function<EnumerableRange<StringPart2>, StringPart2[]> reduce;
+	private final Function<EnumerableRange<StringPart>, StringPart[]> reduce;
 	private final AssociativityPrecedenceLevel level;
 
-	PatternBuilder
-	public Pattern(Token[] tokens, Function<EnumerableRange<StringPart2>, StringPart2[]> reduce, int level) {
+//	PatternBuilder
+	public Pattern(Token[] tokens, Function<EnumerableRange<StringPart>, StringPart[]> reduce, int level) {
 		this.size = tokens.length;
 		this.tokens = tokens;
 		this.reduce = reduce;
 		this.level = AssociativityPrecedenceLevel.of(level);
 	}
 
-	public Pattern(int level, Function<EnumerableRange<StringPart2>, StringPart2[]> reduce, Token... tokens) {
+	public Pattern(int level, Function<EnumerableRange<StringPart>, StringPart[]> reduce, Token... tokens) {
 		this(tokens, reduce, level);
 	}
 
-	public Pattern(Function<EnumerableRange<StringPart2>, StringPart2> reduce, int level, Token... tokens) {
+	public Pattern(Function<EnumerableRange<StringPart>, StringPart> reduce, int level, Token... tokens) {
 		this(tokens, e -> AbstractCompiler.asArray(reduce.apply(e)), level);
 	}
 
-	public Pattern(int level, Function<EnumerableRange<StringPart2>, StringPart2[]> reduce, Class... tokenClasses) {
+	public Pattern(int level, Function<EnumerableRange<StringPart>, StringPart[]> reduce, Class... tokenClasses) {
 		this(Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new), reduce, level);
 	}
 
@@ -45,13 +44,48 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 		this(Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new),
 			 e -> {
 				 try {
-					 return AbstractCompiler.asArray(constructor.newInstance(IntStream.range(0, tokenClasses.length).mapToObj(i -> tokenClasses[i].cast(e.at(i)))));
+					 return AbstractCompiler.asArray(constructor.newInstance(IntStream.range(0, tokenClasses.length)
+							 .mapToObj(i -> new StringPart("", 0, 0, tokenClasses[i].cast(e.at(i)), tokens[i]))));
 				 } catch (InstantiationException | IllegalAccessException | InvocationTargetException x) {
 					 x.printStackTrace();
 					 throw new RuntimeException("Pattern has bad type checking");
 				 }
 			 },
 			 level);
+	}
+
+	public static class PatternBuilder<RR extends Tokenable> {
+		private int level;
+		private Token[] tokens;
+		private Function<EnumerableRange<StringPart>, StringPart[]> reduce;
+
+		public PatternBuilder(int level) {
+			this.level = level;
+		}
+
+		public Pattern<RR> build() {
+			return new Pattern<>(tokens, reduce, level);
+		}
+		public PatternBuilder<RR> reduce(Function<EnumerableRange<StringPart>, StringPart[]> reduce) {
+			this.reduce = reduce;
+			return this;
+		}
+		public PatternBuilder<RR> reduceToOne(Function<EnumerableRange<StringPart>, StringPart> reduce) {
+			this.reduce = e -> new StringPart[] { reduce.apply(e) };
+			return this;
+		}
+		public PatternBuilder<RR> pureReduceToOne(Function<EnumerableRange<StringPart>, Object> reduce, Token token) {
+			this.reduce = e -> new StringPart[] { EnumerableRange.reduce(e).casted(reduce.apply(e), token) };
+			return this;
+		}
+		public PatternBuilder<RR> tokens(Token... tokens) {
+			this.tokens = tokens;
+			return this;
+		}
+		public PatternBuilder<RR> tokens(Class... tokenClasses) {
+			this.tokens = Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new);
+			return this;
+		}
 	}
 
 	public int size() {
@@ -70,7 +104,7 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 		return level.associativity();
 	}
 
-	public boolean matches(List<StringPart2> stringParts, int tokensInd) {
+	public boolean matches(List<StringPart> stringParts, int tokensInd) {
 		return matches(new ListRange<>(stringParts, tokensInd));
 	}
 
@@ -86,7 +120,7 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 	// 					   .allMatch(i -> tokens[i].equalsToken(others.at(i)));
 	// }
 
-	public boolean matches(EnumerableRange<StringPart2> arrayRange) {
+	public boolean matches(EnumerableRange<StringPart> arrayRange) {
 		// for (int i = 0; i < size; i++) {
 		// 	if (!tokens[i].matches(arrayRange.at(i, associativity()).string()))
 		// 		return false;
@@ -98,14 +132,14 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 
 	}
 
-	public StringPart2[] reduce(List<StringPart2> input, int inputInd) {
-		ListRange<StringPart2> listRange = new ListRange<>(input, inputInd);
-		StringPart2[] reduce = reduce(listRange);
-		listRange.replaced(size, Arrays.stream(reduce).map(r -> new StringPart2<R>("", 0, 0, r, r.token())).toArray(StringPart2[]::new));
+	public StringPart[] reduce(List<StringPart> input, int inputInd) {
+		ListRange<StringPart> listRange = new ListRange<>(input, inputInd);
+		StringPart[] reduce = reduce(listRange);
+		listRange.replaced(size, Arrays.stream(reduce).map(r -> new StringPart<R>("", 0, 0, r, r.token())).toArray(StringPart[]::new));
 		return reduce;
 	}
 
-	public StringPart2[] reduce(EnumerableRange<StringPart2> input) {
+	public StringPart[] reduce(EnumerableRange<StringPart> input) {
 		return reduce.apply(input);
 	}
 
