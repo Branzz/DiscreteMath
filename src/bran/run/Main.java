@@ -1,5 +1,6 @@
 package bran.run;
 
+import bran.tree.compositions.expressions.LimitExpression;
 import bran.tree.compositions.expressions.functions.ExpFunction;
 import bran.tree.compositions.expressions.functions.FunctionExpression;
 import bran.tree.compositions.expressions.operators.ArithmeticOperator;
@@ -55,7 +56,7 @@ public class Main {
 		// mountainProof();
 		// StartExpressionViewer.start();
 
-		verify();
+		// verify();
 
 		// Variable x = new Variable("x");
 		//
@@ -104,6 +105,8 @@ public class Main {
 		// System.out.println(ExpressionParser.parseExpression("e^xy+yxe^xy").summaryString());
 
 		// showcase();
+
+		System.out.println(Definition.LIMIT.of(Variable.of("x").approaches(Constant.ONE).of(Variable.of("x").squared())));
 
 	}
 

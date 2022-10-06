@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface MonoTypeChildBranch<F extends Mapper, T> extends PolyTypeChildBranch<F> {
 
-	List<? extends T> getChildren();
+	List<? super T> getChildren();
 
 }

@@ -79,14 +79,17 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		godelBuilder.push(godelBuilder.getVar(this, false));
 	}
 
+	@Override
 	public boolean getTruth() {
 		return value;
 	}
 
-	public List<Composition> getChildren() {
+	@Override
+	public List<Statement> getChildren() {
 		return new ArrayList<>();
 	}
 
+	@Override
 	public List<VariableStatement> getVariables() {
 		ArrayList<VariableStatement> variable = new ArrayList<>();
 		variable.add(this);
@@ -113,6 +116,7 @@ public class VariableStatement extends Statement implements Leaf, Holder<Boolean
 		this.value = value;
 	}
 
+	@Override
 	public String toFullString() {
 		return name;
 	}

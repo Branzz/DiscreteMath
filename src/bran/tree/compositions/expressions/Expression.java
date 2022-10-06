@@ -415,16 +415,16 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 	// Imperative style assistance classes
 
 	public static record LimitApproachesPart(Expression approaches, Expression approached) {
-		public Expression of(Expression function) {
+		public LimitExpression of(Expression function) {
 			return new LimitExpression(approaches, approached, function);
 		}
 	}
 
 	public static record LogBasePart(Expression base) {
-		public Expression of(Expression expression) throws IllegalArgumentAmountException {
+		public FunctionExpression of(Expression expression) throws IllegalArgumentAmountException {
 			return LOG.of(base, expression);
 		}
-		public Expression ofS(Expression expression) {
+		public FunctionExpression ofS(Expression expression) {
 			return LOG.ofS(base, expression);
 		}
 	}

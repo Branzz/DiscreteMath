@@ -22,7 +22,7 @@ public interface MonoTypeFork<O, T, F extends ForkOperator<O, T, T>> extends Mon
 	}
 
 	@Override
-	default List<? extends T> getChildren() {
+	default List<? super T> getChildren() {
 		return List.of(getLeft(), getRight());
 	}
 

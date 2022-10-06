@@ -15,7 +15,7 @@ public interface MonoBranch<C extends TreePart, F extends BranchOperator> extend
 	}
 
 	default List<? extends C> getChildren() {
-		return getChild();
+		return List.of(getChild());
 	}
 
 }

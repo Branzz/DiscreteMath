@@ -1,6 +1,5 @@
 package bran.tree.compositions.sets;
 
-import bran.tree.compositions.Composition;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -66,7 +65,7 @@ public class SetStatement<E> extends Statement implements MonoTypeFork<Boolean, 
 	}
 
 	@Override
-	public List<Composition> getChildren() {
+	public List<? extends Set> getChildren() {
 		return null;
 	}
 

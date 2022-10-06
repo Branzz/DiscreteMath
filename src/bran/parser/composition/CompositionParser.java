@@ -26,38 +26,6 @@ public class CompositionParser {
 
 	static final Map<String, EquivalenceTypeImpl> equivalenceOperators = Parser.getSymbolMapping(EquivalenceTypeImpl.values());
 
-	private enum NumberSuperScript implements OrderedOperator {
-		S0(0, "\u2070"),
-		S1(1, "\u00B9"),
-		S2(2, "\u00B2"),
-		S3(3, "\u00B3"),
-		S4(4, "\u2074"),
-		S5(5, "\u2075"),
-		S6(6, "\u2076"),
-		S7(7, "\u2077"),
-		S8(8, "\u2078"),
-		S9(9, "\u2079");
-
-		private final int value;
-		private final String[] symbols;
-
-		NumberSuperScript(int value, String... symbols) {
-			this.value = value;
-			this.symbols = symbols;
-		}
-
-		@Override
-		public String[] getSymbols() {
-			return symbols;
-		}
-
-		@Override
-		public AssociativityPrecedenceLevel level() {
-			return ArithmeticOperator.POW.level();
-		}
-
-	}
-
 	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = //expected zone param
 			// Map.of(MultiArgFunction.class, FUNCTION,
 			// 	   LineOperator.class, LINE_OPERATOR,

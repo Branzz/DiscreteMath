@@ -48,7 +48,8 @@ public class SimpleToken<T> implements Token {
 
 	@Override
 	public boolean equalSubToken(Token child) {
-		return children != null && children.contains(child);
+		return (children != null && children.contains(child))
+				|| (child instanceof ConstantToken cT && cT.equalSubToken(this)); // TODO strange
 	}
 
 	public Class<T> representingClass() {

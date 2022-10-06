@@ -103,13 +103,13 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 		// POW.inverse = LOG;
 		MUL.inverse = DIV; // 1 / x
 		DIV.inverse = MUL; // 1 / x
-		MOD.inverse = MOD;
+		MOD.inverse = MOD; // TODO
 		ADD.inverse = SUB; // 0 - x
 		SUB.inverse = ADD; // 0 - x
 
-		SUB.inverter = e -> NEG_ONE.times(e);
+		SUB.inverter = NEG_ONE::times;
 		SUB.invertAndSimplifier = e -> ZERO.minus(e).simplified(ZERO, e);
-		DIV.inverter = e -> ONE.div(e);
+		DIV.inverter = ONE::div;
 		DIV.invertAndSimplifier = e -> ONE.div(e).simplified(ONE, e);
 
 	}
@@ -204,10 +204,5 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 	// 						 (Constructor<ExpressionOperation>) ExpressionOperation.class.getConstructors()[0],
 	// 						 Expression.class, ArithmeticOperator.class, Expression.class);
 	// }
-
-	@Override
-	public Class<? extends Tokenable> constructedForkClass() {
-		return ExpressionOperation.class;
-	}
 
 }

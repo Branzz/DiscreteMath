@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static bran.parser.abst.AbstractCompiler.asArray;
 import static bran.tree.compositions.godel.GodelNumberSymbols.*;
 import static bran.tree.compositions.sets.SetDisplayStyle.setStyle;
 import static bran.tree.compositions.statements.StatementDisplayStyle.statementStyle;
@@ -23,14 +24,14 @@ import static java.util.stream.Collectors.toMap;
 
 public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statement> {
 
-	OR		   ((l, r) -> l || r,	 8, true,  (l, r) -> new Object[] { l, LOGICAL_OR, r }, "\u22c1", "or", "||", "|", "union", "\u2229", "or"),
-	NOR 	   ((l, r) -> !(l || r), 8, true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT } , "\u22bd", "nor", "nor", "nor"),
-	IMPLIES	   ((l, r) -> !l || r,	 9, false, (l, r) -> new Object[] { l, IF_THEN, r }, "\u21d2", "->", "implies", "implies"),
-	REV_IMPLIES((l, r) -> l || !r, 	 9, false, (l, r) -> new Object[] { r, IF_THEN, l }, "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
-	NAND	   ((l, r) -> !(l && r), 6, true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT}, "\u22bc", "nand", "nand", "nand"),
-	AND		   ((l, r) -> l && r,	 6, true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT}, "\u22c0", "and", "&&", "&", "intersection", "\u222a", "and"),
-	XOR		   ((l, r) -> l ^ r,	 7, true,  (l, r) -> new Object[] { LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT }, "\u22bb", "xor", "xor", "xor", "symmetric difference", "!="),
-	XNOR	   ((l, r) -> l == r,	 5, true,  (l, r) -> new Object[] { LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT }, "\u2299", "xnor", "==", "=="); // ~
+	OR		   ((l, r) -> l || r,	 8, true,  (l, r) -> asArray(l, LOGICAL_OR, r), "\u22c1", "or", "||", "|", "union", "\u2229", "or"),
+	NOR 	   ((l, r) -> !(l || r), 8, true,  (l, r) -> asArray(LOGICAL_NOT, LEFT, OR.buffer(l, r), RIGHT), "\u22bd", "nor", "nor", "nor"),
+	IMPLIES	   ((l, r) -> !l || r,	 9, false, (l, r) -> asArray(l, IF_THEN, r), "\u21d2", "->", "implies", "implies"),
+	REV_IMPLIES((l, r) -> l || !r, 	 9, false, (l, r) -> asArray(r, IF_THEN, l), "\u21d0", "<-", "implied by", "implied by", "reverse implies"),
+	NAND	   ((l, r) -> !(l && r), 6, true,  (l, r) -> asArray(LOGICAL_NOT, LEFT, l, RIGHT, LOGICAL_OR, LOGICAL_NOT, LEFT, r, RIGHT), "\u22bc", "nand", "nand", "nand"),
+	AND		   ((l, r) -> l && r,	 6, true,  (l, r) -> asArray(LOGICAL_NOT, LEFT, NAND.buffer(l, r), RIGHT), "\u22c0", "and", "&&", "&", "intersection", "\u222a", "and"),
+	XOR		   ((l, r) -> l ^ r,	 7, true,  (l, r) -> asArray(LEFT, IMPLIES.buffer(l, r), RIGHT, LOGICAL_OR, LEFT, REV_IMPLIES.buffer(l, r), RIGHT), "\u22bb", "xor", "xor", "xor", "symmetric difference", "!="),
+	XNOR	   ((l, r) -> l == r,	 5, true,  (l, r) -> asArray(LOGICAL_NOT, LEFT, XOR.buffer(l, r), RIGHT), "\u2299", "xnor", "==", "=="); // ~
 	// NOT(-1, "\u00ac", "~", "!", "~", "complement", "\\", "not"),
 	// EQUIVALENT(-1, "\u8801", "=", "equivalent to", "equivalent to", "equals"),
 
@@ -266,11 +267,6 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 			}
 		}
 		// rightOperators.forEach((key, value) -> System.out.println(key + " = " + value.absorb(A, B)));
-	}
-
-	@Override
-	public Class<? extends Tokenable> constructedForkClass() {
-		return StatementOperation.class;
 	}
 
 }

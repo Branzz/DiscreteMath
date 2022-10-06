@@ -78,11 +78,6 @@ public class ElementSetRelation<E> implements ForkOperator<Boolean, Set<E>, E> {
 		return info.ID;
 	}
 
-	@Override
-	public Class<? extends Tokenable> constructedForkClass() {
-		return ElementSetStatement.class;
-	}
-
 	@CompilerOp
 	public static ElementSetRelation[] getTokens() {
 		return new ElementSetRelation[] { CONTAINS_ELEMENT(), NOT_CONTAINS_ELEMENT() };

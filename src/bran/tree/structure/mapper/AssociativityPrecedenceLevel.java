@@ -2,7 +2,7 @@ package bran.tree.structure.mapper;
 
 import static bran.tree.structure.mapper.Associativity.*;
 
-public record AssociativityPrecedenceLevel(int precedence, Associativity associativity) {
+public record AssociativityPrecedenceLevel(int precedence, Associativity associativity) { // TODO to interface
 
 	public static final int MIN = 0;
 	public static final int MAX;

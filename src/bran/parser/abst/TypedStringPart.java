@@ -2,16 +2,23 @@ package bran.parser.abst;
 
 import bran.parser.matching.Token;
 
-public class TypedStringPart<T> {
+public class TypedStringPart<T> extends StringPart {
 
-	StringPart<T> stringPart;
-	private final Token<T> tokenType;
 	private final T actual;
+	private final Token<T> tokenType;
 
-	public TypedStringPart(StringPart<T> stringPart, Token<T> tokenType, T actual) {
-		this.stringPart = stringPart;
-		this.tokenType = tokenType;
+	public TypedStringPart(String string, int from, int to, T actual, Token<T> tokenType) {
+		super(string, from, to);
 		this.actual = actual;
+		this.tokenType = tokenType;
+	}
+
+	public T actual() {
+		return actual;
+	}
+
+	public Token token() {
+		return tokenType;
 	}
 
 }

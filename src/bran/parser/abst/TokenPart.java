@@ -3,14 +3,13 @@ package bran.parser.abst;
 import java.util.List;
 import java.util.Objects;
 
-public record TokenPart<T>(boolean splittable, List<StringPart<T>> prefixes) {
+public record TokenPart(boolean splittable, List<TypelessStringPart> prefixes) {
 
-	public StringPart<T> lastPrefix() {
+	public TypelessStringPart lastPrefix() {
 		if (prefixes.isEmpty())
 			return null;
 		return prefixes.get(prefixes.size() - 1);
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -18,7 +17,7 @@ public record TokenPart<T>(boolean splittable, List<StringPart<T>> prefixes) {
 			return true;
 		if (obj == null || obj.getClass() != this.getClass())
 			return false;
-		var that = (TokenPart<T>) obj;
+		var that = (TokenPart) obj;
 		return this.splittable == that.splittable && Objects.equals(this.prefixes, that.prefixes);
 	}
 
@@ -31,6 +30,5 @@ public record TokenPart<T>(boolean splittable, List<StringPart<T>> prefixes) {
 	public String toString() {
 		return "TokenPart2[" + "splittable=" + splittable + ", " + "prefixes=" + prefixes + ']';
 	}
-
 
 }
