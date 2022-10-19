@@ -15,6 +15,10 @@ public enum NumberSuperScript implements OrderedOperator { // TODO every super s
 		this.symbols = symbols;
 	}
 
+	public int exponentValue() {
+		return value;
+	}
+
 	@Override
 	public String[] getSymbols() {
 		return symbols;
@@ -23,10 +27,6 @@ public enum NumberSuperScript implements OrderedOperator { // TODO every super s
 	@Override
 	public AssociativityPrecedenceLevel level() {
 		return ArithmeticOperator.POW.level();
-	}
-
-	public int exponentValue() {
-		return value;
 	}
 
 }

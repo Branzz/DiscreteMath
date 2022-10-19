@@ -56,7 +56,7 @@ public class Main {
 		// mountainProof();
 		// StartExpressionViewer.start();
 
-		// verify();
+		verify();
 
 		// Variable x = new Variable("x");
 		//

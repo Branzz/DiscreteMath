@@ -119,34 +119,34 @@ public class CompositionTokens {
 	static {
 		Set<Pattern> patterns = new HashSet<>();
 		patterns.addAll(constructedTokenPatterns.values());
-		Collections.addAll(patterns
-				// new PatternBuilder<>(0)
-				// 		.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
-				// 		.reduce(e -> asArray(e.at(0), e.at(2))).build(),
-				// new PatternBuilder<>(POW) // TODO correct precedence?
-				// 		.tokens(token(NumberSuperScript.class))
-				// 		.reduce(e -> {
-				// 			final int value = ((NumberSuperScript) e.at(0).actual()).exponentValue();
-				// 			return asArray(
-				// 					new TypelessStringPart("^", e.at(0).from(), e.at(0).to(), POW, new ConstantToken(POW)),
-				// 					new TypelessStringPart(Integer.toString(value), e.at(0).from(), e.at(0).to(), Constant.of(value), token(Constant.class)));
-				// 				}
-				// 		).build(),
-				// new PatternBuilder<>(16)
-				// 		.tokens(LEFT_PAREN, token(TreePart.class), RIGHT_PAREN)
-				// 		.pureReduceToOne(e -> e.at(1).actual(), token(TreePart.class)).build(),
-				// new PatternBuilder<>(16)
-				// 		.tokens(LEFT_PAREN, token(Composition.class), COMMA, token(Composition.class), RIGHT_PAREN)
-				// 		.reduce(e -> asArray(e.at(1), e.at(3))).build(),
-				// new PatternBuilder<>(MUL) // (a)(b) = a*b
-				// 		.tokens(LEFT_PAREN, token(Expression.class), RIGHT_PAREN, LEFT_PAREN, token(Expression.class), RIGHT_PAREN)
-				// 		.pureReduceToOne(e -> ((Expression) e.at(1).actual()).times((Expression) e.at(4).actual()), token(Expression.class)).build(),
-				// new PatternBuilder<>(POW)
-				// 		.tokens(token(MultiArgFunction.class), new ConstantToken(POW), token(Constant.class), token(CommaSeparatedComposition.class))
-				// 		.pureReduceToOne(e -> ((MultiArgFunction) e.at(0).actual())
-				// 									  .of(((CommaSeparatedComposition) e.at(3).actual()).asExpressions().toArray(Expression[]::new))
-				// 									  .pow((Constant) e.at(2).actual()),
-				// 						 token(Expression.class)).build()
+		Collections.addAll(	//	 patterns
+				new PatternBuilder<>(0)
+						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
+						.reduce(e -> asArray(e.at(0), e.at(2))).build(),
+				new PatternBuilder<>(POW) // TODO correct precedence?
+						.tokens(token(NumberSuperScript.class))
+						.reduce(e -> {
+							final int value = ((NumberSuperScript) e.at(0).actual()).exponentValue();
+							return asArray(
+									new TypelessStringPart("^", e.at(0).from(), e.at(0).to(), POW, new ConstantToken(POW)),
+									new TypelessStringPart(Integer.toString(value), e.at(0).from(), e.at(0).to(), Constant.of(value), token(Constant.class)));
+								}
+						).build(),
+				new PatternBuilder<>(16)
+						.tokens(LEFT_PAREN, token(TreePart.class), RIGHT_PAREN)
+						.pureReduceToOne(e -> e.at(1).actual(), token(TreePart.class)).build(),
+				new PatternBuilder<>(16)
+						.tokens(LEFT_PAREN, token(Composition.class), COMMA, token(Composition.class), RIGHT_PAREN)
+						.reduce(e -> asArray(e.at(1), e.at(3))).build(),
+				new PatternBuilder<>(MUL) // (a)(b) = a*b
+						.tokens(LEFT_PAREN, token(Expression.class), RIGHT_PAREN, LEFT_PAREN, token(Expression.class), RIGHT_PAREN)
+						.pureReduceToOne(e -> ((Expression) e.at(1).actual()).times((Expression) e.at(4).actual()), token(Expression.class)).build(),
+				new PatternBuilder<>(POW)
+						.tokens(token(MultiArgFunction.class), new ConstantToken(POW), token(Constant.class), token(CommaSeparatedComposition.class))
+						.pureReduceToOne(e -> ((MultiArgFunction) e.at(0).actual())
+													  .of(((CommaSeparatedComposition) e.at(3).actual()).asExpressions().toArray(Expression[]::new))
+													  .pow((Constant) e.at(2).actual()),
+										 token(Expression.class)).build()
 
 //				new PatternBuilder<>(0)
 //						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
