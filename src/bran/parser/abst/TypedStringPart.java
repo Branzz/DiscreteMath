@@ -2,6 +2,7 @@ package bran.parser.abst;
 
 import bran.parser.matching.Token;
 
+@Deprecated
 public class TypedStringPart<T> extends StringPart {
 
 	private final T actual;

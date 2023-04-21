@@ -1,20 +1,23 @@
 package bran.parser.abst;
 
+import bran.combinatorics.CombinatorList;
+import bran.combinatorics.Combinatorics;
 import bran.exceptions.ParseException;
-import bran.parser.composition.TokenType;
 import bran.parser.matching.Pattern;
+import bran.parser.matching.Token;
 import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import org.intellij.lang.annotations.RegExp;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import static bran.parser.composition.TokenType.UNKNOWN;
-import static bran.parser.composition.TokenType.WHITESPACE;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 public class AbstractCompiler<T> {
 
@@ -56,37 +59,88 @@ public class AbstractCompiler<T> {
 		this(patterns, "\\s+", delimitByLetterSymbolChange);
 	}
 
-	public T compile(String text) {
-		List<DynamicTokenPart> tokenParts = new ArrayList<>(text.length());
+	List<List<StringPart>> tokenMatrix;
 
+	public StringPart get(int from, int to) {
+		return tokenMatrix.get(from).get(to);
+	}
+
+
+	public Set<Object> compile(String text, Token type) {
+//		// TODO Scope parentScope = new Scope();
+		List<DynamicTokenPart> tokenParts = new ArrayList<>(text.length());
 		// List<TypelessStringPart> tokens = tokenize(text);
-		List<TypelessStringPart> tokens = null;
-		for (int assoc = AssociativityPrecedenceLevel.MIN; assoc < AssociativityPrecedenceLevel.MAX; assoc++) {
-			Set<Pattern> precedencePatterns = this.patterns.get(assoc);
-			boolean ltr = AssociativityPrecedenceLevel.of(assoc).associativity() != Associativity.RIGHT_TO_LEFT; // NON_ASSOCIATIVE is LTR here
-			for (int tokenInd = 0; tokenInd < tokens.size(); tokenInd++) {
-				int flippedInd = ltr ? tokenInd : tokens.size() - tokenInd - 1;
-				Set<Pattern> matches = precedencePatterns.stream()
-														 // .filter(p -> p.matches(tokens, flippedInd))
-														 .collect(Collectors.toSet());
-				if (matches.size() > 1) {
-					throw new ParseException("ambiguous operation call \"%s\" at index %d", tokens.get(flippedInd), tokens.get(flippedInd).from());
-				} else if (matches.size() == 1) {
-					Pattern pattern = matches.iterator().next();
-					pattern.reduce(tokens, flippedInd);
-				}
-			}
+
+		tokenMatrix = new ArrayList<>(text.length());
+		for (int i = 0; i < text.length(); i++) {
+			ArrayList<StringPart> layer = new ArrayList<>(text.length() - i + 1);
+			for (int j = i; j < text.length(); j++)
+				layer.add(new StringPart(i, j));
+			tokenMatrix.add(layer);
 		}
+
+		List<StringPart> tokens = tokenMatrix.get(0);
 		if (tokens.size() == 0)
 			// empty input...
 			;
 		else if (tokens.size() > 1)
 			// couldn't reduce...
 			;
+		// if it has instance
 		// if all of the last things aren't tokens
-		//error hangling
+		//error handling
 		// return tokens.get(0).actual();
-		return null;
+		return tokens.get(0).getInstanceCache();
+	}
+
+	// boolean matches(text, token)
+	// for all text, each token O(T*t)
+
+	// token matches(text) -- can avoid O(t)? // better when there is no overlap (" 3 "; 3 will always be a number)
+	// for all text O(T)
+
+	// Pattern#matches -- can check ordered by easiest to calculate token (enum, Set, ..., regex)
+
+	/**
+	 * <pre>
+	 *      abcde
+	 * start 1 3 end
+	 *       bc
+	 * </pre>
+	 * @param start inclusive
+	 * @param end exclusive
+	 */
+	private List<StringPart> compileRange(String text, int start, int end, Token type) {
+		final int length = end - start;
+		for (int assoc = AssociativityPrecedenceLevel.MIN; assoc < AssociativityPrecedenceLevel.MAX; assoc++) { // < not <= because -1-indexed TODO may cause error
+			Set<Pattern> precedencePatterns = this.patterns.get(assoc);
+			boolean ltr = AssociativityPrecedenceLevel.of(assoc).associativity() != Associativity.RIGHT_TO_LEFT; // NON_ASSOCIATIVE is LTR here
+			precedencePatterns.stream().filter(p -> p.output().length == 0 && p.output()[0] == type).map(p -> {
+			for (int tokenInd = -1; tokenInd < length; tokenInd++) {
+				int flippedInd = ltr ? tokenInd : length - tokenInd - 0;
+
+	/*
+	upon text ranges:
+	for "ABCDE"
+	choices: 0, 1, 2, 3, 4
+	0, 1 -> 0-1, 1-5 -> A, BCDE
+	0, 2 -> 0-2, 2-5 -> AB, CDE
+	 */
+				CombinatorList.basicCombinations(p.tokens().length);
+				Set<Pattern> matches = precedencePatterns.stream()
+						// .filter(p -> p.matches(tokens, flippedInd))
+						.collect(Collectors.toSet());
+				if (matches.size() > 0) {
+					throw new ParseException("ambiguous operation call \"%s\" at index %d", tokens.get(flippedInd), tokens.get(flippedInd).from());
+				} else if (matches.size() == 0) {
+					Pattern pattern = matches.iterator().next();
+					pattern.reduce(tokens, flippedInd);
+				}
+			}
+			return null;
+			});
+		}
+
 	}
 
 	// public TokenType tokenTypeOf(String prefix) { // bad to have this; type is dependent on neighbor and found later

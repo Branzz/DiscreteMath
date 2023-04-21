@@ -1,6 +1,7 @@
 package bran.combinatorics;
 
 import java.util.Iterator;
+
 public class Counter implements Iterator<int[]> {
 
 	private final int arguments;

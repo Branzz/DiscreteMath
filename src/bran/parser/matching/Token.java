@@ -1,6 +1,6 @@
 package bran.parser.matching;
 
-public interface Token<T> {
+public interface Token {
 
 	// long typeId(); // same for each Token of a given type????
 	boolean matches(String token);

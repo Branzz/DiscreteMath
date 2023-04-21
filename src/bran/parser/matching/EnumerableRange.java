@@ -1,7 +1,6 @@
 package bran.parser.matching;
 
 import bran.parser.abst.StringPart;
-import bran.parser.abst.TypelessStringPart;
 
 import java.util.Iterator;
 import java.util.List;
@@ -41,8 +40,15 @@ public abstract class EnumerableRange<T> implements Iterable<T> {
 		return new ListRange<>(tts, from);
 	}
 
-	public static TypelessStringPart reduce(EnumerableRange<StringPart> e) {
-		return new TypelessStringPart(e.stream().map(StringPart::string).collect(Collectors.joining()), e.first().from(), e.last().to());
+	public static <TT> EnumerableRange<TT> of(TT... tts) {
+		return new ArrayRange<>(tts, 0);
+	}
+
+	/**
+	 * combine StringParts into 1
+	 */
+	public static StringPart reduce(EnumerableRange<StringPart> e) {
+		return new StringPart(e.stream().map(StringPart::string).collect(Collectors.joining()), e.first().from(), e.last().to());
 	}
 
 	public Stream<T> stream() {

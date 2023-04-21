@@ -2,14 +2,12 @@ package bran.parser.composition;
 
 import bran.exceptions.IllegalArgumentAmountException;
 import bran.exceptions.ParseException;
-import bran.parser.*;
+import bran.parser.Parser;
 import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.operators.ArithmeticOperator;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.special.equivalences.EquivalenceTypeImpl;
-import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.Mapper;
 import bran.tree.structure.mapper.OrderedOperator;
 
@@ -17,8 +15,9 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static bran.parser.composition.OrderZone.MIDDLE;
+import static bran.parser.composition.OrderZone.START;
 import static bran.parser.composition.TokenType.*;
-import static bran.parser.composition.OrderZone.*;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.*;
 
@@ -26,7 +25,7 @@ public class CompositionParser {
 
 	static final Map<String, EquivalenceTypeImpl> equivalenceOperators = Parser.getSymbolMapping(EquivalenceTypeImpl.values());
 
-	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = //expected zone param
+	static final Map<String, Map.Entry<Mapper, TokenType>> symbolTokens = // expected zone param
 			// Map.of(MultiArgFunction.class, FUNCTION,
 			// 	   LineOperator.class, LINE_OPERATOR,
 			// 	   Operator.class, EXP_OPERATOR,

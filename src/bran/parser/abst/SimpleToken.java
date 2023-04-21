@@ -1,24 +1,21 @@
 package bran.parser.abst;
 
 import bran.parser.matching.Token;
-import org.intellij.lang.annotations.RegExp;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SimpleToken<T> implements Token {
 
-	private Matcher matcher;
+	private String matcher;
 	private Set<Token> children;
 	private Class<T> representingClass;
 	private Set<String> symbols;
 
-	public SimpleToken(@RegExp String regex, Set<Token> children) {
-		this.matcher = Pattern.compile(regex).matcher("");
+	public SimpleToken(String regex, Set<Token> children) {
+		this.matcher = regex;
 		this.children = children;
 	}
 
@@ -36,14 +33,13 @@ public class SimpleToken<T> implements Token {
 		this.children = Arrays.stream(children).collect(Collectors.toSet());
 	}
 
-	public SimpleToken(@RegExp String regex) {
-		this(regex, Collections.emptySet());
+	public SimpleToken(String matcher) {
+		this(matcher, Collections.emptySet());
 	}
 
 	@Override
 	public boolean matches(String token) {
-		return (matcher != null && matcher.reset(token).matches())
-				|| (symbols != null && symbols.contains(token));
+		return matcher.equals(token);
 	}
 
 	@Override

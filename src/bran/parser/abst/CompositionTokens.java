@@ -24,6 +24,7 @@ import bran.tree.compositions.statements.special.equivalences.EquivalenceImpl;
 import bran.tree.structure.MonoTypeFork;
 import bran.tree.structure.PolyTypeChildBranch;
 import bran.tree.structure.TreePart;
+import bran.tree.structure.mapper.Mapper;
 import bran.tree.structure.mapper.OrderedOperator;
 
 import java.lang.reflect.Constructor;
@@ -33,22 +34,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static bran.parser.abst.AbstractCompiler.asArray;
+import static bran.tree.compositions.expressions.functions.MultiArgFunction.ABS;
 import static bran.tree.compositions.expressions.operators.ArithmeticOperator.MUL;
 import static bran.tree.compositions.expressions.operators.ArithmeticOperator.POW;
 
 public class CompositionTokens {
 
-	// public static final Token<Statement> Statement_TOKEN		= new SimpleToken<>(Statement.class);
-	// public static final Token<Expression> Expression_TOKEN		= new SimpleToken<>(Expression.class);
+	// public static final Token<Statement> Statement_TOKEN		= new SimpleToken<>(Statement.class); // AUTOed
+	// public static final Token<Expression> Expression_TOKEN	= new SimpleToken<>(Expression.class);
 	// public static final Token<Set> Set_TOKEN					= new SimpleToken<>(Set.class);
 	// public static final Token<Composition> Composition_TOKEN	= new SimpleToken<>(Composition.class, Statement_TOKEN, Expression_TOKEN, Set_TOKEN);
 
-	public static final Token LEFT_PAREN	= new SimpleToken("\\(");
-	public static final Token RIGHT_PAREN	= new SimpleToken("\\)");
-	public static final Token COMMA			= new SimpleToken(",");
-	public static final Token DELIMIT = new SimpleToken("\\s+");
-	public static final Token FUNCTION_COMPOSITION = new SimpleToken("\\."); // Haskell
-	public static final Token FUNCTION_SEPARATION = new SimpleToken("\\$");
+	public static final Token LEFT_PAREN = new SimpleToken("(");
+	public static final Token RIGHT_PAREN = new SimpleToken(")");
+	public static final Token COMMA = new SimpleToken(",");
+	public static final Token DELIMIT = new SimpleRegexToken("\\s+");
+	public static final Token FUNCTION_COMPOSITION = new SimpleToken("."); // Haskell
+	public static final Token FUNCTION_SEPARATION = new SimpleToken("$");
 
 	private final static Map<Class, Token> tokens = new HashMap<>();
 	private final static Map<Class, Token> constructedTokens = new HashMap<>();
@@ -96,18 +98,29 @@ public class CompositionTokens {
 						 .filter(m -> m.isAnnotationPresent(CompilerOp.class))
 						 .flatMap(m -> {
 						 	try {
-						 		return (Stream.of(m.invoke(null)));
+						 		return (Stream.of(m.invoke(null))); // TODO null?
 							} catch (IllegalAccessException | InvocationTargetException e) {
 								throw new ParseException("bad reflection analysis " + e.getMessage());
 							}
 						 })
 						 .map(o -> (O) o)
 		).forEach(o -> {
+			SimpleToken<O> oToken = new SimpleToken<>(actualOpClass, o.getSymbols());
 			constructedTokenPatterns.put(c, new PatternBuilder<>(o.precedence(),
 																 constructor,
-																 addToken(new SimpleToken<>(actualOpClass, o.getSymbols())),
+																 addToken(oToken),
 																 parameterTypes).build());
+			for (String symbol : o.getSymbols()) {
+				symbolTokens.putIfAbsent(symbol, new HashSet<>());
+				symbolTokens.get(symbol).add(oToken);
+			}
 		});
+	}
+
+	static final Map<String, Set<Token>> symbolTokens = new HashMap<>(); // only has enum symbols
+
+	public static Set<Token> getTokenSymbols(String tokenSymbol) { // O(1)
+		symbolTokens.get(tokenSymbol);
 	}
 
 	private static Token addToken(SimpleToken token) {
@@ -116,41 +129,58 @@ public class CompositionTokens {
 
 	public static final AbstractCompiler<TreePart> compositionCompiler;
 
+	/**
+	 * when we must pattern match on token(SuperClass.class), then check all sub classes
+	 *  0 matches: pattern fails
+	 *  1 match: correct
+	 *  >1 match: TODO program fails?
+	 * if any of them do match, TODO should this be cached?
+	 */
+
 	static {
 		Set<Pattern> patterns = new HashSet<>();
 		patterns.addAll(constructedTokenPatterns.values());
-		Collections.addAll(	//	 patterns
+		Collections.addAll(	// (anonymous) patterns
+				patterns,
 				new PatternBuilder<>(0)
-						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
+						.tokens(TreePart.class, DELIMIT, TreePart.class)
 						.reduce(e -> asArray(e.at(0), e.at(2))).build(),
+				// TODO superscript a superscript b = ^ab not ^a^b
 				new PatternBuilder<>(POW) // TODO correct precedence?
-						.tokens(token(NumberSuperScript.class))
+						.tokens(NumberSuperScript.class)
 						.reduce(e -> {
-							final int value = ((NumberSuperScript) e.at(0).actual()).exponentValue();
+							final int value = e.at(0).getTokenInstance(NumberSuperScript.class).exponentValue();
 							return asArray(
-									new TypelessStringPart("^", e.at(0).from(), e.at(0).to(), POW, new ConstantToken(POW)),
-									new TypelessStringPart(Integer.toString(value), e.at(0).from(), e.at(0).to(), Constant.of(value), token(Constant.class)));
-								}
-						).build(),
+									new StringPart("^", e.at(0).from(), e.at(0).to()).withInstance(POW),
+									new StringPart(Integer.toString(value), e.at(0).from(), e.at(0).to()).withInstance(Constant.of(value)));
+							})
+						.build(),
 				new PatternBuilder<>(16)
-						.tokens(LEFT_PAREN, token(TreePart.class), RIGHT_PAREN)
-						.pureReduceToOne(e -> e.at(1).actual(), token(TreePart.class)).build(),
-				new PatternBuilder<>(16)
-						.tokens(LEFT_PAREN, token(Composition.class), COMMA, token(Composition.class), RIGHT_PAREN)
-						.reduce(e -> asArray(e.at(1), e.at(3))).build(),
+						.tokens(LEFT_PAREN, Composition.class, RIGHT_PAREN)
+						.pureReduceToOne(e -> e.at(1),
+								token(Composition.class)).build(),
+//				new PatternBuilder<>(16)
+//						.tokens(LEFT_PAREN, Composition.class, COMMA, Composition.class, RIGHT_PAREN)
+//						.reduce(e -> asArray(e.at(1), e.at(3))).build(),
 				new PatternBuilder<>(MUL) // (a)(b) = a*b
-						.tokens(LEFT_PAREN, token(Expression.class), RIGHT_PAREN, LEFT_PAREN, token(Expression.class), RIGHT_PAREN)
-						.pureReduceToOne(e -> ((Expression) e.at(1).actual()).times((Expression) e.at(4).actual()), token(Expression.class)).build(),
+						.tokens(LEFT_PAREN, Expression.class, RIGHT_PAREN, LEFT_PAREN, Expression.class, RIGHT_PAREN)
+						.pureReduceToOne(e -> e.at(1).getTokenInstance(Expression.class).times(e.at(4).getTokenInstance(Expression.class)),
+								token(Expression.class)).build(),
+				new PatternBuilder<>(ABS)
+						.tokens("|", Expression.class, "|")
+						.pureReduceToOne(e -> ABS.of(e.at(1).getTokenInstance(Expression.class)),
+								token(Expression.class)).build(),
 				new PatternBuilder<>(POW)
-						.tokens(token(MultiArgFunction.class), new ConstantToken(POW), token(Constant.class), token(CommaSeparatedComposition.class))
-						.pureReduceToOne(e -> ((MultiArgFunction) e.at(0).actual())
-													  .of(((CommaSeparatedComposition) e.at(3).actual()).asExpressions().toArray(Expression[]::new))
-													  .pow((Constant) e.at(2).actual()),
+						.tokens(MultiArgFunction.class, new ConstantToken(POW), Constant.class, CommaSeparatedComposition.class)
+						.pureReduceToOne(e -> (e.at(0).getTokenInstance(MultiArgFunction.class))
+													  .of((e.at(3).getTokenInstance(CommaSeparatedComposition.class))
+															  .asExpressions().toArray(Expression[]::new))
+													  .pow(e.at(2).getTokenInstance(Constant.class)),
 										 token(Expression.class)).build()
 
 //				new PatternBuilder<>(0)
 //						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))
-//						.reduce(e -> new TreePart[] {((TreePart) e.at(0).actual()), ((TreePart) e.at(2).actual())}).build()
+//						.reduce(e -> new TreePart[] {((TreePart) e.at(0)), ((TreePart) e.at(2))}).build()
 		);
 		compositionCompiler = new AbstractCompiler<>(patterns, true);
 	}

@@ -1,5 +1,6 @@
 package bran.parser.matching;
 
+import bran.exceptions.IllegalArgumentAmountException;
 import bran.parser.abst.*;
 import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
@@ -12,19 +13,31 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+/**
+ * Sequence of tokens which can be reduced (or expanded) to other tokens (or to nothing)
+ * Different patterns may work on the same StringPart, so the type depends on the context
+ * When given the needed type of some range, test all known patterns which return the type of this token/token
+ *
+ */
 public class Pattern<R extends Tokenable> { // TODO super pattern for tree and pre pattern for non Tokenable conversions
 
 	private final int size;
-	private final Token[] tokens;
+	private final Token[] inputTokens;
+	private final Token[] outputTokens;
 	private final Function<EnumerableRange<StringPart>, StringPart[]> reduce;
 	private final AssociativityPrecedenceLevel level;
 
 //	PatternBuilder
-	public Pattern(Token[] tokens, Function<EnumerableRange<StringPart>, StringPart[]> reduce, int level) {
-		this.size = tokens.length;
-		this.tokens = tokens;
+	public Pattern(Token[] inputTokens, Token[] outputTokens, Function<EnumerableRange<StringPart>, StringPart[]> reduce, int level) {
+		this.size = inputTokens.length;
+		this.inputTokens = inputTokens;
+		this.outputTokens = outputTokens;
 		this.reduce = reduce;
 		this.level = AssociativityPrecedenceLevel.of(level);
+	}
+
+	public Token[] output() {
+		return outputTokens;
 	}
 
 	public static class PatternBuilder<RR extends Tokenable> {
@@ -40,10 +53,10 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 			tokens = Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new);
 			reduce = e -> {
 					 try {
-						 return AbstractCompiler.asArray(EnumerableRange.reduce(e).casted(
-						 		constructor.newInstance(IntStream.range(0, tokenClasses.length)
-										 .mapToObj(i -> new TypedStringPart("", 0, 0, tokenClasses[i].cast(e.at(i)), tokens[i]))),
-								token
+						 return AbstractCompiler.asArray(EnumerableRange.reduce(e).withInstance(
+						 			constructor.newInstance(
+										 IntStream.range(0, tokenClasses.length)
+												 .mapToObj(i -> new StringPart("", 0, 0).withInstance(e.at(i).getTokenInstance(tokenClasses[i]))))
 								));
 					 } catch (InstantiationException | IllegalAccessException | InvocationTargetException x) {
 						 x.printStackTrace();
@@ -58,7 +71,7 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 		}
 
 		public Pattern<RR> build() {
-			return new Pattern<>(tokens, reduce, level);
+			return new Pattern<>(tokens, outputTokens, reduce, level);
 		}
 		public PatternBuilder<RR> reduce(Function<EnumerableRange<StringPart>, StringPart[]> reduce) {
 			this.reduce = reduce;
@@ -76,12 +89,36 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 			this.reduce = e -> AbstractCompiler.asArray(EnumerableRange.reduce(e).casted(reduce.apply(e), token));
 			return this;
 		}
-		public PatternBuilder<RR> tokens(Token... tokens) {
-			this.tokens = tokens;
+
+		public PatternBuilder<RR> reduceCasting(Function<EnumerableRange<?>, Object> reduce) {
+//			// TODO this.reduce = e ->
 			return this;
 		}
-		public PatternBuilder<RR> tokens(Class... tokenClasses) {
-			this.tokens = Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new);
+
+//		public PatternBuilder<RR> tokens(Token... tokens) {
+//			this.tokens = tokens;
+//			return this;
+//		}
+//		public PatternBuilder<RR> tokens(Class... tokenClasses) {
+//			this.tokens = Arrays.stream(tokenClasses).map(CompositionTokens::token).toArray(Token[]::new);
+//			return this;
+//		}
+
+		public PatternBuilder<RR> tokens(Object... tokenClasses) {
+			this.tokens = Arrays.stream(tokenClasses)
+								  .map(o -> {
+									  if (o instanceof Token t)
+										  return t;
+									  else if (o instanceof Class<?> c)
+										  return CompositionTokens.token(c);
+									  else if (o instanceof String s)
+										  return new SimpleToken<>(s);
+									  // TODO else if (o instanceof Mapper m)
+									  // 	return new SimpleToken(m);
+									  else
+										  throw new IllegalArgumentAmountException("Input must be token or class");
+								  })//.map(o -> (Token) o)
+					.toArray(Token[]::new);
 			return this;
 		}
 	}
@@ -91,7 +128,7 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 	}
 
 	public Token[] tokens() {
-		return tokens;
+		return inputTokens;
 	}
 
 	public int precedence() {
@@ -129,9 +166,9 @@ public class Pattern<R extends Tokenable> { // TODO super pattern for tree and p
 		// 		return false;
 		// }
 		// return true;
-			return arrayRange.inRange(tokens.length) &&
-				   IntStream.range(0, tokens.length)
-							.allMatch(i -> tokens[i].matches(arrayRange.at(i).string()));
+			return arrayRange.inRange(inputTokens.length) &&
+				   IntStream.range(0, inputTokens.length)
+							.allMatch(i -> inputTokens[i].matches(arrayRange.at(i).string()));
 
 	}
 
