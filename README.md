@@ -146,8 +146,7 @@ new GodelNumberFactors(243_000_000L).symbols()
 ```
 `0=0`
 ```java
-VariableStatement x = new VariableStatement('x');
-forAll(x).in(new SpecialSet(SpecialSetType.Z), args -> x.nand(new VariableStatement('y'))).proven()
+forAll(new Variable('x')).in(new SpecialSet(SpecialSetType.Z)).that(x -> x.nand(new VariableStatement('y'))).proven()
         .implies(Constant.of(3).plus(new Variable("abc")).equates(new Variable("var")))
 ```
 ```java
