@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import bran.exceptions.IllegalMatrixSizeException;
-import bran.matrices.Matrix;
+import bran.graphs.matrices.DoubleMatrix;
 
 public class Graph {
 
@@ -25,7 +25,7 @@ public class Graph {
 		edgesSize = vertexEdgeTable.values().stream().map(List::size).reduce(0, Integer::sum);
 	}
 
-	public Graph(Matrix m) {
+	public Graph(DoubleMatrix m) {
 		Vertex.resetNames();
 		Edge.resetNames();
 		if (!m.isSymmetric() || m.getRows() != m.getColumns())

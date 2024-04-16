@@ -11,6 +11,7 @@ import bran.tree.structure.TreePart;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static bran.parser.composition.CompositionParser.*;
 import static bran.parser.ExpressionParser.TokenType.ExpressionZone.*;
@@ -39,7 +40,7 @@ public class ExpressionParser {
 	public static final Map<String, ArithmeticOperator> expressionOperators = Parser.getSymbolMapping(ArithmeticOperator.values());
 	public static final Map<String, MultiArgFunction> expressionLineOperators = Parser.getSymbolMapping(MultiArgFunction.values());
 
-	// private static final Set<String> statementLeftIdentifiers = "([{".chars().mapToObj(Character::toString).collect(Collectors.toSet());
+	private static final Set<String> statementLeftIdentifiers = "([{".chars().mapToObj(Character::toString).collect(Collectors.toSet());
 
 	enum TokenType {
 		FUNCTION(START, START, expressionLineOperators::get),
@@ -73,8 +74,8 @@ public class ExpressionParser {
 					: prefix.isBlank() ? WHITESPACE
 					: expressionOperators.containsKey(prefix) ? OPERATOR
 					: expressionLineOperators.containsKey(prefix) ? FUNCTION
-					: leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
-					: rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
+					// : leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
+					// : rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
 					: Constant.validName(prefix) ? CONSTANT
 					: Variable.validName(prefix) ? VARIABLE
 					: UNKNOWN;

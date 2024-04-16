@@ -1,9 +1,8 @@
 package bran.parser.abst;
 
-import bran.combinatorics.CombinatorList;
-import bran.combinatorics.Combinatorics;
 import bran.exceptions.ParseException;
-import bran.parser.matching.Pattern;
+import bran.parser.matching.ListRange;
+import bran.parser.matching.TokenPattern;
 import bran.parser.matching.Token;
 import bran.tree.structure.mapper.Associativity;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
@@ -15,13 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 
 public class AbstractCompiler<T> {
 
-	private List<Set<Pattern>> patterns;
+	private List<Set<TokenPattern>> patterns;
 	private String delimiter; // TODO anything but lettel next to letter???
 
 	// TODO String input for compiler symbols/patterns/tokens? (and link with java class?)
@@ -44,9 +42,9 @@ public class AbstractCompiler<T> {
 	// 	public AbstractCompilerBuilder<TT>() {}
 	// }
 
-	public AbstractCompiler(Set<Pattern> patterns, @RegExp String delimiter, boolean delimitByLetterSymbolChange) {
+	public AbstractCompiler(Set<TokenPattern> patterns, @RegExp String delimiter, boolean delimitByLetterSymbolChange) {
 		this.patterns = patterns.stream()
-								.collect(groupingBy(Pattern::precedence, toSet()))
+								.collect(groupingBy(TokenPattern::precedence, toSet()))
 								.entrySet()
 								.stream()
 								.sorted(Map.Entry.comparingByKey())
@@ -55,7 +53,7 @@ public class AbstractCompiler<T> {
 		this.delimiter = delimiter;
 	}
 
-	public AbstractCompiler(Set<Pattern> patterns, boolean delimitByLetterSymbolChange) {
+	public AbstractCompiler(Set<TokenPattern> patterns, boolean delimitByLetterSymbolChange) {
 		this(patterns, "\\s+", delimitByLetterSymbolChange);
 	}
 
@@ -66,7 +64,7 @@ public class AbstractCompiler<T> {
 	}
 
 
-	public Set<Object> compile(String text, Token type) {
+	public Set<Object> compile(String text) {
 //		// TODO Scope parentScope = new Scope();
 		List<DynamicTokenPart> tokenParts = new ArrayList<>(text.length());
 		// List<TypelessStringPart> tokens = tokenize(text);
@@ -111,35 +109,44 @@ public class AbstractCompiler<T> {
 	 * @param end exclusive
 	 */
 	private List<StringPart> compileRange(String text, int start, int end, Token type) {
+
+		List<StringPart> tokens = new ArrayList<>(text.length());
+
 		final int length = end - start;
 		for (int assoc = AssociativityPrecedenceLevel.MIN; assoc < AssociativityPrecedenceLevel.MAX; assoc++) { // < not <= because -1-indexed TODO may cause error
-			Set<Pattern> precedencePatterns = this.patterns.get(assoc);
+			Set<TokenPattern> precedencePatterns = this.patterns.get(assoc);
 			boolean ltr = AssociativityPrecedenceLevel.of(assoc).associativity() != Associativity.RIGHT_TO_LEFT; // NON_ASSOCIATIVE is LTR here
-			precedencePatterns.stream().filter(p -> p.output().length == 0 && p.output()[0] == type).map(p -> {
-			for (int tokenInd = -1; tokenInd < length; tokenInd++) {
-				int flippedInd = ltr ? tokenInd : length - tokenInd - 0;
+			/*
+			precedencePatterns.stream()
+							  .filter(p -> p.output().length == 0 && p.output()[0] == type)
+							  .map(p -> {
+			*/
+				for (int tokenInd = 0; tokenInd < length; tokenInd++) {
+					int flippedInd = ltr ? tokenInd : length - tokenInd;
 
-	/*
-	upon text ranges:
-	for "ABCDE"
-	choices: 0, 1, 2, 3, 4
-	0, 1 -> 0-1, 1-5 -> A, BCDE
-	0, 2 -> 0-2, 2-5 -> AB, CDE
-	 */
-				CombinatorList.basicCombinations(p.tokens().length);
-				Set<Pattern> matches = precedencePatterns.stream()
-						// .filter(p -> p.matches(tokens, flippedInd))
-						.collect(Collectors.toSet());
-				if (matches.size() > 0) {
-					throw new ParseException("ambiguous operation call \"%s\" at index %d", tokens.get(flippedInd), tokens.get(flippedInd).from());
-				} else if (matches.size() == 0) {
-					Pattern pattern = matches.iterator().next();
-					pattern.reduce(tokens, flippedInd);
+		/*
+		upon text ranges:
+		for "ABCDE"
+		choices: 0, 1, 2, 3, 4
+		0, 1 -> 0-1, 1-5 -> A, BCDE
+		0, 2 -> 0-2, 2-5 -> AB, CDE
+		 */
+					// CombinatorList.basicCombinations(p.tokens().length);
+					Set<TokenPattern> matches = precedencePatterns.stream()
+																  .filter(p -> p.matches(new ListRange<>(tokens, flippedInd)))
+																  .collect(Collectors.toSet());
+					if (matches.size() > 0) {
+						throw new ParseException("ambiguous operation call \"%s\" at index %d", tokens.get(flippedInd), tokens.get(flippedInd).from());
+					} else if (matches.size() == 0) {
+						TokenPattern pattern = matches.iterator().next();
+						pattern.reduce(tokens, flippedInd);
+					}
 				}
+				return null;
 			}
-			return null;
-			});
-		}
+		// );
+	//
+		return null;
 
 	}
 

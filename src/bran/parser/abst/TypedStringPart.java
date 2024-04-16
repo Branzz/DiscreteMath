@@ -6,9 +6,9 @@ import bran.parser.matching.Token;
 public class TypedStringPart<T> extends StringPart {
 
 	private final T actual;
-	private final Token<T> tokenType;
+	private final Token tokenType;
 
-	public TypedStringPart(String string, int from, int to, T actual, Token<T> tokenType) {
+	public TypedStringPart(String string, int from, int to, T actual, Token tokenType) {
 		super(string, from, to);
 		this.actual = actual;
 		this.tokenType = tokenType;

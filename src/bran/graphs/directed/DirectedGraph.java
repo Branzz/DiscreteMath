@@ -7,7 +7,7 @@ import bran.exceptions.IllegalMatrixSizeException;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
 import bran.graphs.Vertex;
-import bran.matrices.Matrix;
+import bran.graphs.matrices.DoubleMatrix;
 
 public class DirectedGraph extends Graph {
 
@@ -26,7 +26,7 @@ public class DirectedGraph extends Graph {
 	}
 
 
-	public DirectedGraph(Matrix m) {
+	public DirectedGraph(DoubleMatrix m) {
 		Vertex.resetNames();
 		Edge.resetNames();
 		if (m.getRows() != m.getColumns())

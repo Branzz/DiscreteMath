@@ -3,8 +3,8 @@ package bran.parser.abst;
 import bran.exceptions.ParseException;
 import bran.parser.NumberSuperScript;
 import bran.parser.composition.CommaSeparatedComposition;
-import bran.parser.matching.Pattern;
-import bran.parser.matching.Pattern.PatternBuilder;
+import bran.parser.matching.TokenPattern;
+import bran.parser.matching.TokenPattern.PatternBuilder;
 import bran.parser.matching.Token;
 import bran.parser.matching.Tokenable;
 import bran.tree.compositions.Composition;
@@ -24,7 +24,6 @@ import bran.tree.compositions.statements.special.equivalences.EquivalenceImpl;
 import bran.tree.structure.MonoTypeFork;
 import bran.tree.structure.PolyTypeChildBranch;
 import bran.tree.structure.TreePart;
-import bran.tree.structure.mapper.Mapper;
 import bran.tree.structure.mapper.OrderedOperator;
 
 import java.lang.reflect.Constructor;
@@ -57,7 +56,7 @@ public class CompositionTokens {
 	/**
 	 * UPDATING AFTER STATIC INITIALIZATION WILL NOT BE INCLUDED IN MASTER PATTERN SET
 	 */
-	public final static Map<Class, Pattern> constructedTokenPatterns = new HashMap<>();
+	public final static Map<Class, TokenPattern> constructedTokenPatterns = new HashMap<>();
 
 	public static <T> Token token(Class<T> tokenClass) {
 		return tokens.computeIfAbsent(tokenClass, SimpleToken<T>::new);
@@ -120,7 +119,7 @@ public class CompositionTokens {
 	static final Map<String, Set<Token>> symbolTokens = new HashMap<>(); // only has enum symbols
 
 	public static Set<Token> getTokenSymbols(String tokenSymbol) { // O(1)
-		symbolTokens.get(tokenSymbol);
+		return symbolTokens.get(tokenSymbol);
 	}
 
 	private static Token addToken(SimpleToken token) {
@@ -136,12 +135,15 @@ public class CompositionTokens {
 	 *  >1 match: TODO program fails?
 	 * if any of them do match, TODO should this be cached?
 	 */
-
 	static {
-		Set<Pattern> patterns = new HashSet<>();
+		Set<TokenPattern> patterns = new HashSet<>();
 		patterns.addAll(constructedTokenPatterns.values());
 		Collections.addAll(	// (anonymous) patterns
 				patterns,
+				/*
+				comments -> backslash -> string -> parens
+				 */
+
 				new PatternBuilder<>(0)
 						.tokens(TreePart.class, DELIMIT, TreePart.class)
 						.reduce(e -> asArray(e.at(0), e.at(2))).build(),
@@ -155,28 +157,28 @@ public class CompositionTokens {
 									new StringPart(Integer.toString(value), e.at(0).from(), e.at(0).to()).withInstance(Constant.of(value)));
 							})
 						.build(),
-				new PatternBuilder<>(16)
+				new PatternBuilder<>(1)
 						.tokens(LEFT_PAREN, Composition.class, RIGHT_PAREN)
 						.pureReduceToOne(e -> e.at(1),
 								token(Composition.class)).build(),
 //				new PatternBuilder<>(16)
 //						.tokens(LEFT_PAREN, Composition.class, COMMA, Composition.class, RIGHT_PAREN)
 //						.reduce(e -> asArray(e.at(1), e.at(3))).build(),
-				new PatternBuilder<>(MUL) // (a)(b) = a*b
+				new PatternBuilder<>(MUL) // (a)(b) = a*b TODO: = a(b)
 						.tokens(LEFT_PAREN, Expression.class, RIGHT_PAREN, LEFT_PAREN, Expression.class, RIGHT_PAREN)
 						.pureReduceToOne(e -> e.at(1).getTokenInstance(Expression.class).times(e.at(4).getTokenInstance(Expression.class)),
-								token(Expression.class)).build(),
-				new PatternBuilder<>(ABS)
+								token(ExpressionOperation.class)).build(),
+				new PatternBuilder<>(1) // because it's bracket-like
 						.tokens("|", Expression.class, "|")
 						.pureReduceToOne(e -> ABS.of(e.at(1).getTokenInstance(Expression.class)),
-								token(Expression.class)).build(),
+								token(FunctionExpression.class)).build(),
 				new PatternBuilder<>(POW)
 						.tokens(MultiArgFunction.class, new ConstantToken(POW), Constant.class, CommaSeparatedComposition.class)
 						.pureReduceToOne(e -> (e.at(0).getTokenInstance(MultiArgFunction.class))
 													  .of((e.at(3).getTokenInstance(CommaSeparatedComposition.class))
 															  .asExpressions().toArray(Expression[]::new))
 													  .pow(e.at(2).getTokenInstance(Constant.class)),
-										 token(Expression.class)).build()
+										 token(ExpressionOperation.class)).build()
 
 //				new PatternBuilder<>(0)
 //						.tokens(token(TreePart.class), DELIMIT, token(TreePart.class))

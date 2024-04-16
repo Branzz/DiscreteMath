@@ -1,41 +1,37 @@
 package bran.run;
 
-import bran.exceptions.ParseException;
-import bran.parser.composition.CompositionParser;
-import bran.tree.compositions.Composition;
-import bran.tree.compositions.sets.regular.MultiRangedSet;
-import bran.tree.compositions.statements.StatementImpl;
-import bran.tree.compositions.statements.special.VerbalStatement;
-import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
 import bran.application.draw.StartViewer;
 import bran.application.draw.exprs.StartExpressionViewer;
+import bran.exceptions.ParseException;
 import bran.graphs.Edge;
 import bran.graphs.Graph;
 import bran.graphs.Vertex;
-import bran.matrices.Matrix;
+import bran.graphs.matrices.DoubleMatrix;
+import bran.parser.composition.CompositionParser;
 import bran.tree.Holder;
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.Expression;
-import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.expressions.values.Constant;
+import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.expressions.values.numbers.NumberToText;
 import bran.tree.compositions.godel.GodelNumberFactors;
-import bran.tree.compositions.sets.regular.FiniteSet;
-import bran.tree.compositions.sets.regular.SpecialSet;
-import bran.tree.compositions.sets.regular.SpecialSetType;
+import bran.tree.compositions.sets.regular.*;
+import bran.tree.compositions.sets.regular.var.WithVariableSet;
 import bran.tree.compositions.statements.Statement;
+import bran.tree.compositions.statements.StatementImpl;
 import bran.tree.compositions.statements.TruthTable;
 import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.compositions.statements.special.BooleanSet;
+import bran.tree.compositions.statements.special.VerbalStatement;
 import bran.tree.compositions.statements.special.equivalences.equation.Equation;
 import bran.tree.compositions.statements.special.proofs.Argument;
+import bran.tree.compositions.statements.special.quantifier.ExistentialStatement;
+import bran.tree.compositions.statements.special.quantifier.QuantifiedStatementArguments;
 import bran.tree.compositions.statements.special.quantifier.UniversalStatement;
 import bran.tree.generators.ExpressionGenerator;
 import bran.tree.generators.StatementGenerator;
-import bran.tree.compositions.sets.regular.*;
-import bran.tree.compositions.sets.regular.var.WithVariableSet;
-import bran.tree.compositions.statements.special.BooleanSet;
-import bran.tree.compositions.statements.special.quantifier.QuantifiedStatementArguments;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -57,7 +53,8 @@ public class MainTest {
 	// TODO add delimit statements in parser like new line semicolon or auto ?? then switch to the desmos equation analyzer for declarations etc
 	// TODO implement functions: evaluate (e->e), simplify(c->c), derive(e->e), range(e->b), domain(e->b), truth(t->t), inverse(e->e), etc
 	public static void main(String[] args) {
-		System.out.println(CompositionParser.parseExpression("(x^5 * y^3) / (x^2 * y)").simplified());
+		// System.out.println(CompositionParser.parseExpression("(x^5 * y^3) / (x^2 * y)").simplified());
+		// System.out.println(CompositionTokens.compositionCompiler.compile("(x^5 * y^3) / (x^2 * y)"));
 		// System.out.println(CompositionParser.parse("rng()"));
 		// numberToStringTest();
 		// SetsTest();
@@ -82,7 +79,7 @@ public class MainTest {
 		// inverseTest();
 		// compareTest();
 //		tetrationTest();
-		setOperationsTest();
+// 		setOperationsTest();
 
 		// System.out.println(ExpressionParser.parseExpression("1 / SQRT(x ^ 2 + 1)").getDomainConditions().simplified());
 		// Variable a = new Variable("a");
@@ -103,6 +100,7 @@ public class MainTest {
 		// .replaceAll(", ", ",\n\t"));
 
 		// System.out.println(CompositionParser.parse("LOG(2, x)").simplified());
+
 
 
 	}
@@ -604,13 +602,13 @@ public class MainTest {
 
 	private static void hamiltonianPathTestingEdges() {
 		new ArrayList<Integer>();
-		Graph graph = new Graph(new Matrix(new double[][]
-												   { {0, 1, 1, 1, 0, 2},
-														   {1, 0, 0, 1, 1, 2},
-														   {1, 0, 0, 1, 0, 2},
-														   {1, 1, 1, 0, 1, 1},
-														   {0, 1, 0, 1, 0, 2},
-														   {1, 1, 1, 1, 1, 0} }));
+		Graph graph = new Graph(new DoubleMatrix(new Double[][]
+												   		 { {0.0, 1.0, 1.0, 1.0, 0.0, 2.0},
+														   {1.0, 0.0, 0.0, 1.0, 1.0, 2.0},
+														   {1.0, 0.0, 0.0, 1.0, 0.0, 2.0},
+														   {1.0, 1.0, 1.0, 0.0, 1.0, 1.0},
+														   {0.0, 1.0, 0.0, 1.0, 0.0, 2.0},
+														   {1.0, 1.0, 1.0, 1.0, 1.0, 0.0} }));
 		System.out.println("For graph:\n" + graph);
 		System.out.println("Is Eulerian trail? " + graph.isEulerianTrailDeepSearch());
 		// System.out.println("Is Eulerian trail? " + graph.isEulerianTrail());
@@ -624,7 +622,7 @@ public class MainTest {
 		// 	{1, 1, 1, 0, 1, 1},
 		// 	{0, 1, 0, 1, 0, 1},
 		// 	{1, 1, 1, 1, 1, 0} }));
-		Graph frame = new Graph(symmetricalize(new double[][]
+		Graph frame = new Graph(symmetricalize((Double[][]) Arrays.stream(new double[][]
 						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
 				/*0*/ { {-0, 1, 2, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 }, /*0*/
 				/*1*/	{ 0,-0, 1, 1, 2, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1 }, /*1*/
@@ -641,25 +639,25 @@ public class MainTest {
 				/*12*/	{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0,-0, 1, 1, 2 }, /*12*/
 				/*13*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1,-0, 1, 1 }, /*13*/
 				/*14*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1,-0, 1 }, /*14*/
-				/*15*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1,-0 } }));
+				/*15*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1,-0 } }).map(d -> Arrays.stream(d).boxed().toArray()).toArray()));
 						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
 		System.out.println("For graph:\n" + frame);
 		System.out.println("Is Hamiltonian path? " + frame.isHamiltonianPath());
 
 	}
 
-	private static Matrix symmetricalize(double[][] values) {
+	private static DoubleMatrix symmetricalize(Double[][] values) {
 		return symmetricalize(values, Math::max);
 	}
 
-	private static Matrix symmetricalize(double[][] values, BiFunction<Double, Double, Double> biFunction) {
+	private static DoubleMatrix symmetricalize(Double[][] values, BiFunction<Double, Double, Double> biFunction) {
 		for (int row = 0; row < values.length; row++)
 			for (int col = 0; col < row; col++) {
 				double decision = biFunction.apply(values[row][col], values[col][row]);
 				values[row][col] = decision;
 				values[col][row] = decision;
 			}
-		return new Matrix(values);
+		return new DoubleMatrix(values);
 	}
 
 	private static void mountainProof() {

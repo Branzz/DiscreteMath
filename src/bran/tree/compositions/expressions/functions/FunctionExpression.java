@@ -42,7 +42,7 @@ public class FunctionExpression extends AbstractFunctionExpression<ExpFunction, 
 	}
 
 	@Override
-	public List<? extends Expression> getChildren() {
+	public List<? super Expression> getChildren() {
 		return List.of(expressions);
 	}
 

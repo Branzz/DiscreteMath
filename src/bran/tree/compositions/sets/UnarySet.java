@@ -4,6 +4,8 @@ import bran.tree.compositions.sets.operators.UnarySetOperator;
 import bran.tree.compositions.sets.regular.SpecialSet;
 import bran.tree.structure.MonoBranch;
 
+import java.util.List;
+
 public class UnarySet<E> implements Set<E>, MonoBranch<Set<E>, UnarySetOperator> {
 
 	private final UnarySetOperator lineOperator;
@@ -28,6 +30,11 @@ public class UnarySet<E> implements Set<E>, MonoBranch<Set<E>, UnarySetOperator>
 	@Override
 	public UnarySetOperator getOperator() {
 		return lineOperator;
+	}
+
+	@Override
+	public List<? super Set<E>> getChildren() {
+		return MonoBranch.super.getChildren();
 	}
 
 	@Override

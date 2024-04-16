@@ -9,7 +9,7 @@ public class TypelessStringPart extends StringPart {
 		super(string, from, to);
 	}
 
-	public <T> TypedStringPart<T> casted(T actual, Token<T> tokenType) {
+	public <T> TypedStringPart<T> casted(T actual, Token tokenType) {
 		return new TypedStringPart<T>(string, from, to, actual, tokenType);
 	}
 

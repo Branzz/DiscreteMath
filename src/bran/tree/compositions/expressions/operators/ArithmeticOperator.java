@@ -1,7 +1,5 @@
 package bran.tree.compositions.expressions.operators;
 
-import bran.parser.matching.Pattern;
-import bran.parser.matching.Tokenable;
 import bran.tree.compositions.Definition;
 import bran.tree.compositions.expressions.Expression;
 import bran.tree.compositions.expressions.ExpressionDisplayStyle;
@@ -11,7 +9,6 @@ import bran.tree.compositions.statements.Statement;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
-import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 import static bran.tree.compositions.expressions.ExpressionDisplayStyle.expressionStyle;

@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface MultiBranch<F extends Mapper, T extends TreePart> extends MonoTypeChildBranch<F, T> {
 
-	List<? extends T> getChildren();
+	// List<? extends T> getChildren();
 
 	F getFunction();
 

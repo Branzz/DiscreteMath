@@ -9,9 +9,9 @@ public interface TreePart {
 	static <P extends TreePart,							  		Pc extends Class<P>,
 			O,													Oc extends Class<O>,
 			FO extends ForkOperator<O, P, P>,					FOc extends Class<FO>,
-			F extends MonoTypeFork<O, P, FO>,	Fc extends Class<F>,
+			F extends MonoTypeFork<O, P, FO>,					Fc extends Class<F>,
 			M extends Mapper,							  		Mc extends Class<M>,
-			B extends MonoTypeChildBranch<M, ? extends P>,			  		Bc extends Class<B>,
+			B extends MonoTypeChildBranch<M, ? extends P>,		Bc extends Class<B>,
 			V extends Holder<?>,								Vc extends Class<V>>
 	String treeVerifier(Pc mainType, Oc representingType, FOc forkOp, Fc fork, Mc branchOp, Bc branch, Vc variable) {
 		return mainType.getSimpleName() + ": "

@@ -169,6 +169,35 @@ public class Main {
 
 		System.out.println(TreePart.treeVerifier(Set.class, Set.class, SetOperator.class,
 				SetOperation.class, UnarySetOperator.class, UnarySet.class, null));
+
+/*
+format:
+Statement	(example) A or NOT B nor 5 >= x, for all x...
+Expression	(exmaple) 5 * f(|s|)
+Set			(example) Z, { blue, red }
+
+Boolean		true
+Double		3.5
+Set			{ A, B }
+
+LogicalOperator			AND
+ArithmeticOperator		+
+SetOperator				Union
+
+StatementOperation		true AND false
+ExpressionOperation		3.5 + 8
+SetOperation			{ A, B } Union { B, C }
+
+UnaryStatementOperator	NOT
+ExpFunction				ln
+UnarySetOperator		Complement
+
+UnaryStatement			NOT true
+FunctionExpression		ln (3.5)
+UnarySet				Complement { A, B }
+
+others: variables,
+*/
 	}
 
 	private static <T> T[] toArray(List<T> list) {

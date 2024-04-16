@@ -89,8 +89,8 @@ public class StatementOperation extends Statement implements MonoTypeFork<Boolea
 	}
 
 	@Override
-	public List<Statement> getChildren() {
-		ArrayList<Statement> current = new ArrayList<>();
+	public List<Composition> getChildren() {
+		ArrayList<Composition> current = new ArrayList<>();
 		current.add(this);
 		current.addAll(left.getChildren());
 		current.addAll(right.getChildren());

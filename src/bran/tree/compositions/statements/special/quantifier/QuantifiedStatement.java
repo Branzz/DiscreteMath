@@ -48,7 +48,7 @@ public abstract class QuantifiedStatement<I, E extends Holder<I>> extends Specia
 
 	@Override
 	public List<Composition> getChildren() {
-		List<Statement> current = new ArrayList<>();
+		List<Composition> current = new ArrayList<>();
 		current.add(this);
 		current.addAll(statement.getChildren());
 		return current;

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
@@ -34,7 +36,7 @@ public class TruthTable {
 
 		ArrayList<Statement> allStatements = new ArrayList<>(); // Remove repeat Statements from all statements
 		for (Statement statement : separateStatements)
-			allStatements.addAll(statement.getChildren());
+			statement.getChildren().stream().filter(c -> c instanceof Statement).map(s -> (Statement) s).forEach(allStatements::add);
 		ArrayList<Statement> statements = new ArrayList<>();
 		while(allStatements.size() != 0) {
 			statements.add(allStatements.get(0));

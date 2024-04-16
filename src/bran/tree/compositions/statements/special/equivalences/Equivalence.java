@@ -1,6 +1,7 @@
 package bran.tree.compositions.statements.special.equivalences;
 
 import bran.exceptions.IllegalInverseExpressionException;
+import bran.tree.compositions.Composition;
 import bran.tree.compositions.expressions.values.Variable;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.statements.StatementOperation;
@@ -226,19 +227,25 @@ public abstract class Equivalence extends SpecialStatement implements MonoTypeFo
 	}
 
 	@Override
-	public List<? extends Expression> getChildren() {
-		List<Statement> variables = new ArrayList<>();
-		// variables.addAll(left.getChildren());
-		// variables.addAll(right.getVariables());
-		return null;
+	public List<Expression> getChildren() {
+		return List.of(left, right);
 	}
+
+	// @Override
+	// public List<? extends Composition> getChildren() {
+	// 	List<Statement> children = new ArrayList<>();
+	// 	// variables.addAll(left.getChildren());
+	// 	// variables.addAll(right.getVariables());
+	// 	return null;
+	// }
 
 	@Override
 	public List<VariableStatement> getVariables() {
 		// List<VariableStatement> variables = new ArrayList<>();
 		// variables.addAll(left.getVariables());
 		// variables.addAll(right.getVariables());
-		return null;
+		// return variables;
+		return List.of();
 	}
 
 }

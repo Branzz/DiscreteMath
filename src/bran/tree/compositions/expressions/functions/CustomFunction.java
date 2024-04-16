@@ -1,7 +1,5 @@
 package bran.tree.compositions.expressions.functions;
 
-import bran.parser.matching.Pattern;
-import bran.parser.matching.Tokenable;
 import bran.tree.compositions.expressions.functions.appliers.DomainSupplier;
 import bran.tree.compositions.expressions.functions.appliers.FunctionDerivable;
 import bran.tree.compositions.expressions.functions.appliers.Functional;

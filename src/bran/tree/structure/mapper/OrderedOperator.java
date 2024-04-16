@@ -1,10 +1,5 @@
 package bran.tree.structure.mapper;
 
-import bran.parser.matching.Pattern;
-import bran.parser.matching.Tokenable;
-
-import java.lang.reflect.Constructor;
-
 public interface OrderedOperator extends Mapper {
 
 	AssociativityPrecedenceLevel level();

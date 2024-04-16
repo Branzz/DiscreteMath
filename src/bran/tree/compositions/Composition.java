@@ -59,7 +59,7 @@ public interface Composition extends TreePart, Tokenable {
 	// final static SimpleToken<Composition> COMPOSITION_TOKEN = new SimpleToken<Composition>(getClass(), Set.SET_TOKEN);
 
 	@Override
-	default Token<? extends Composition> token() {
+	default Token token() {
 		return CompositionTokens.token(this.getClass());
 	}
 

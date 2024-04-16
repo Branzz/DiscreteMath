@@ -88,8 +88,8 @@ public class RecFunctionExpression extends AbstractFunctionExpression<RecFunctio
 	}
 
 	@Override
-	public List<? extends Expression> getChildren() {
-		return new Expression[0];
+	public List<? super Expression> getChildren() {
+		return List.of();
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package bran.tree.structure.mapper;
 
-import bran.parser.matching.Pattern;
+import bran.parser.matching.TokenPattern;
 import bran.parser.matching.Tokenable;
 
 public interface Patternable {
@@ -8,6 +8,6 @@ public interface Patternable {
 	/**
 	 * for constructable objects
 	 */
-	Pattern<? extends Tokenable> pattern();
+	TokenPattern<? extends Tokenable> pattern();
 
 }
