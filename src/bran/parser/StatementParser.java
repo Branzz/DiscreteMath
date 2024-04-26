@@ -1,6 +1,7 @@
 package bran.parser;
 
 import bran.exceptions.ParseException;
+import bran.parser.composition.CompositionParser;
 import bran.tree.compositions.statements.special.proofs.Argument;
 import bran.tree.compositions.statements.*;
 import bran.tree.compositions.statements.operators.UnaryStatementOperator;
@@ -49,8 +50,8 @@ public class StatementParser {
 		static TokenType tokenTypeOf(String prefix) {
 			return statementOperators.containsKey(prefix) ? OPERATOR
 			: statementLineOperators.containsKey(prefix) ? LINE_OPERATOR
-			// : leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
-			// : rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
+			: leftIdentifiers.contains(prefix) ? LEFT_IDENTIFIER
+			: rightIdentifiers.contains(prefix) ? RIGHT_IDENTIFIER
 			: VariableStatement.validName(prefix) ? VARIABLE
 			: prefix.isBlank() ? WHITESPACE
 			: UNKNOWN;

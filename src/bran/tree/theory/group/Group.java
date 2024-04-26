@@ -1,13 +1,9 @@
-package bran.tree.group;
+package bran.tree.theory.group;
 
-import bran.tree.Holder;
-import bran.tree.Var;
 import bran.tree.compositions.sets.Set;
 import bran.tree.compositions.statements.Statement;
-import bran.tree.compositions.statements.VariableStatement;
-
-import static bran.tree.compositions.statements.Statement.forAll;
-import static bran.tree.compositions.statements.Statement.thereExists;
+import bran.tree.theory.Element;
+import bran.tree.theory.Operation;
 
 /**
  * closure

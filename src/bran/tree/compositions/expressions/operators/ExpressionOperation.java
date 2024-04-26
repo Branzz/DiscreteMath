@@ -245,14 +245,14 @@ public class ExpressionOperation extends Expression implements MonoTypeFork<Doub
 					else if (leftConstant.equals(Constant.ONE))
 						return rightSimplified;
 				}
-				else if (rightSimplified instanceof FunctionExpression rightFunction)
+				else if (rightSimplified instanceof FunctionExpression rightFunction) {
 					if (rightFunction.getFunction() == LOG) {
 						if (leftSimplified.equals(rightFunction.getExpressions()[0]))
 							return rightFunction.getExpressions()[1];
-					}
-					else if (rightFunction.getFunction() == LN)
+					} else if (rightFunction.getFunction() == LN)
 						if (Constant.E.equals(rightFunction.getExpressions()[0]))
 							return rightFunction.getExpressions()[1];
+				}
 				break;
 			case MUL: // a^b * a = a^(b + 1)
 				if (leftSimplified instanceof Constant leftConstant) {

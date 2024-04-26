@@ -1,6 +1,4 @@
-package bran.tree.group;
-
-import bran.tree.compositions.statements.Statement;
+package bran.tree.theory;
 
 public interface Element<E extends Element<E>> {
 

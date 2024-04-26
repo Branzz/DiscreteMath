@@ -1,4 +1,4 @@
-package bran.tree.group;
+package bran.tree.theory;
 
 public interface Operation<E extends Element<E>, I extends E> {
 

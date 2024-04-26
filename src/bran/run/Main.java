@@ -56,7 +56,7 @@ public class Main {
 		// mountainProof();
 		// StartExpressionViewer.start();
 
-		verify();
+		// verify();
 
 		// Variable x = new Variable("x");
 		//
@@ -104,15 +104,14 @@ public class Main {
 
 		// System.out.println(ExpressionParser.parseExpression("e^xy+yxe^xy").summaryString());
 
-		// showcase();
+		showcase();
 
-		System.out.println(Definition.LIMIT.of(Variable.of("x").approaches(Constant.ONE).of(Variable.of("x").squared())));
+		// System.out.println(Definition.LIMIT.of(Variable.of("x").approaches(Constant.ONE).of(Variable.of("x").squared())));
 
 	}
 
 	public static void showcase() {
-		// DisplayStyle.displayStyle;
-		String statementString = "a    and  ~ b or  !(c ^   t) implies b"; // where t is a tautology
+		String statementString = "a   and  ~ b or  !(c xor  t) implies b"; // where t is a tautology
 		Statement statement = StatementParser.parse(statementString);
 		StatementDisplayStyle.statementStyle = StatementDisplayStyle.MATH;
 		Variable varA = new Variable("a", true);
@@ -121,27 +120,26 @@ public class Main {
 			expression = varA.pow(LOG.of(varA, varA.pow(varA))).minus(ZERO);
 		} catch (IllegalArgumentAmountException ignored) { }
 		System.out.println(statementString
-						   + "\n" + statement
-						   + "\n" + statement.getTable()
-						   + "\n" + StatementGenerator.generate(3L, 14)
-						   + "\n" + StatementGenerator.generate(3L, 14).simplified()
-						   + "\n     " + expression
-						   + "\ns:   " + expression.simplified()
-						   + "\nd:   " + expression.derive()
-						   + "\nds:  " + expression.derive().simplified()
-						   + "\nsd:  " + expression.simplified().derive()
-						   + "\nsds: " + expression.simplified().derive().simplified()
-						   + "\n" + expression.derive().getUniversalStatement()
-						   + "\n" + expression.derive().getUniversalStatement().simplified()
-						   + "\n" + Definition.ODD.test(new Constant(5.0))
-						   + "\n" + new ExistentialStatement<>(a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(ZERO),
+				  + "\n" + statement
+				  + "\n" + statement.getTable()
+				  + "\n" + StatementGenerator.generate(3L, 14)
+				  + "\n" + StatementGenerator.generate(3L, 14).simplified()
+				  + "\n     " + expression
+				  + "\ns:   " + expression.simplified()
+				  + "\nd:   " + expression.derive()
+				  + "\nds:  " + expression.derive().simplified()
+				  + "\nsd:  " + expression.simplified().derive()
+				  + "\nsds: " + expression.simplified().derive().simplified()
+				  + "\n" + expression.derive().getUniversalStatement()
+				  + "\n" + expression.derive().getUniversalStatement().simplified()
+				  + "\n" + Definition.ODD.test(new Constant(5.0))
+				  + "\n" + new ExistentialStatement<>(a -> new UniversalStatement<>(b -> a[0].times(b[0]).equates(ZERO),
 																							 new FiniteSet(new NumberLiteral(9), new NumberLiteral(5)), true,
 																							 new Variable("b")),
 															   new FiniteSet(new NumberLiteral(0), new NumberLiteral(1), new NumberLiteral(2)), true,
 															   new Variable("a"))
-						   + "\n" + Arrays.toString(ZERO.equates(ZERO).godelNumber().getGodelNumberArray())
-						   + "\n" + new GodelNumberFactors(243_000_000L).symbols()
-				// + "\n" +
+				  + "\n" + Arrays.toString(ZERO.equates(ZERO).godelNumber().getGodelNumberArray())
+				  + "\n" + new GodelNumberFactors(243_000_000L).symbols()
 		);
 		VariableStatement x = new VariableStatement('x');
 		System.out.println(Statement.forAll(x)
@@ -160,6 +158,34 @@ public class Main {
 				.proven());
 	}
 
+	/**
+	format      example
+	Statement	A or NOT B nor 5 >= x, for all x...
+	Expression	5 * f(|s|)
+	Set			Z, { blue, red }
+
+	Boolean		true
+	Double		3.5
+	Set			{ A, B }
+
+	LogicalOperator			AND
+	ArithmeticOperator		+
+	SetOperator				Union
+
+	StatementOperation		true AND false
+	ExpressionOperation		3.5 + 8
+	SetOperation			{ A, B } Union { B, C }
+
+	UnaryStatementOperator	NOT
+	ExpFunction				ln
+	UnarySetOperator		Complement
+
+	UnaryStatement			NOT true
+	FunctionExpression		ln (3.5)
+	UnarySet				Complement { A, B }
+
+	others: variables,
+	*/
 	public static void verify() {
 		System.out.println(TreePart.treeVerifier(Statement.class, Boolean.class, LogicalOperator.class,
 				StatementOperation.class, UnaryStatementOperator.class, UnaryStatement.class, VariableStatement.class));
@@ -169,35 +195,6 @@ public class Main {
 
 		System.out.println(TreePart.treeVerifier(Set.class, Set.class, SetOperator.class,
 				SetOperation.class, UnarySetOperator.class, UnarySet.class, null));
-
-/*
-format:
-Statement	(example) A or NOT B nor 5 >= x, for all x...
-Expression	(exmaple) 5 * f(|s|)
-Set			(example) Z, { blue, red }
-
-Boolean		true
-Double		3.5
-Set			{ A, B }
-
-LogicalOperator			AND
-ArithmeticOperator		+
-SetOperator				Union
-
-StatementOperation		true AND false
-ExpressionOperation		3.5 + 8
-SetOperation			{ A, B } Union { B, C }
-
-UnaryStatementOperator	NOT
-ExpFunction				ln
-UnarySetOperator		Complement
-
-UnaryStatement			NOT true
-FunctionExpression		ln (3.5)
-UnarySet				Complement { A, B }
-
-others: variables,
-*/
 	}
 
 	private static <T> T[] toArray(List<T> list) {

@@ -54,8 +54,8 @@ public class CompositionParser {
 	}
 
 	// static final Map<String, EquationType> equivalences = Parser.getSymbolMapping()
-	static final Set<String> leftIdentifiers = Set.of("(", "[", "{");
-	static final Set<String> rightIdentifiers = Set.of(")", "]", "}");
+	public static final Set<String> leftIdentifiers = Set.of("(", "[", "{");
+	public static final Set<String> rightIdentifiers = Set.of(")", "]", "}");
 
 	public static Expression parseExpression(String str) {
 		Composition composition = parse(str);

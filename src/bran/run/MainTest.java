@@ -121,7 +121,7 @@ public class MainTest {
 		System.out.println(t);
 		final ExpressionMatrix m1 = t.toMatrix();
 		System.out.println(m1);
-		System.out.println(m1.toVectorSet());
+		System.out.println(m1.getColumn(2));
 
 		Variable x = Variable.of("x");
 

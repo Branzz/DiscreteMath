@@ -169,18 +169,18 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		//      storing the original domains of each function is therefore useless in complex expressions
 		// the range of f(x) is the domain of f'(x)
 		// TODO; simplify first? you can prove if a function is less somehow; you can with given variables for sure
-		// return Double.compare(evaluate(), expression.evaluate());
-		try {
-
-		} catch (IllegalInverseExpressionException e) {
-
-		}
-		final Expression inverse = subtraction.inverse().iterator().next();
-		final Set<Variable> variables = subtraction.getVariables();
+		return Double.compare(this.evaluate(), expression.evaluate());
+		// try {
+		// 	final Expression inverse = subtraction.inverse().iterator().next();
+		// 	final Statement range = inverse.domainConditions; // TODO getAll method needed to replace everything properly (?)
+		//
+		// } catch (IllegalInverseExpressionException e) {
+		//
+		// }
+		// final Set<Variable> variables = subtraction.getVariables();
 		// if (variables.size() != 1)
 		// 	return 0;
-		Variable variable = variables.iterator().next();
-		final Statement range = inverse.domainConditions; // TODO getAll method needed to replace everything properly (?)
+		// Variable variable = variables.iterator().next();
 		// new RangedSet(new SpecialSet(SpecialSetType.R), range);
 		// if (!expression.equals(ZERO)) {
 		// 	if (range.and(variable.lessEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
@@ -188,7 +188,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		// 	if (range.and(variable.greaterEqual(Constant.ZERO)).simplified().equals(VariableStatement.TAUTOLOGY))
 		// 		return -1;
 		// }
-		return 0;
+		// return 0;
 	}
 
 	public List<Expression> inverse() {
@@ -213,7 +213,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 					continue;
 				} else {
 					if (!varsOnLeft && !varsOnRight)
-						throw new IllegalStateException("simplification of constants was weak; coder's fault");
+						throw new IllegalInverseExpressionException("simplification of constants was weak; coder's fault");
 					if (opExp.getOperator() == POW) {
 						final int originalSize = otherSides.size();
 						if (opExp.getRight().equals(Constant.TWO))
@@ -242,7 +242,7 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 						simplifiedStep = true; // can only try to simplify once before it's infinite loop
 						continue;
 					} else if (!varsOnLeft && !varsOnRight) {
-						throw new IllegalStateException("simplification of constants was weak; coder's fault");
+						throw new IllegalInverseExpressionException("simplification of constants was weak; coder's fault");
 					}
 					thisSide = fExp.getExpressions()[0];
 					map(otherSides, otherSide -> fExp.getFunction().inverse(varsOnLeft ? 0 : 1, otherSide));

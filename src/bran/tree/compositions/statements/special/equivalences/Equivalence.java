@@ -144,18 +144,21 @@ public abstract class Equivalence extends SpecialStatement implements MonoTypeFo
 				return VariableStatement.of(getEquivalenceType().evaluate(oneSideSimplified, Constant.ZERO));
 			else if (oneSideVariables.size() == 1) {
 				// 	oneSideVariables.iterator().next();
-				final List<Expression> inverse = new ArrayList<>(oneSideSimplified.inverse(Constant.ZERO));
-				final Variable theVar = oneSideVariables.iterator().next();
-				final Function<Integer, Equivalence> equivSup = i -> Equivalence.of(theVar, getEquivalenceType(), inverse.get(i).simplified());
+				try {
+					final List<Expression> inverse = new ArrayList<>(oneSideSimplified.inverse(Constant.ZERO));
+					final Variable theVar = oneSideVariables.iterator().next();
+					final Function<Integer, Equivalence> equivSup = i -> Equivalence.of(theVar, getEquivalenceType(), inverse.get(i).simplified());
 
-				equivSup.apply(0);
-				Statement combinedStatements = equivSup.apply(0);
-				for (int i = 1; i < inverse.size(); i++)
-					combinedStatements = new StatementOperation(combinedStatements, LogicalOperator.AND, equivSup.apply(1));
-				return combinedStatements;
+					equivSup.apply(0);
+					Statement combinedStatements = equivSup.apply(0);
+					for (int i = 1; i < inverse.size(); i++)
+						combinedStatements = new StatementOperation(combinedStatements, LogicalOperator.AND, equivSup.apply(1));
+					return combinedStatements;
+				} catch(IllegalInverseExpressionException ignored) {
+				}
 
 			}
-			Equivalence.of(oneSideSimplified, getEquivalenceType(), Constant.ZERO);
+			// Equivalence.of(oneSideSimplified, getEquivalenceType(), Constant.ZERO);
 		// 	// commutativeSearch(leftStatement, leftTerms, false);
 		// 	// commutativeSearch(rightStatement, rightTerms, inverted);
 		// 	List<OperatorExpression.Term> terms = new ArrayList<>();
