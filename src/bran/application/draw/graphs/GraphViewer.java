@@ -1,8 +1,8 @@
 package bran.application.draw.graphs;
 
-import bran.graphs.Edge;
-import bran.graphs.Graph;
-import bran.graphs.Vertex;
+import bran.lattice.graphs.Edge;
+import bran.lattice.graphs.Graph;
+import bran.lattice.graphs.Vertex;
 
 import java.applet.Applet;
 import java.awt.*;

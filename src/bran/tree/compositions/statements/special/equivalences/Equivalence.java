@@ -22,7 +22,7 @@ import bran.tree.structure.MonoTypeFork;
 import java.util.*;
 import java.util.function.Function;
 
-public abstract class Equivalence extends SpecialStatement implements MonoTypeFork<Boolean, Expression, EquivalenceType> {
+public abstract class Equivalence extends SpecialStatement implements MonoTypeFork<Boolean, Expression, EquivalenceType, Equivalence> {
 
 	protected Expression left;
 	protected Expression right;

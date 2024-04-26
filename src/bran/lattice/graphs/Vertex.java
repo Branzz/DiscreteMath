@@ -1,4 +1,4 @@
-package bran.graphs;
+package bran.lattice.graphs;
 
 import java.awt.Color;
 import java.awt.Font;

@@ -1,7 +1,7 @@
-package bran.graphs.directed;
+package bran.lattice.graphs.directed;
 
-import bran.graphs.Edge;
-import bran.graphs.Vertex;
+import bran.lattice.graphs.Edge;
+import bran.lattice.graphs.Vertex;
 public class DirectedEdge extends Edge {
 
 	public DirectedEdge() {

@@ -15,7 +15,7 @@ import java.util.function.Function;
 import static bran.tree.compositions.expressions.operators.ArithmeticOperator.*;
 import static bran.tree.compositions.expressions.functions.MultiArgFunction.*;
 
-public class ExpressionOperation extends Expression implements MonoTypeFork<Double, Expression, ArithmeticOperator> {
+public class ExpressionOperation extends Expression implements MonoTypeFork<Double, Expression, ArithmeticOperator, ExpressionOperation> {
 
 	private Expression left;
 	private final ArithmeticOperator arithmeticOperator;
@@ -26,6 +26,11 @@ public class ExpressionOperation extends Expression implements MonoTypeFork<Doub
 		this.left = left;
 		this.arithmeticOperator = arithmeticOperator;
 		this.right = right;
+	}
+
+	@Override
+	public TriFunction<Expression, ArithmeticOperator, Expression, ExpressionOperation> getter() {
+		return ExpressionOperation::new;
 	}
 
 	@Override
@@ -155,7 +160,7 @@ public class ExpressionOperation extends Expression implements MonoTypeFork<Doub
 		boolean leftGiven = true;
 		boolean rightGiven = true;
 		if (left instanceof ExpressionOperation leftOperator) {
-			if (leftOperator.getOperator().precedence() < arithmeticOperator.precedence()) {
+			if (leftOperator.getOperator().precedence() > arithmeticOperator.precedence()) {
 					leftString = Composition.parens(leftString);
 			} else
 				leftGiven = false;
@@ -578,9 +583,9 @@ public class ExpressionOperation extends Expression implements MonoTypeFork<Doub
 		return newTerm;
 	}
 
-	private List<Term> commutativeSearch(final Expression statement, final boolean inverted, final ArithmeticOperator op) {
+	public static List<Term> commutativeSearch(final Expression statement, final boolean inverted, final ArithmeticOperator op) {
 		List<Term> terms = new ArrayList<>();
-		commutativeSearch(statement, terms, inverted,op);
+		commutativeSearch(statement, terms, inverted, op);
 		return terms;
 	}
 

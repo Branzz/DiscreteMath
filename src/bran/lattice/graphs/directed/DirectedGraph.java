@@ -1,13 +1,13 @@
-package bran.graphs.directed;
+package bran.lattice.graphs.directed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import bran.exceptions.IllegalMatrixSizeException;
-import bran.graphs.Edge;
-import bran.graphs.Graph;
-import bran.graphs.Vertex;
-import bran.graphs.matrices.DoubleMatrix;
+import bran.lattice.graphs.Edge;
+import bran.lattice.graphs.Graph;
+import bran.lattice.graphs.Vertex;
+import bran.lattice.matrix.DoubleGrid;
 
 public class DirectedGraph extends Graph {
 
@@ -26,7 +26,7 @@ public class DirectedGraph extends Graph {
 	}
 
 
-	public DirectedGraph(DoubleMatrix m) {
+	public DirectedGraph(DoubleGrid m) {
 		Vertex.resetNames();
 		Edge.resetNames();
 		if (m.getRows() != m.getColumns())

@@ -3,7 +3,7 @@ package bran.tree.compositions.sets;
 import bran.tree.compositions.sets.operators.SetOperator;
 import bran.tree.structure.MonoTypeFork;
 
-public class SetOperation<E> implements Set<E>, MonoTypeFork<Set, Set, SetOperator> { // TODO generics
+public class SetOperation<E> implements Set<E>, MonoTypeFork<Set, Set, SetOperator, SetOperation<E>> { // TODO generics
 
 	private final Set<E> left;
 	private final SetOperator operator;

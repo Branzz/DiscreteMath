@@ -1,9 +1,9 @@
-package bran.graphs.directed;
+package bran.lattice.graphs.directed;
 
 import java.awt.Color;
 import java.awt.Font;
 
-import bran.graphs.Vertex;
+import bran.lattice.graphs.Vertex;
 import bran.tree.compositions.sets.regular.FiniteSet;
 
 public class DirectedVertex {

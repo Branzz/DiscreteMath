@@ -8,7 +8,7 @@ import bran.tree.structure.MonoTypeFork;
 
 import java.util.List;
 
-public class SetStatement<E> extends Statement implements MonoTypeFork<Boolean, Set, SetStatementOperator> {
+public class SetStatement<E> extends Statement implements MonoTypeFork<Boolean, Set, SetStatementOperator, SetStatement<E>> {
 
 	private final Set<E> left;
 	private final SetStatementOperator operator;

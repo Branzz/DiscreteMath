@@ -3,10 +3,12 @@ package bran.run;
 import bran.application.draw.StartViewer;
 import bran.application.draw.exprs.StartExpressionViewer;
 import bran.exceptions.ParseException;
-import bran.graphs.Edge;
-import bran.graphs.Graph;
-import bran.graphs.Vertex;
-import bran.graphs.matrices.DoubleMatrix;
+import bran.lattice.graphs.Edge;
+import bran.lattice.graphs.Graph;
+import bran.lattice.graphs.Vertex;
+import bran.lattice.matrix.DoubleGrid;
+import bran.lattice.SystemOfEquations;
+import bran.lattice.matrix.ExpressionMatrix;
 import bran.parser.composition.CompositionParser;
 import bran.tree.Holder;
 import bran.tree.compositions.Composition;
@@ -102,7 +104,35 @@ public class MainTest {
 		// System.out.println(CompositionParser.parse("LOG(2, x)").simplified());
 
 
+		linearAlgebraTest();
 
+	}
+
+	private static void linearAlgebraTest() {
+		Variable a = Variable.of("a");
+		Variable b = Variable.of("b");
+		Variable c = Variable.of("c");
+		Variable d = Variable.of("d");
+		SystemOfEquations t = new SystemOfEquations(
+				Constant.of(3).times(a).plus(b).minus(c).equates(Constant.of(-5)),
+				b.negate().equates(Constant.of(4)),
+				d.equates(Constant.of(1).plus(a))
+		);
+		System.out.println(t);
+		final ExpressionMatrix m1 = t.toMatrix();
+		System.out.println(m1);
+		System.out.println(m1.toVectorSet());
+
+		Variable x = Variable.of("x");
+
+		SystemOfEquations s = new SystemOfEquations(
+				Constant.of(3).times(a.squared().sqrt()).plus(b.pow(Constant.ONE))
+						.minus(c.div(Constant.of(5)).times(Constant.of(5))).equates(Constant.of(-5)));
+		System.out.println(s);
+		final ExpressionMatrix m2 = s.toMatrix();
+		System.out.println(m2);
+
+		System.out.println(m1.map(Expression::squared).map(Expression::simplified));
 	}
 
 	static class Property {}
@@ -602,7 +632,7 @@ public class MainTest {
 
 	private static void hamiltonianPathTestingEdges() {
 		new ArrayList<Integer>();
-		Graph graph = new Graph(new DoubleMatrix(new Double[][]
+		Graph graph = new Graph(new DoubleGrid(new double[][]
 												   		 { {0.0, 1.0, 1.0, 1.0, 0.0, 2.0},
 														   {1.0, 0.0, 0.0, 1.0, 1.0, 2.0},
 														   {1.0, 0.0, 0.0, 1.0, 0.0, 2.0},
@@ -622,7 +652,7 @@ public class MainTest {
 		// 	{1, 1, 1, 0, 1, 1},
 		// 	{0, 1, 0, 1, 0, 1},
 		// 	{1, 1, 1, 1, 1, 0} }));
-		Graph frame = new Graph(symmetricalize((Double[][]) Arrays.stream(new double[][]
+		Graph frame = new Graph(symmetricalize(new double[][]
 						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
 				/*0*/ { {-0, 1, 2, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 }, /*0*/
 				/*1*/	{ 0,-0, 1, 1, 2, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1 }, /*1*/
@@ -639,25 +669,25 @@ public class MainTest {
 				/*12*/	{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0,-0, 1, 1, 2 }, /*12*/
 				/*13*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1,-0, 1, 1 }, /*13*/
 				/*14*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1,-0, 1 }, /*14*/
-				/*15*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1,-0 } }).map(d -> Arrays.stream(d).boxed().toArray()).toArray()));
+				/*15*/	{ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1,-0 } }));
 						/*0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15*/
 		System.out.println("For graph:\n" + frame);
 		System.out.println("Is Hamiltonian path? " + frame.isHamiltonianPath());
 
 	}
 
-	private static DoubleMatrix symmetricalize(Double[][] values) {
+	private static DoubleGrid symmetricalize(double[][] values) {
 		return symmetricalize(values, Math::max);
 	}
 
-	private static DoubleMatrix symmetricalize(Double[][] values, BiFunction<Double, Double, Double> biFunction) {
+	private static DoubleGrid symmetricalize(double[][] values, BiFunction<Double, Double, Double> biFunction) {
 		for (int row = 0; row < values.length; row++)
 			for (int col = 0; col < row; col++) {
 				double decision = biFunction.apply(values[row][col], values[col][row]);
 				values[row][col] = decision;
 				values[col][row] = decision;
 			}
-		return new DoubleMatrix(values);
+		return new DoubleGrid(values);
 	}
 
 	private static void mountainProof() {

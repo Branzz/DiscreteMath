@@ -17,7 +17,7 @@ import bran.tree.structure.MonoTypeFork;
 import static bran.tree.compositions.statements.VariableStatement.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.*;
 
-public class StatementOperation extends Statement implements MonoTypeFork<Boolean, Statement, LogicalOperator> {
+public class StatementOperation extends Statement implements MonoTypeFork<Boolean, Statement, LogicalOperator, StatementOperation> {
 
 	private Statement left;
 	private LogicalOperator operator;

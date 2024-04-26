@@ -6,6 +6,7 @@ import bran.tree.compositions.expressions.ExpressionDisplayStyle;
 import bran.tree.compositions.godel.GodelNumber;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.statements.Statement;
+import bran.tree.structure.UnifiedOperable;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
@@ -63,29 +64,30 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 	private Function<Expression, Expression> invertAndSimplifier;
 
 	private final AssociativityPrecedenceLevel level;
-	private final Operable operable;
+	interface ArithmeticOperable extends UnifiedOperable<Double, ArithmeticOperator> { }
+	private final ArithmeticOperable operable;
 	private final OperatorDerivable derivable;
 	private final DomainSupplier domainSupplier;
 	private final String[] symbols;
 	private final boolean commutative;
 	private final GodelNumberSymbols godelNumberSymbols;
 
-	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable,
+	ArithmeticOperator(int level, final ArithmeticOperable operable, final OperatorDerivable derivable,
 					   boolean commutative, final String... symbols) {
 		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, symbols);
 	}
 
-	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+	ArithmeticOperator(int level, final ArithmeticOperable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
 					   boolean commutative, final String... symbols) {
 		this(level, operable, derivable, domainSupplier, commutative, GodelNumberSymbols.SYNTAX_ERROR, symbols);
 	}
 
-	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable,
+	ArithmeticOperator(int level, final ArithmeticOperable operable, final OperatorDerivable derivable,
 					   boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
 		this(level, operable, derivable, (l, r) -> defaultConditions(l).and(defaultConditions(r)), commutative, godelNumberSymbols, symbols);
 	}
 
-	ArithmeticOperator(int level, final Operable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
+	ArithmeticOperator(int level, final ArithmeticOperable operable, final OperatorDerivable derivable, final DomainSupplier domainSupplier,
 					   boolean commutative, GodelNumberSymbols godelNumberSymbols, final String... symbols) {
 		this.level = AssociativityPrecedenceLevel.of(level);
 		this.operable = operable;
@@ -115,6 +117,7 @@ public enum ArithmeticOperator implements ForkOperator<Double, Expression, Expre
 	public AssociativityPrecedenceLevel level() {
 		return level;
 	}
+
 
 	public Double operate(Expression left, Expression right) {
 		return operable.operate(left.evaluate(), right.evaluate());

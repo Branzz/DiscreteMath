@@ -1,11 +1,10 @@
 package bran.tree.compositions.statements.operators;
 
-import bran.parser.matching.Tokenable;
-import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.statements.UnaryStatement;
 import bran.tree.compositions.statements.StatementOperation;
 import bran.tree.compositions.statements.Statement;
 import bran.tree.compositions.statements.VariableStatement;
+import bran.tree.structure.UnifiedOperable;
 import bran.tree.structure.mapper.AssociativityPrecedenceLevel;
 import bran.tree.structure.mapper.ForkOperator;
 
@@ -50,7 +49,8 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 	public static final int MAX_ORDER = 5;
 
 	private final String[] symbols;
-	private final Operable operable;
+	interface LogicOperable extends UnifiedOperable<Boolean, LogicalOperator> { }
+	private final LogicOperable operable;
 	private final AssociativityPrecedenceLevel level;
 	private final boolean commutative;
 	private final GodelBuffer godelBuffer;
@@ -73,7 +73,7 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 	// 	{ }
 	// };
 
-	LogicalOperator(Operable operable, int level, boolean commutative, GodelBuffer godelBuffer, String... symbols) {
+	LogicalOperator(LogicOperable operable, int level, boolean commutative, GodelBuffer godelBuffer, String... symbols) {
 		this.operable = operable;
 		this.level = AssociativityPrecedenceLevel.of(level);
 		this.commutative = commutative;
@@ -137,10 +137,6 @@ public enum LogicalOperator implements ForkOperator<Boolean, Statement, Statemen
 		};
 	}
 
-	@FunctionalInterface
-	interface Operable {
-		boolean operate(boolean left, boolean right);
-	}
 
 	@Override
 	public Boolean operate(Statement left, Statement right) {

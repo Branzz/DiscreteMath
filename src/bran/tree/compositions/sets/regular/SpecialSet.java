@@ -1,8 +1,9 @@
 package bran.tree.compositions.sets.regular;
 
+import bran.tree.compositions.expressions.Expression;
+import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.numbers.NumberLiteral;
 import bran.tree.compositions.sets.Set;
-import bran.tree.compositions.sets.SetStatement;
 import bran.tree.structure.Leaf;
 
 /**
@@ -30,7 +31,9 @@ public class SpecialSet implements Set<NumberLiteral>, Leaf { // TODO INTEGRATE 
 
 	private final SpecialSetType type;
 
-	public SpecialSet(SpecialSetType type) {
+	private final Expression dimensions;
+
+	public SpecialSet(SpecialSetType type, Expression dimensions) {
 		limitedPositivity = false;
 		nonPositivity = false;
 		positivity = false;
@@ -38,6 +41,15 @@ public class SpecialSet implements Set<NumberLiteral>, Leaf { // TODO INTEGRATE 
 		containsNegatives = type.containsNegatives;
 		containsZero = type.containsZero;
 		containsPositives = type.containsPositives;
+		this.dimensions = dimensions;
+	}
+
+	public SpecialSet(SpecialSetType type, int dimensions) {
+		this(type, Constant.of(dimensions));
+	}
+
+	public SpecialSet(SpecialSetType type) {
+		this(type, Constant.ONE);
 	}
 
 	/*
@@ -55,6 +67,7 @@ public class SpecialSet implements Set<NumberLiteral>, Leaf { // TODO INTEGRATE 
 		containsNegatives = type.containsNegatives && nonPositivity == positivity;
 		containsZero = type.containsZero && nonPositivity;
 		containsPositives = type.containsPositives && nonPositivity ^ positivity;
+		dimensions = Constant.ONE;
 	}
 
 	public SpecialSetType getType() {
@@ -229,7 +242,12 @@ public class SpecialSet implements Set<NumberLiteral>, Leaf { // TODO INTEGRATE 
 	// 	return limitedPositivity ? new SpecialSet(type, nonPositivity, positivity) : new SpecialSet(type);
 	// }
 
-//	@Override
+	@Override
+	public SpecialSet simplified() {
+		return new SpecialSet(this.getType(), this.dimensions.simplified());
+	}
+
+	//	@Override
 	public int compareTo(Set<NumberLiteral> s) { // TODO use this? or delete
 		return s instanceof SpecialSet ? getLevel() - getLevel(((SpecialSet) s).getType()) : 0;
 	}

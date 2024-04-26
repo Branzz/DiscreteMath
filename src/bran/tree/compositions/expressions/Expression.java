@@ -9,6 +9,7 @@ import bran.tree.compositions.expressions.operators.ExpressionOperation;
 import bran.tree.compositions.expressions.values.Constant;
 import bran.tree.compositions.expressions.values.Value;
 import bran.tree.compositions.expressions.values.Variable;
+import bran.tree.compositions.expressions.values.numbers.StandardOperand;
 import bran.tree.compositions.godel.GodelBuilder;
 import bran.tree.compositions.godel.GodelNumberSymbols;
 import bran.tree.compositions.sets.regular.SpecialSet;
@@ -32,7 +33,7 @@ import static bran.tree.compositions.expressions.values.Constant.*;
 import static bran.tree.compositions.statements.operators.LogicalOperator.AND;
 import static bran.tree.compositions.statements.special.equivalences.inequality.InequalityType.*;
 
-public abstract class Expression implements Composition, Equivalable<Expression>, Comparable<Expression> {
+public abstract class Expression implements Composition, Equivalable<Expression>, Comparable<Expression>, StandardOperand<Expression, Expression> {
 
 	protected Statement domainConditions;
 
@@ -112,10 +113,10 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		return null;
 	}
 
-	public abstract boolean respect(final Collection<Variable> respectsTo);
+	public boolean respect(final Collection<Variable> respectsTo) { return false; }
 
 	@Override
-	public abstract void appendGodelNumbers(final GodelBuilder godelBuilder);
+	public void appendGodelNumbers(final GodelBuilder godelBuilder) { /* add nothing*/ }
 
 	private static final Expression emptyExpression = new Expression() {
 		@Override public Set<Variable> getVariables()					{ return Collections.emptySet(); }
@@ -336,6 +337,34 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		return pow(Constant.of(3));
 	}
 
+	@Override
+	public Expression add(Expression expression) {
+		return this.plus(expression);
+	}
+
+	@Override
+	public Expression subtract(Expression expression) {
+		return this.minus(expression);
+	}
+
+	@Override
+	public Expression multiply(Expression expression) {
+		return this.times(expression);
+	}
+
+	@Override
+	public Expression divide(Expression expression) {
+		return this.div(expression);
+	}
+
+	public ExpressionOperation plus(Expression addend) {
+		return new ExpressionOperation(this, ADD, addend);
+	}
+
+	public ExpressionOperation minus(Expression subtrahend) {
+		return new ExpressionOperation(this, SUB, subtrahend);
+	}
+
 	public ExpressionOperation times(Expression multiplicand) {
 		return new ExpressionOperation(this, MUL, multiplicand);
 	}
@@ -346,14 +375,6 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 
 	public ExpressionOperation mod(Expression divisor) {
 		return new ExpressionOperation(this, MOD, divisor);
-	}
-
-	public ExpressionOperation plus(Expression addend) {
-		return new ExpressionOperation(this, ADD, addend);
-	}
-
-	public ExpressionOperation minus(Expression subtrahend) {
-		return new ExpressionOperation(this, SUB, subtrahend);
 	}
 
 	public ExpressionOperation reciprocal() {
@@ -427,6 +448,11 @@ public abstract class Expression implements Composition, Equivalable<Expression>
 		public FunctionExpression ofS(Expression expression) {
 			return LOG.ofS(base, expression);
 		}
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 
 }

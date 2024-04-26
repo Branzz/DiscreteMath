@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import bran.application.draw.graphs.GraphViewer;
-import bran.graphs.Graph;
+import bran.lattice.graphs.Graph;
 
 public class StartViewer {
 

@@ -1,4 +1,4 @@
-package bran.graphs;
+package bran.lattice.graphs;
 
 public class CustomTree { // TODO
 

@@ -21,6 +21,11 @@ public class FiniteSet<T> implements Set<T>, Leaf, java.util.Set<T>, java.util.L
 		set = new ArrayList<>();
 	}
 
+	public FiniteSet(List<T> ts) {
+		super();
+		this.set = ts;
+	}
+
 	public FiniteSet(T... ts) {
 		super();
 		set = new ArrayList<>(Arrays.asList(ts));

@@ -1,8 +1,7 @@
-package bran.graphs;
+package bran.lattice.graphs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class SimpleGraph extends Graph {
 

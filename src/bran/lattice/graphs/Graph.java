@@ -1,12 +1,12 @@
-package bran.graphs;
+package bran.lattice.graphs;
+
+import bran.exceptions.IllegalMatrixSizeException;
+import bran.lattice.matrix.DoubleGrid;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import bran.exceptions.IllegalMatrixSizeException;
-import bran.graphs.matrices.DoubleMatrix;
-
-public class Graph {
+public class Graph /*implements Lattice*/ {
 
 	protected Map<Vertex, List<Edge>> vertexEdgeTable;
 	protected long edgesSize;
@@ -25,7 +25,7 @@ public class Graph {
 		edgesSize = vertexEdgeTable.values().stream().map(List::size).reduce(0, Integer::sum);
 	}
 
-	public Graph(DoubleMatrix m) {
+	public Graph(DoubleGrid m) {
 		Vertex.resetNames();
 		Edge.resetNames();
 		if (!m.isSymmetric() || m.getRows() != m.getColumns())
